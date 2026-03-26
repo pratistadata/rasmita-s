@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rasmita Family Gathering 2026 — Panduan Lengkap</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  :root {
+    --gold: #C9A84C; --gold-light: #F0D080; --gold-dark: #8B6914;
+    --cream: #FDF8EE; --cream-dark: #F5EDD8;
+    --brown: #3D2B1F; --brown-light: #6B4C3B;
+    --green: #2D5016; --green-light: #4A7C2A;
+    --red: #8B1A1A; --white: #FFFFFF;
+    --shadow: 0 4px 24px rgba(61,43,31,0.15);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'DM Sans',sans-serif; background:var(--cream); color:var(--brown); }
+
+  /* NAV */
+  nav {
+    background:var(--green); color:var(--gold-light);
+    padding:1rem 2rem; display:flex; align-items:center; gap:1rem;
+    position:sticky; top:0; z-index:100; flex-wrap:wrap;
+  }
+  nav .logo { font-family:'Playfair Display',serif; font-size:1.2rem; font-weight:700; }
+  nav .tabs { display:flex; gap:8px; flex-wrap:wrap; }
+  nav .tab {
+    padding:6px 16px; border-radius:20px; font-size:12px; font-weight:600;
+    cursor:pointer; border:1.5px solid rgba(240,208,128,0.3);
+    color:var(--gold-light); background:transparent; transition:all 0.2s;
+  }
+  nav .tab:hover, nav .tab.active { background:var(--gold); color:var(--brown); border-color:var(--gold); }
+
+  /* SECTIONS */
+  .section { display:none; padding:2rem; max-width:1200px; margin:0 auto; }
+  .section.active { display:block; }
+  h1 { font-family:'Playfair Display',serif; font-size:2rem; margin-bottom:0.5rem; }
+  h2 { font-family:'Playfair Display',serif; font-size:1.4rem; margin:1.5rem 0 0.8rem; color:var(--brown); }
+  .subtitle { color:var(--brown-light); margin-bottom:2rem; font-size:0.95rem; }
+
+  /* CARDS GRID */
+  .cards-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:1.5rem; margin-bottom:2rem; }
+
+  .game-card {
+    background:var(--white); border-radius:16px; overflow:hidden;
+    box-shadow:var(--shadow); border:1px solid rgba(201,168,76,0.2);
+    transition:transform 0.2s;
+  }
+  .game-card:hover { transform:translateY(-4px); }
+
+  .card-header {
+    padding:1.2rem 1.5rem 0.8rem;
+    border-bottom:3px solid var(--gold);
+    background:linear-gradient(135deg, var(--cream) 0%, var(--white) 100%);
+  }
+  .card-icon { font-size:2.5rem; margin-bottom:0.5rem; }
+  .card-badge {
+    display:inline-block; background:var(--green); color:var(--gold-light);
+    font-size:10px; font-weight:700; letter-spacing:2px; text-transform:uppercase;
+    padding:3px 10px; border-radius:2px; margin-bottom:6px;
+  }
+  .card-title { font-family:'Playfair Display',serif; font-size:1.3rem; color:var(--brown); }
+  .card-desc { font-size:13px; color:var(--brown-light); margin-top:4px; line-height:1.4; }
+
+  .card-body { padding:1.2rem 1.5rem; }
+
+  .info-row { display:flex; justify-content:space-between; margin-bottom:8px; font-size:13px; }
+  .info-label { color:var(--brown-light); font-weight:500; }
+  .info-val { font-weight:600; color:var(--brown); }
+
+  .rules-list { list-style:none; }
+  .rules-list li {
+    padding:6px 0; font-size:13px; border-bottom:1px solid var(--cream-dark);
+    display:flex; gap:8px; align-items:flex-start;
+  }
+  .rules-list li:last-child { border-bottom:none; }
+  .rules-list li span { font-size:14px; }
+
+  .points-table { width:100%; border-collapse:collapse; font-size:12px; margin:8px 0; }
+  .points-table th { background:var(--cream-dark); padding:6px 8px; text-align:left; font-weight:600; }
+  .points-table td { padding:5px 8px; border-bottom:1px solid var(--cream-dark); }
+  .points-val { color:var(--green); font-weight:700; }
+
+  .tip-box {
+    background:var(--cream-dark); border-left:3px solid var(--gold);
+    padding:10px 14px; border-radius:0 8px 8px 0; font-size:12px;
+    color:var(--brown-light); margin-top:10px; font-style:italic;
+  }
+
+  .mc-badge {
+    display:inline-block; background:var(--gold); color:var(--brown);
+    font-size:9px; font-weight:700; letter-spacing:1px;
+    padding:2px 8px; border-radius:10px; margin-right:6px; vertical-align:middle;
+  }
+
+  /* DIFFICULTY STARS */
+  .difficulty { display:flex; gap:3px; }
+  .star { width:12px; height:12px; border-radius:50%; background:var(--cream-dark); }
+  .star.filled { background:var(--gold); }
+
+  /* SONG LIST */
+  .song-list { display:grid; gap:10px; }
+  .song-item {
+    display:flex; align-items:center; gap:12px;
+    background:var(--cream-dark); border-radius:10px; padding:10px 14px;
+  }
+  .song-num {
+    width:32px; height:32px; border-radius:50%; background:var(--green);
+    color:var(--gold-light); display:flex; align-items:center; justify-content:center;
+    font-weight:700; font-size:14px; flex-shrink:0;
+  }
+  .song-title { font-weight:600; font-size:14px; color:var(--brown); }
+  .song-meta { font-size:12px; color:var(--brown-light); }
+  .song-pts { margin-left:auto; font-weight:700; color:var(--green); font-size:13px; }
+
+  /* COMEDIAN CARDS */
+  .comedian-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:12px; }
+  .comedian-card {
+    background:var(--white); border-radius:12px; padding:12px; text-align:center;
+    border:1px solid rgba(201,168,76,0.2); box-shadow:var(--shadow);
+  }
+  .comedian-avatar {
+    width:60px; height:60px; border-radius:50%; margin:0 auto 8px;
+    background:linear-gradient(135deg, var(--green), var(--green-light));
+    display:flex; align-items:center; justify-content:center;
+    font-size:1.5rem; color:white; border:2px solid var(--gold);
+  }
+  .comedian-name { font-size:12px; font-weight:600; color:var(--brown); margin-bottom:4px; }
+  .comedian-tagline { font-size:10px; color:var(--gold-dark); font-style:italic; }
+
+  /* QR SECTION */
+  .qr-box {
+    background:var(--white); border-radius:16px; padding:2rem;
+    box-shadow:var(--shadow); text-align:center; max-width:500px; margin:0 auto;
+  }
+  .qr-display { margin:1.5rem auto; }
+  #qrcode { display:inline-block; }
+  #qrcode img, #qrcode canvas { border:4px solid var(--gold) !important; border-radius:8px; }
+  .url-input { width:100%; padding:10px 14px; border:1.5px solid rgba(201,168,76,0.4);
+    border-radius:8px; font-size:14px; font-family:'DM Sans',sans-serif;
+    background:var(--cream); color:var(--brown); outline:none; margin-bottom:1rem; }
+  .url-input:focus { border-color:var(--gold); }
+  .btn-green {
+    padding:10px 24px; background:var(--green); color:var(--gold-light);
+    border:none; border-radius:8px; font-family:'DM Sans',sans-serif;
+    font-weight:600; cursor:pointer; font-size:14px; transition:all 0.2s;
+  }
+  .btn-green:hover { background:var(--green-light); }
+  .short-url { margin-top:1rem; font-size:13px; color:var(--brown-light); }
+  .short-url a { color:var(--green); font-weight:600; }
+
+  /* LOBBY CARD PREVIEW */
+  .lobby-preview { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+  .lobby-pill {
+    background:var(--cream-dark); border:1px solid rgba(201,168,76,0.3);
+    border-radius:20px; padding:6px 12px; font-size:12px; font-weight:600;
+    color:var(--brown); text-align:center; cursor:pointer; transition:all 0.2s;
+    position:relative;
+  }
+  .lobby-pill:hover { background:var(--gold-light); }
+  .lobby-pill .new-badge {
+    position:absolute; top:-6px; right:-4px;
+    background:var(--red); color:white; font-size:8px; font-weight:700;
+    padding:2px 5px; border-radius:10px;
+  }
+  .lobby-pill .icon { font-size:16px; display:block; margin-bottom:2px; }
+
+  /* FLOW CHART */
+  .flow { display:flex; flex-direction:column; gap:0; }
+  .flow-step {
+    display:flex; gap:1rem; align-items:flex-start;
+    background:var(--white); border:1px solid rgba(201,168,76,0.2);
+    border-radius:12px; padding:1rem; margin-bottom:0;
+    position:relative;
+  }
+  .flow-step::after {
+    content:'↓'; position:absolute; bottom:-18px; left:50%;
+    transform:translateX(-50%); font-size:16px; color:var(--gold);
+    z-index:1;
+  }
+  .flow-step:last-child::after { display:none; }
+  .flow-step + .flow-step { margin-top:20px; }
+  .flow-num {
+    width:32px; height:32px; border-radius:50%; background:var(--green);
+    color:var(--gold-light); display:flex; align-items:center; justify-content:center;
+    font-weight:700; flex-shrink:0;
+  }
+  .flow-content h4 { font-size:14px; font-weight:600; margin-bottom:4px; }
+  .flow-content p { font-size:12px; color:var(--brown-light); line-height:1.4; }
+
+  /* CHECKLIST */
+  .checklist { list-style:none; }
+  .checklist li {
+    padding:8px 0; border-bottom:1px solid var(--cream-dark);
+    display:flex; gap:10px; align-items:flex-start; font-size:14px;
+  }
+  .check-box {
+    width:18px; height:18px; border:2px solid var(--gold);
+    border-radius:4px; cursor:pointer; flex-shrink:0; margin-top:1px;
+    display:flex; align-items:center; justify-content:center;
+    transition:all 0.2s;
+  }
+  .check-box.done { background:var(--green); border-color:var(--green); color:white; font-size:11px; }
+
+  /* PRINT STYLES */
+  @media print {
+    nav, .tabs { display:none !important; }
+    .section { display:block !important; padding:0; }
+    .game-card { break-inside:avoid; }
+    body { background:white; }
+  }
+
+  .tag-green { background:#E8F5E9; color:var(--green); padding:2px 8px; border-radius:10px; font-size:11px; font-weight:600; }
+  .tag-gold { background:#FFF8E1; color:var(--gold-dark); padding:2px 8px; border-radius:10px; font-size:11px; font-weight:600; }
+
+  .divider-gold {
+    height:2px; background:linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin:1.5rem 0;
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">🏡 Rasmita 2026</div>
+  <div class="tabs">
+    <button class="tab active" onclick="showSection('games')">🎮 6 Games</button>
+    <button class="tab" onclick="showSection('lobby')">🎯 Lobby</button>
+    <button class="tab" onclick="showSection('songs')">🎵 Lagu</button>
+    <button class="tab" onclick="showSection('comedians')">🎭 Komedian</button>
+    <button class="tab" onclick="showSection('deploy')">🚀 Deploy</button>
+    <button class="tab" onclick="showSection('qr')">📱 QR Code</button>
+    <button class="tab" onclick="showSection('checklist')">✅ Checklist</button>
+  </div>
+</nav>
+
+<!-- ===== SECTION: GAMES ===== -->
+<div id="sec-games" class="section active">
+  <h1>🎮 6 Game Rasmita Family Gathering 2026</h1>
+  <p class="subtitle">Referensi lengkap semua game — aturan, poin, dan tips MC</p>
+
+  <div class="cards-grid">
+
+    <!-- GAME 1 -->
+    <div class="game-card">
+      <div class="card-header">
+        <div class="card-icon">🃏</div>
+        <div class="card-badge">Game 01</div>
+        <div class="card-title">Memory Match Foto</div>
+        <div class="card-desc">Cocokkan pasangan foto anggota keluarga. Bergantian antar pemain!</div>
+      </div>
+      <div class="card-body">
+        <div class="info-row"><span class="info-label">👥 Pemain</span><span class="info-val">2–4 orang</span></div>
+        <div class="info-row"><span class="info-label">⏱ Durasi</span><span class="info-val">10–15 menit</span></div>
+        <div class="info-row"><span class="info-label">📱 Device</span><span class="info-val">1 HP dibagi</span></div>
+        <div class="info-row">
+          <span class="info-label">⭐ Kesulitan</span>
+          <span class="difficulty"><span class="star filled"></span><span class="star filled"></span><span class="star"></span><span class="star"></span><span class="star"></span></span>
+        </div>
+        <div class="divider-gold"></div>
+        <table class="points-table">
+          <tr><th>Kondisi</th><th>Poin</th></tr>
+          <tr><td>Pasangan cocok</td><td class="points-val">+10</td></tr>
+          <tr><td>Tidak cocok</td><td>0</td></tr>
+        </table>
+        <ul class="rules-list">
+          <li><span>🎯</span> Tap 2 kartu, jika cocok dapat poin & giliran lanjut</li>
+          <li><span>🔄</span> Tidak cocok → giliran pindah ke pemain berikutnya</li>
+          <li><span>🏆</span> Poin tertinggi saat semua kartu habis = menang</li>
+          <li><span>❌</span> Dilarang foto posisi kartu</li>
+        </ul>
+        <div class="tip-box"><span class="mc-badge">MC TIP</span>"Ingat-ingat kartu yang sudah dibuka. Ingatan kuat = poin besar!"</div>
+      </div>
+    </div>
+
+    <!-- GAME 2 -->
+    <div class="game-card">
+      <div class="card-header">
+        <div class="card-icon">🔍</div>
+        <div class="card-badge">Game 02</div>
+        <div class="card-title">Tebak Siapa?</div>
+        <div class="card-desc">Foto blur perlahan terungkap. Tebak lebih awal = poin lebih besar!</div>
+      </div>
+      <div class="card-body">
+        <div class="info-row"><span class="info-label">👥 Pemain</span><span class="info-val">Semua (individual)</span></div>
+        <div class="info-row"><span class="info-label">⏱ Durasi</span><span class="info-val">15–20 menit</span></div>
+        <div class="info-row"><span class="info-label">📱 Device</span><span class="info-val">1 HP per orang</span></div>
+        <div class="info-row">
+          <span class="info-label">⭐ Kesulitan</span>
+          <span class="difficulty"><span class="star filled"></span><span class="star filled"></span><span class="star filled"></span><span class="star"></span><span class="star"></span></span>
+        </div>
+        <div class="divider-gold"></div>
+        <table class="points-table">
+          <tr><th>Waktu Jawab</th><th>Poin</th></tr>
+          <tr><td>Sangat awal (blur)</td><td class="points-val">400–500</td></tr>
+          <tr><td>Cukup awal</td><td class="points-val">300–400</td></tr>
+          <tr><td>Sebagian terlihat</td><td class="points-val">200–300</td></tr>
+          <tr><td>Foto jelas</td><td class="points-val">100–200</td></tr>
+          <tr><td>Salah</td><td>0</td></tr>
+        </table>
+        <ul class="rules-list">
+          <li><span>❌</span> Dilarang tanya ke orang lain</li>
+          <li><span>✅</span> Ejaan kurang tepat masih OK</li>
+          <li><span>✅</span> Nama panggilan diterima</li>
+        </ul>
+        <div class="tip-box"><span class="mc-badge">MC TIP</span>"Kalau kenal betul keluarga ini, rambut aja cukup buat nebak!"</div>
+      </div>
+    </div>
+
+    <!-- GAME 3 -->
+    <div class="game-card">
+      <div class="card-header">
+        <div class="card-icon">🗳️</div>
+        <div class="card-badge">Game 03</div>
+        <div class="card-title">Siapa yang Paling...?</div>
+        <div class="card-desc">Voting seru! Yang paling sering dipilih masuk Hall of Fame keluarga! 😄</div>
+      </div>
+      <div class="card-body">
+        <div class="info-row"><span class="info-label">👥 Pemain</span><span class="info-val">Semua serentak</span></div>
+        <div class="info-row"><span class="info-label">⏱ Durasi</span><span class="info-val">10–15 menit</span></div>
+        <div class="info-row"><span class="info-label">⏰ Per pertanyaan</span><span class="info-val">30 detik</span></div>
+        <div class="info-row">
+          <span class="info-label">⭐ Kesulitan</span>
+          <span class="difficulty"><span class="star filled"></span><span class="star"></span><span class="star"></span><span class="star"></span><span class="star"></span></span>
+        </div>
+        <div class="divider-gold"></div>
+        <table class="points-table">
+          <tr><th>Kondisi</th><th>Poin</th></tr>
+          <tr><td>Dipilih orang lain</td><td class="points-val">+5/suara</td></tr>
+          <tr><td>Pilih yang terbanyak</td><td class="points-val">+10</td></tr>
+        </table>
+        <ul class="rules-list">
+          <li><span>✅</span> Boleh pilih diri sendiri!</li>
+          <li><span>✅</span> Voting anonim, tidak ada yang tau</li>
+          <li><span>❌</span> Tidak boleh protes kalau banyak yang pilih kamu 😂</li>
+        </ul>
+        <div class="tip-box"><span class="mc-badge">MC TIP</span>"Yang paling banyak dipilih = yang paling dikenal karakternya. Itu artinya memorable!"</div>
+      </div>
+    </div>
+
+    <!-- GAME 4 -->
+    <div class="game-card">
+      <div class="card-header">
+        <div class="card-icon">⏳</div>
+        <div class="card-badge">Game 04</div>
+        <div class="card-title">Timeline Keluarga</div>
+        <div class="card-desc">Susun foto dari termuda ke tertua. 3 ronde × 5 foto. Bonus kecepatan!</div>
+      </div>
+      <div class="card-body">
+        <div class="info-row"><span class="info-label">👥 Pemain</span><span class="info-val">Individual/tim</span></div>
+        <div class="info-row"><span class="info-label">⏱ Durasi</span><span class="info-val">10–15 menit</span></div>
+        <div class="info-row"><span class="info-label">🔄 Ronde</span><span class="info-val">3 ronde</span></div>
+        <div class="info-row">
+          <span class="info-label">⭐ Kesulitan</span>
+          <span class="difficulty"><span class="star filled"></span><span class="star filled"></span><span class="star filled"></span><span class="star"></span><span class="star"></span></span>
+        </div>
+        <div class="divider-gold"></div>
+        <table class="points-table">
+          <tr><th>Kondisi</th><th>Poin</th></tr>
+          <tr><td>5/5 benar</td><td class="points-val">+100</td></tr>
+          <tr><td>4/5 benar</td><td class="points-val">+70</td></tr>
+          <tr><td>3/5 benar</td><td class="points-val">+40</td></tr>
+          <tr><td>Bonus < 10 detik</td><td class="points-val">+50</td></tr>
+          <tr><td>Bonus 10–20 detik</td><td class="points-val">+25</td></tr>
+        </table>
+        <ul class="rules-list">
+          <li><span>❌</span> Dilarang tanya langsung ke orangnya</li>
+          <li><span>❌</span> Tidak boleh pakai catatan</li>
+          <li><span>✅</span> Estimasi dari penampilan fisik boleh</li>
+        </ul>
+        <div class="tip-box"><span class="mc-badge">MC TIP</span>"Tau usia semua anggota keluarga? Sekarang dibuktikan!"</div>
+      </div>
+    </div>
+
+    <!-- GAME 5 -->
+    <div class="game-card">
+      <div class="card-header">
+        <div class="card-icon">🎭</div>
+        <div class="card-badge">Game 05</div>
+        <div class="card-title">Kamu Mirip Siapa?</div>
+        <div class="card-desc">Jawab 6 pertanyaan → dapat komedian Indonesia yang mirip denganmu! 200 komedian!</div>
+      </div>
+      <div class="card-body">
+        <div class="info-row"><span class="info-label">👥 Pemain</span><span class="info-val">Individual</span></div>
+        <div class="info-row"><span class="info-label">⏱ Durasi</span><span class="info-val">5 menit/orang</span></div>
+        <div class="info-row"><span class="info-label">🎭 Database</span><span class="info-val">200 komedian</span></div>
+        <div class="info-row">
+          <span class="info-label">⭐ Kesulitan</span>
+          <span class="difficulty"><span class="star filled"></span><span class="star"></span><span class="star"></span><span class="star"></span><span class="star"></span></span>
+        </div>
+        <div class="divider-gold"></div>
+        <div style="font-size:13px;font-weight:600;margin-bottom:8px">6 Pertanyaan:</div>
+        <ul class="rules-list">
+          <li><span>1️⃣</span> Jenis kelamin</li>
+          <li><span>2️⃣</span> Kisaran usia</li>
+          <li><span>3️⃣</span> Postur tubuh</li>
+          <li><span>4️⃣</span> Jenis rambut</li>
+          <li><span>5️⃣</span> Ciri khas wajah</li>
+          <li><span>6️⃣</span> Karakter/gaya humor</li>
+        </ul>
+        <div class="tip-box"><span class="mc-badge">MC TIP</span>"Screenshot hasilnya dan share ke grup! Tebak-tebakan siapa dapat komedian paling aneh!"</div>
+      </div>
+    </div>
+
+    <!-- GAME 6 -->
+    <div class="game-card">
+      <div class="card-header" style="border-bottom-color:var(--red);">
+        <div class="card-icon">🎵</div>
+        <div class="card-badge" style="background:var(--red);">Game 06 ✨ BARU</div>
+        <div class="card-title">Tebak Lagu Indonesia</div>
+        <div class="card-desc">Dengar intro melodi, tebak judul lagunya! 5 lagu legendaris + sing-along bareng!</div>
+      </div>
+      <div class="card-body">
+        <div class="info-row"><span class="info-label">👥 Pemain</span><span class="info-val">Individual</span></div>
+        <div class="info-row"><span class="info-label">⏱ Durasi</span><span class="info-val">10–15 menit</span></div>
+        <div class="info-row"><span class="info-label">🎵 Lagu</span><span class="info-val">5 lagu legendaris</span></div>
+        <div class="info-row">
+          <span class="info-label">⭐ Kesulitan</span>
+          <span class="difficulty"><span class="star filled"></span><span class="star filled"></span><span class="star"></span><span class="star"></span><span class="star"></span></span>
+        </div>
+        <div class="divider-gold"></div>
+        <table class="points-table">
+          <tr><th>Kondisi</th><th>Poin</th></tr>
+          <tr><td>Benar tanpa petunjuk</td><td class="points-val">+100</td></tr>
+          <tr><td>Benar dengan petunjuk</td><td class="points-val">+50</td></tr>
+          <tr><td>Salah</td><td>0</td></tr>
+          <tr><td>Maksimum (5 lagu)</td><td class="points-val">500</td></tr>
+        </table>
+        <div class="tip-box"><span class="mc-badge">MC TIP</span>"Audio sintetis, mungkin agak robot. Tapi kalau legend musik Indonesia, pasti langsung tau!"</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== SECTION: LOBBY ===== -->
+<div id="sec-lobby" class="section">
+  <h1>🎯 Preview Lobby & Card Game</h1>
+  <p class="subtitle">Tampilan card game di lobby — admin tinggal klik "Play" untuk membuka setiap game</p>
+
+  <div style="max-width:600px;">
+    <h2>Preview Card Pills (Landing Page)</h2>
+    <p style="font-size:13px;color:var(--brown-light);margin-bottom:1rem;">
+      6 pill/badge ini muncul di bawah form login sebagai preview game yang tersedia:
+    </p>
+    <div class="lobby-preview" style="margin-bottom:2rem;">
+      <div class="lobby-pill">
+        <span class="icon">🃏</span>Memory Match
+      </div>
+      <div class="lobby-pill">
+        <span class="icon">🔍</span>Tebak Siapa?
+      </div>
+      <div class="lobby-pill">
+        <span class="icon">🗳️</span>Siapa Paling...
+      </div>
+      <div class="lobby-pill">
+        <span class="icon">⏳</span>Timeline
+      </div>
+      <div class="lobby-pill">
+        <span class="icon">🎭</span>Mirip Siapa?
+      </div>
+      <div class="lobby-pill" style="border-color:var(--red);">
+        <span class="new-badge">✨Baru</span>
+        <span class="icon">🎵</span>Tebak Lagu
+      </div>
+    </div>
+
+    <h2>Cara Admin Membuka Game</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-num">1</div>
+        <div class="flow-content">
+          <h4>Buka Admin Panel</h4>
+          <p>Dari landing page, klik link kecil "Admin" di bagian bawah. Kode akses: <strong>FAM2026</strong></p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">2</div>
+        <div class="flow-content">
+          <h4>Pilih Game yang Ingin Dibuka</h4>
+          <p>Di Admin Panel, terlihat daftar 6 game. Masing-masing ada tombol <strong>"Buka Game"</strong> / <strong>"Tutup Game"</strong></p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">3</div>
+        <div class="flow-content">
+          <h4>Klik "Buka Game"</h4>
+          <p>Di lobby semua pemain, game card berubah dari <span class="tag-gold">⌛ MENUNGGU</span> menjadi <span class="tag-green">✓ DIBUKA</span></p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">4</div>
+        <div class="flow-content">
+          <h4>Pemain Tap Card = Masuk Game</h4>
+          <p>Semua pemain di lobby tinggal tap card game yang sudah terbuka untuk langsung mulai bermain</p>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:var(--cream-dark);border-radius:12px;padding:1.5rem;margin-top:1.5rem;">
+      <div style="font-weight:600;margin-bottom:8px;">⚠️ Catatan Penting</div>
+      <ul style="list-style:disc;padding-left:1.2rem;font-size:13px;color:var(--brown-light);line-height:2;">
+        <li>Buka game <strong>satu per satu</strong> sesuai urutan acara</li>
+        <li>Tutup game sebelumnya sebelum membuka yang baru (agar fokus)</li>
+        <li>Admin Panel berjalan di device admin, pemain di device masing-masing</li>
+        <li>Tidak ada sinkronisasi real-time — setiap pemain punya state sendiri</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SECTION: SONGS ===== -->
+<div id="sec-songs" class="section">
+  <h1>🎵 Daftar Lagu Game 6</h1>
+  <p class="subtitle">5 lagu legendaris Indonesia lintas generasi (usia 12–70 tahun)</p>
+
+  <div style="max-width:600px;">
+    <div class="song-list">
+      <div class="song-item">
+        <div class="song-num">1</div>
+        <div>
+          <div class="song-title">Keluarga Cemara</div>
+          <div class="song-meta">Hedi Yunus · 1996 · Pop Nostalgia · OST Sinetron</div>
+          <div style="font-size:11px;color:var(--green);margin-top:2px;">🎯 Cocok usia 30–70 tahun</div>
+        </div>
+        <div class="song-pts">100 pts</div>
+      </div>
+      <div class="song-item">
+        <div class="song-num">2</div>
+        <div>
+          <div class="song-title">Tabo Balik</div>
+          <div class="song-meta">Lagu Tradisional/Pop · Klasik</div>
+          <div style="font-size:11px;color:var(--green);margin-top:2px;">🎯 Cocok semua usia</div>
+        </div>
+        <div class="song-pts">100 pts</div>
+      </div>
+      <div class="song-item">
+        <div class="song-num">3</div>
+        <div>
+          <div class="song-title">Kangen</div>
+          <div class="song-meta">Dewa 19 · 1992 · Rock/Pop</div>
+          <div style="font-size:11px;color:var(--green);margin-top:2px;">🎯 Cocok usia 25–55 tahun</div>
+        </div>
+        <div class="song-pts">100 pts</div>
+      </div>
+      <div class="song-item">
+        <div class="song-num">4</div>
+        <div>
+          <div class="song-title">Laskar Pelangi</div>
+          <div class="song-meta">Nidji · 2008 · Pop Rock · OST Film</div>
+          <div style="font-size:11px;color:var(--green);margin-top:2px;">🎯 Cocok usia 15–45 tahun</div>
+        </div>
+        <div class="song-pts">100 pts</div>
+      </div>
+      <div class="song-item">
+        <div class="song-num">5</div>
+        <div>
+          <div class="song-title">Pergi Pagi Pulang Pagi</div>
+          <div class="song-meta">Armada · 2018 · Pop</div>
+          <div style="font-size:11px;color:var(--green);margin-top:2px;">🎯 Cocok usia 12–40 tahun</div>
+        </div>
+        <div class="song-pts">100 pts</div>
+      </div>
+    </div>
+
+    <div style="background:var(--cream-dark);border-radius:12px;padding:1.5rem;margin-top:1.5rem;">
+      <div style="font-weight:600;margin-bottom:8px;">🎤 Sing-Along Section</div>
+      <p style="font-size:13px;color:var(--brown-light);line-height:1.7;">
+        Setelah setiap lagu dijawab, lirik bait pertama ditampilkan dan melodi bisa diputar ulang. 
+        Moment ini cocok untuk <strong>nyanyi bersama seluruh keluarga!</strong> 
+        Sediakan mikrofon wireless untuk semangat lebih.
+      </p>
+    </div>
+
+    <div style="background:#FFF8E1;border-radius:12px;padding:1.5rem;margin-top:1rem;border-left:3px solid var(--gold);">
+      <div style="font-weight:600;margin-bottom:8px;color:var(--gold-dark);">⚠️ Catatan Teknis Audio</div>
+      <p style="font-size:13px;color:var(--brown-light);line-height:1.7;">
+        Melodi dihasilkan via <strong>Web Audio API</strong> (nada sintetis, bukan rekaman asli). 
+        Pengguna perlu <strong>tap/klik layar dulu</strong> sebelum audio bisa diputar di iOS/Safari.
+        Untuk audio lebih jernih, pertimbangkan sambungkan HP ke speaker bluetooth.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SECTION: COMEDIANS ===== -->
+<div id="sec-comedians" class="section">
+  <h1>🎭 Preview Database Komedian</h1>
+  <p class="subtitle">200 komedian Indonesia (100 pria + 100 wanita) — Game 5 "Kamu Mirip Siapa?"</p>
+
+  <h2>Top Komedian Pria</h2>
+  <div class="comedian-grid">
+    <div class="comedian-card">
+      <div class="comedian-avatar">😂</div>
+      <div class="comedian-name">Sule</div>
+      <div class="comedian-tagline">"Emang gue pikirin!"</div>
+    </div>
+    <div class="comedian-card">
+      <div class="comedian-avatar">📚</div>
+      <div class="comedian-name">Raditya Dika</div>
+      <div class="comedian-tagline">"Hidup itu absurd"</div>
+    </div>
+    <div class="comedian-card">
+      <div class="comedian-avatar">🎬</div>
+      <div class="comedian-name">Ernest Prakasa</div>
+      <div class="comedian-tagline">"Sudah dewasa?"</div>
+    </div>
+    <div class="comedian-card">
+      <div class="comedian-avatar">🎤</div>
+      <div class="comedian-name">Bintang Emon</div>
+      <div class="comedian-tagline">"Guys, serius..."</div>
+    </div>
+    <div class="comedian-card">
+      <div class="comedian-avatar">🧠</div>
+      <div class="comedian-name">Coki Pardede</div>
+      <div class="comedian-tagline">"Orang tua gue..."</div>
+    </div>
+    <div class="comedian-card">
+      <div class="comedian-avatar">💪</div>
+      <div class="comedian-name">Deddy Corbuzier</div>
+      <div class="comedian-tagline">"Buktikan!"</div>
+    </div>
+    <div class="comedian-card">
+      <div class="comedian-avatar">🔥</div>
+      <div class="comedian-name">Pandji</div>
+      <div class="comedian-tagline">"Indonesia bisa!"</div>
+    </div>
+    <div class="comedian-card">
+      <div class="comedian-avatar">😎</div>
+      <div class="comedian-name">Ge Pamungkas</div>
+      <div class="comedian-tagline">"Kalau mau jujur..."</div>
+    </div>
+    <div class="comedian-card">
+      <div class="comedian-avatar">😤</div>
+      <div class="comedian-name">Mongol Stres</div>
+      <div class="comedian-tagline">"Gue stres!"</div>
+    </div>
+    <div class="comedian-card">
+      <div class="comedian-avatar">👔</div>
+      <div class="comedian-name">Kemal Palevi</div>
+      <div class="comedian-tagline">"Stylish comedy"</div>
+    </div>
+    <div class="comedian-card">
+      <div class="comedian-avatar">🎓</div>
+      <div class="comedian-name">Soleh Solihun</div>
+      <div class="comedian-tagline">"Secara akademis..."</div>
+    </div>
+    <div class="comedian-card" style="border:1.5px dashed var(--gold);">
+      <div class="comedian-avatar" style="background:var(--cream-dark);color:var(--brown-light);">+89</div>
+      <div class="comedian-name" style="color:var(--brown-light);">Lainnya</div>
+      <div class="comedian-tagline">100 total pria</div>
+    </div>
+  </div>
+
+  <h2>Top Komedian Wanita</h2>
+  <div class="comedian-grid">
+    <div class="comedian-card">
+      <div class="comedian-avatar" style="background:linear-gradient(135deg,#8B1A1A,#C62828);">😄</div>
+      <div class="comedian-name">Nunung</div>
+      <div class="comedian-tagline">"Aduh mak!"</div>
+    </div>
+    <div class="comedian-card">
+      <div class="comedian-avatar" style="background:linear-gradient(135deg,#8B1A1A,#C62828);">🎤</div>
+      <div class="comedian-name">Kiky Saputri</div>
+      <div class="comedian-tagline">"Berani bicara!"</div>
+    </div>
+    <div class="comedian-card">
+      <div class="comedian-avatar" style="background:linear-gradient(135deg,#8B1A1A,#C62828);">🎪</div>
+      <div class="comedian-name">Soimah</div>
+      <div class="comedian-tagline">"Duh gusti!"</div>
+    </div>
+    <div class="comedian-card">
+      <div class="comedian-avatar" style="background:linear-gradient(135deg,#8B1A1A,#C62828);">💥</div>
+      <div class="comedian-name">Rina Nose</div>
+      <div class="comedian-tagline">"Eksplosif!"</div>
+    </div>
+    <div class="comedian-card">
+      <div class="comedian-avatar" style="background:linear-gradient(135deg,#8B1A1A,#C62828);">📱</div>
+      <div class="comedian-name">Arafah Rianti</div>
+      <div class="comedian-tagline">"Relate banget"</div>
+    </div>
+    <div class="comedian-card">
+      <div class="comedian-avatar" style="background:linear-gradient(135deg,#8B1A1A,#C62828);">❤️</div>
+      <div class="comedian-name">Asri Welas</div>
+      <div class="comedian-tagline">"Nggak nyana!"</div>
+    </div>
+    <div class="comedian-card" style="border:1.5px dashed var(--gold);">
+      <div class="comedian-avatar" style="background:var(--cream-dark);color:var(--brown-light);">+94</div>
+      <div class="comedian-name" style="color:var(--brown-light);">Lainnya</div>
+      <div class="comedian-tagline">100 total wanita</div>
+    </div>
+  </div>
+
+  <div style="background:var(--cream-dark);border-radius:12px;padding:1.5rem;margin-top:1.5rem;max-width:600px;">
+    <div style="font-weight:600;margin-bottom:8px;">📷 Status Foto Komedian</div>
+    <p style="font-size:13px;color:var(--brown-light);line-height:1.7;">
+      Saat ini Game 5 <strong>belum menampilkan foto</strong> komedian — hanya nama dan komentar personal. 
+      Untuk menambahkan foto, lihat panduan di tab <strong>DATABASE.md</strong>.
+      Foto bisa diambil dari Wikipedia (legal) atau diupload sendiri ke Imgur.
+    </p>
+  </div>
+</div>
+
+<!-- ===== SECTION: DEPLOY ===== -->
+<div id="sec-deploy" class="section">
+  <h1>🚀 Deploy & Publish Aplikasi</h1>
+  <p class="subtitle">Pilih platform hosting gratis — Netlify paling mudah untuk pemula</p>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;max-width:900px;">
+
+    <div class="game-card">
+      <div class="card-header" style="border-bottom-color:var(--green);">
+        <div style="font-size:2rem;">🌐</div>
+        <div class="card-badge">DIREKOMENDASIKAN</div>
+        <div class="card-title">Netlify</div>
+        <div class="card-desc">Drag & drop, gratis, URL instan dalam 30 detik</div>
+      </div>
+      <div class="card-body">
+        <ol style="padding-left:1.2rem;font-size:13px;line-height:2;color:var(--brown);">
+          <li>Buka <strong>netlify.com</strong> → Sign up</li>
+          <li>Di dashboard, scroll ke bawah</li>
+          <li><strong>Drag & drop</strong> file index.html</li>
+          <li>Tunggu 30 detik → URL siap! ✅</li>
+          <li>Opsional: ganti nama jadi <em>rasmita-2026</em></li>
+        </ol>
+        <div style="margin-top:12px;background:var(--cream-dark);padding:10px;border-radius:8px;font-size:12px;">
+          URL contoh: <strong>rasmita-2026.netlify.app</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="game-card">
+      <div class="card-header">
+        <div style="font-size:2rem;">🐙</div>
+        <div class="card-badge">UNTUK DEVELOPER</div>
+        <div class="card-title">GitHub Pages</div>
+        <div class="card-desc">Perlu akun GitHub, gratis, URL permanen</div>
+      </div>
+      <div class="card-body">
+        <ol style="padding-left:1.2rem;font-size:13px;line-height:2;color:var(--brown);">
+          <li>Buat repo baru di GitHub</li>
+          <li>Upload index.html</li>
+          <li>Settings → Pages → Deploy from main</li>
+          <li>Tunggu 1-2 menit ✅</li>
+        </ol>
+        <div style="margin-top:12px;background:var(--cream-dark);padding:10px;border-radius:8px;font-size:12px;">
+          URL: <strong>username.github.io/nama-repo</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="game-card">
+      <div class="card-header">
+        <div style="font-size:2rem;">▲</div>
+        <div class="card-badge">TERCEPAT</div>
+        <div class="card-title">Vercel</div>
+        <div class="card-desc">Deploy dalam hitungan detik, performa terbaik</div>
+      </div>
+      <div class="card-body">
+        <ol style="padding-left:1.2rem;font-size:13px;line-height:2;color:var(--brown);">
+          <li>Buka <strong>vercel.com</strong> → Sign up</li>
+          <li>Add New Project → Upload</li>
+          <li>Upload folder berisi index.html</li>
+          <li>Klik Deploy ✅</li>
+        </ol>
+        <div style="margin-top:12px;background:var(--cream-dark);padding:10px;border-radius:8px;font-size:12px;">
+          URL: <strong>rasmita-2026.vercel.app</strong>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== SECTION: QR CODE ===== -->
+<div id="sec-qr" class="section">
+  <h1>📱 Generator QR Code & Short URL</h1>
+  <p class="subtitle">Masukkan URL aplikasi yang sudah di-deploy untuk membuat QR Code siap print</p>
+
+  <div class="qr-box">
+    <div style="font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:1rem;">🔗 URL Aplikasi</div>
+    <input type="text" class="url-input" id="appUrl" placeholder="https://rasmita-2026.netlify.app" value="https://rasmita-gathering-2026.netlify.app">
+    <button class="btn-green" onclick="generateQR()">📱 Generate QR Code</button>
+
+    <div class="qr-display" id="qrDisplay" style="display:none;">
+      <div style="margin:1.5rem 0;">
+        <div id="qrcode"></div>
+      </div>
+      <div style="font-family:'Playfair Display',serif;font-size:1.1rem;margin-bottom:4px;">🏡 Rasmita Family Gathering 2026</div>
+      <div style="font-size:13px;color:var(--brown-light);margin-bottom:1rem;" id="qrUrlDisplay"></div>
+      <button class="btn-green" onclick="printQR()">🖨️ Print QR Code</button>
+    </div>
+
+    <div class="short-url" id="shortUrlInfo" style="display:none;">
+      <div style="font-weight:600;margin-bottom:6px;">🔗 Cara Buat Short URL</div>
+      <p>Pergi ke <a href="https://bitly.com" target="_blank">bitly.com</a> → Create Link → paste URL di atas → custom back-half: <strong>rasmita2026</strong></p>
+      <p style="margin-top:6px;">Hasilnya: <strong>bit.ly/rasmita2026</strong></p>
+    </div>
+  </div>
+
+  <div style="max-width:500px;margin:2rem auto;">
+    <h2>📋 Spesifikasi Print QR Code</h2>
+    <table class="points-table" style="margin-top:0.5rem;">
+      <tr><th>Parameter</th><th>Nilai</th></tr>
+      <tr><td>Ukuran minimal</td><td>5 × 5 cm</td></tr>
+      <tr><td>Ukuran disarankan</td><td>10 × 10 cm</td></tr>
+      <tr><td>Format file</td><td>PNG atau SVG</td></tr>
+      <tr><td>Quiet zone (border)</td><td>Min 1 cm semua sisi</td></tr>
+      <tr><td>Warna foreground</td><td>#2D5016 (hijau tua)</td></tr>
+      <tr><td>Warna background</td><td>#FDF8EE (krem)</td></tr>
+    </table>
+
+    <div style="background:var(--cream-dark);border-radius:12px;padding:1.2rem;margin-top:1rem;">
+      <div style="font-weight:600;margin-bottom:8px;">📍 Tempel QR Code di:</div>
+      <ul style="list-style:none;font-size:13px;line-height:2.2;">
+        <li>📌 Pintu masuk venue</li>
+        <li>📌 Meja registrasi</li>
+        <li>📌 Setiap meja makan</li>
+        <li>📌 Layar/proyektor (tampilkan digital)</li>
+        <li>📌 Backdrop foto</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SECTION: CHECKLIST ===== -->
+<div id="sec-checklist" class="section">
+  <h1>✅ Checklist Persiapan</h1>
+  <p class="subtitle">Centang satu per satu — klik untuk tandai selesai!</p>
+
+  <div style="max-width:600px;">
+    <h2>📅 H-7 (Seminggu Sebelum)</h2>
+    <ul class="checklist" id="list1">
+      <li><div class="check-box" onclick="toggle(this)"></div> Kumpulkan foto semua anggota keluarga (JPG/PNG, 300×300px)</li>
+      <li><div class="check-box" onclick="toggle(this)"></div> Kompress foto di squoosh.app agar loading cepat</li>
+      <li><div class="check-box" onclick="toggle(this)"></div> Masukkan foto ke kode index.html (field `foto`)</li>
+      <li><div class="check-box" onclick="toggle(this)"></div> Tentukan Kode Room (contoh: FAM2026)</li>
+      <li><div class="check-box" onclick="toggle(this)"></div> Deploy aplikasi ke Netlify/GitHub Pages/Vercel</li>
+      <li><div class="check-box" onclick="toggle(this)"></div> Buat QR Code dari URL yang sudah jadi</li>
+      <li><div class="check-box" onclick="toggle(this)"></div> Buat Short URL di bitly.com</li>
+    </ul>
+
+    <h2>📅 H-3 (Tiga Hari Sebelum)</h2>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggle(this)"></div> Test semua 6 game dari awal sampai akhir</li>
+      <li><div class="check-box" onclick="toggle(this)"></div> Test di Android Chrome</li>
+      <li><div class="check-box" onclick="toggle(this)"></div> Test di iPhone Safari</li>
+      <li><div class="check-box" onclick="toggle(this)"></div> Test audio Game 6 (tap layar dulu di iOS)</li>
+      <li><div class="check-box" onclick="toggle(this)"></div> Test Admin Panel — buka/tutup game</li>
+      <li><div class="check-box" onclick="toggle(this)"></div> Print QR Code ukuran A4</li>
+    </ul>
+
+    <h2>📅 H-1 (Sehari Sebelum)</h2>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggle(this)"></div> Kirim info ke grup WhatsApp (kode room + URL + tips)</li>
+      <li><div class="check-box" onclick="toggle(this)"></div> Simpan backup file HTML di flashdisk</li>
+      <li><div class="check-box" onclick="toggle(this)"></div> Charge semua perangkat admin</li>
+      <li><div class="check-box" onclick="toggle(this)"></div> Briefing MC tentang aturan semua game</li>
+    </ul>
+
+    <h2>📅 Hari H (2 Jam Sebelum)</h2>
+    <ul class="checklist">
+      <li><div class="check-box" onclick="toggle(this)"></div> Nyalakan WiFi dan test kecepatan</li>
+      <li><div class="check-box" onclick="toggle(this)"></div> Tempel QR Code di semua titik</li>
+      <li><div class="check-box" onclick="toggle(this)"></div> Setup proyektor/TV untuk layar admin</li>
+      <li><div class="check-box" onclick="toggle(this)"></div> Test sekali lagi semua game</li>
+      <li><div class="check-box" onclick="toggle(this)"></div> Siapkan mobile hotspot sebagai backup</li>
+      <li><div class="check-box" onclick="toggle(this)"></div> Briefing helper untuk bantu peserta lansia</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('sec-' + id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+function toggle(el) {
+  el.classList.toggle('done');
+  el.textContent = el.classList.contains('done') ? '✓' : '';
+}
+
+let qrInstance = null;
+
+function generateQR() {
+  const url = document.getElementById('appUrl').value.trim();
+  if (!url) { alert('Masukkan URL dulu!'); return; }
+
+  document.getElementById('qrDisplay').style.display = 'block';
+  document.getElementById('shortUrlInfo').style.display = 'block';
+  document.getElementById('qrUrlDisplay').textContent = url;
+
+  const container = document.getElementById('qrcode');
+  container.innerHTML = '';
+
+  new QRCode(container, {
+    text: url,
+    width: 200,
+    height: 200,
+    colorDark: '#2D5016',
+    colorLight: '#FDF8EE',
+    correctLevel: QRCode.CorrectLevel.H
+  });
+}
+
+function printQR() {
+  window.print();
+}
+
+// Auto generate on load with placeholder
+window.onload = function() {
+  generateQR();
+};
+</script>
+
+</body>
+</html>

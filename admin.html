@@ -1,0 +1,1455 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel — Rasmita Family Gathering 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #C9A84C; --gold-light: #F0D080; --gold-dark: #8B6914;
+    --cream: #FDF8EE; --cream-dark: #F5EDD8;
+    --brown: #3D2B1F; --brown-light: #6B4C3B;
+    --green: #2D5016; --green-light: #4A7C2A;
+    --red: #8B1A1A; --white: #FFFFFF;
+    --shadow: 0 4px 24px rgba(61,43,31,0.15);
+    --sidebar: 260px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'DM Sans',sans-serif; background:var(--cream); color:var(--brown); display:flex; min-height:100vh; }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: var(--sidebar);
+    background: var(--brown);
+    min-height: 100vh;
+    position: fixed;
+    top: 0; left: 0;
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+    box-shadow: 4px 0 20px rgba(0,0,0,0.2);
+  }
+  .sidebar-logo {
+    padding: 24px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    text-align: center;
+  }
+  .sidebar-logo .logo-title {
+    font-family:'Playfair Display',serif;
+    font-size: 1.1rem;
+    color: var(--gold-light);
+    line-height: 1.3;
+  }
+  .sidebar-logo .logo-sub {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.3);
+    margin-top: 4px;
+  }
+  .sidebar-badge {
+    background: var(--gold);
+    color: var(--brown);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 2px 10px;
+    border-radius: 20px;
+    display: inline-block;
+    margin-top: 8px;
+  }
+  .sidebar-nav { flex: 1; padding: 16px 0; overflow-y: auto; }
+  .nav-section-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.25);
+    padding: 12px 20px 4px;
+    font-weight: 600;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 20px;
+    cursor: pointer;
+    transition: all 0.15s;
+    border-left: 3px solid transparent;
+    font-size: 14px;
+    color: rgba(255,255,255,0.6);
+    font-weight: 500;
+    text-decoration: none;
+  }
+  .nav-item:hover { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.9); }
+  .nav-item.active {
+    background: rgba(201,168,76,0.12);
+    border-left-color: var(--gold);
+    color: var(--gold-light);
+  }
+  .nav-item .nav-icon { font-size: 1.1rem; width: 22px; text-align: center; }
+  .sidebar-footer {
+    padding: 16px 20px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+  }
+  .btn-launch {
+    display: block;
+    width: 100%;
+    background: var(--gold);
+    color: var(--brown);
+    border: none;
+    border-radius: 8px;
+    padding: 12px;
+    font-family:'DM Sans',sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    transition: all 0.2s;
+    margin-bottom: 8px;
+  }
+  .btn-launch:hover { background: var(--gold-light); transform: translateY(-1px); }
+  .btn-launch-outline {
+    display: block;
+    width: 100%;
+    background: transparent;
+    color: rgba(255,255,255,0.5);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 8px;
+    padding: 10px;
+    font-family:'DM Sans',sans-serif;
+    font-size: 12px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+  }
+  .btn-launch-outline:hover { border-color: rgba(255,255,255,0.3); color: rgba(255,255,255,0.8); }
+
+  /* ── MAIN CONTENT ── */
+  .main-content {
+    margin-left: var(--sidebar);
+    flex: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  .topbar {
+    background: var(--white);
+    border-bottom: 1px solid rgba(201,168,76,0.2);
+    padding: 16px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    box-shadow: 0 2px 12px rgba(61,43,31,0.06);
+  }
+  .topbar-title {
+    font-family:'Playfair Display',serif;
+    font-size: 1.4rem;
+    color: var(--brown);
+  }
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+  .room-code-badge {
+    background: var(--green);
+    color: var(--gold-light);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    padding: 6px 18px;
+    border-radius: 6px;
+  }
+  .notif-bar {
+    background: rgba(45,80,22,0.9);
+    color: var(--gold-light);
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px;
+    display: none;
+    position: fixed;
+    top: 0; left: var(--sidebar); right: 0;
+    z-index: 200;
+  }
+  .notif-bar.show { display: block; }
+
+  .page-content { padding: 32px; flex: 1; }
+
+  /* ── PANEL SECTIONS ── */
+  .panel-page { display: none; }
+  .panel-page.active { display: block; }
+
+  /* ── STAT CARDS ── */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .stat-card {
+    background: var(--white);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 14px;
+    padding: 20px 24px;
+    box-shadow: var(--shadow);
+  }
+  .stat-label { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--brown-light); margin-bottom: 6px; font-weight: 600; }
+  .stat-value { font-family:'Playfair Display',serif; font-size: 2.2rem; color: var(--brown); font-weight: 700; line-height: 1; }
+  .stat-value.gold { color: var(--gold-dark); }
+  .stat-value.green { color: var(--green); }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--white);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: var(--shadow);
+    margin-bottom: 24px;
+  }
+  .card-title {
+    font-family:'Playfair Display',serif;
+    font-size: 1.15rem;
+    color: var(--brown);
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(201,168,76,0.15);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .card-title span { font-size: 1.3rem; }
+
+  /* ── FORM ── */
+  .form-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 12px; }
+  .form-group { flex: 1; min-width: 160px; }
+  .form-group label { display:block; font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--brown-light); margin-bottom:6px; }
+  .form-group input, .form-group select, .form-group textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid rgba(201,168,76,0.3);
+    border-radius: 8px;
+    font-family:'DM Sans',sans-serif;
+    font-size: 14px;
+    color: var(--brown);
+    background: var(--cream);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--gold); }
+  .form-group textarea { resize: vertical; min-height: 80px; }
+
+  /* ── BUTTONS ── */
+  .btn { padding:10px 20px; border-radius:8px; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; cursor:pointer; border:none; transition:all 0.15s; }
+  .btn-gold { background:var(--green); color:var(--gold-light); }
+  .btn-gold:hover { background:var(--green-light); transform:translateY(-1px); }
+  .btn-outline { background:transparent; border:1.5px solid rgba(201,168,76,0.4); color:var(--brown-light); }
+  .btn-outline:hover { border-color:var(--gold); color:var(--brown); }
+  .btn-danger { background:#FFF0F0; border:1.5px solid #FFCCCC; color:var(--red); }
+  .btn-danger:hover { background:#FFDDDD; }
+  .btn-sm { padding:7px 14px; font-size:12px; }
+
+  /* ── GAME TOGGLE GRID ── */
+  .game-toggle-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 14px;
+  }
+  .game-toggle-card {
+    background: var(--cream);
+    border: 1.5px solid rgba(201,168,76,0.25);
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .game-toggle-icon { font-size: 2rem; flex-shrink: 0; }
+  .game-toggle-info { flex: 1; }
+  .game-toggle-info h4 { font-size: 14px; font-weight: 700; color: var(--brown); margin-bottom: 3px; }
+  .game-toggle-info p { font-size: 12px; color: var(--brown-light); line-height: 1.4; }
+  .toggle-switch { position:relative; width:46px; height:26px; flex-shrink:0; }
+  .toggle-switch input { opacity:0; width:0; height:0; }
+  .toggle-slider {
+    position:absolute; inset:0; cursor:pointer;
+    background: #ddd; border-radius:26px; transition:0.3s;
+  }
+  .toggle-slider:before {
+    content:''; position:absolute; height:20px; width:20px;
+    left:3px; bottom:3px; background:white; border-radius:50%; transition:0.3s;
+  }
+  input:checked + .toggle-slider { background: var(--green); }
+  input:checked + .toggle-slider:before { transform: translateX(20px); }
+
+  /* ── PHOTO UPLOAD GRID ── */
+  .photo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 14px;
+  }
+  .photo-item {
+    background: var(--cream);
+    border: 1.5px solid rgba(201,168,76,0.25);
+    border-radius: 12px;
+    padding: 12px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .photo-item:hover { border-color: var(--gold); box-shadow: 0 4px 14px rgba(201,168,76,0.2); }
+  .photo-item img { width:80px; height:80px; border-radius:50%; object-fit:cover; margin-bottom:8px; border:2px solid rgba(201,168,76,0.3); display:block; margin: 0 auto 8px; }
+  .photo-placeholder { width:80px; height:80px; border-radius:50%; background:var(--cream-dark); border:2px dashed rgba(201,168,76,0.4); display:flex; align-items:center; justify-content:center; font-size:1.8rem; margin:0 auto 8px; }
+  .photo-name { font-size:12px; font-weight:600; color:var(--brown); margin-bottom:3px; cursor:text; }
+  .photo-status { font-size:10px; color: var(--brown-light); }
+  .photo-status.has-photo { color: var(--green); }
+  .photo-del { position:absolute; top:6px; right:6px; background:rgba(139,26,26,0.1); border:none; border-radius:50%; width:20px; height:20px; font-size:10px; cursor:pointer; color:var(--red); display:none; }
+  .photo-item:hover .photo-del { display:block; }
+
+  /* ── PLAYERS LIST ── */
+  .players-table { width:100%; border-collapse:collapse; font-size:13px; }
+  .players-table th { text-align:left; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--brown-light); font-weight:600; padding:8px 12px; border-bottom:1px solid rgba(201,168,76,0.2); }
+  .players-table td { padding:10px 12px; border-bottom:1px solid rgba(201,168,76,0.1); color:var(--brown); }
+  .players-table tr:hover td { background:var(--cream); }
+  .player-avatar-sm { width:32px; height:32px; border-radius:50%; background:var(--cream-dark); border:1.5px solid rgba(201,168,76,0.3); display:inline-flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:var(--brown); overflow:hidden; }
+  .player-avatar-sm img { width:100%; height:100%; object-fit:cover; }
+  .dot-online { width:8px; height:8px; border-radius:50%; background:#4CAF50; display:inline-block; margin-right:4px; }
+
+  /* ── GAME SPECIFIC ADMIN PANELS ── */
+  .tab-bar { display:flex; gap:4px; margin-bottom:24px; border-bottom:1px solid rgba(201,168,76,0.2); padding-bottom:0; flex-wrap:wrap; }
+  .tab-btn {
+    padding:10px 18px; border:none; background:transparent; font-family:'DM Sans',sans-serif;
+    font-size:13px; font-weight:600; color:var(--brown-light); cursor:pointer;
+    border-bottom:3px solid transparent; margin-bottom:-1px; transition:all 0.15s;
+  }
+  .tab-btn.active { color:var(--brown); border-bottom-color:var(--gold); }
+  .tab-btn:hover { color:var(--brown); }
+  .tab-panel { display:none; }
+  .tab-panel.active { display:block; }
+
+  /* ── PROJECTOR VIEW LINK ── */
+  .projector-card {
+    background: linear-gradient(135deg, var(--green), #4A7C2A);
+    border-radius: 16px;
+    padding: 24px;
+    color: white;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .projector-icon { font-size: 3rem; flex-shrink:0; }
+  .projector-text { flex:1; }
+  .projector-text h3 { font-family:'Playfair Display',serif; font-size:1.3rem; margin-bottom:6px; color:var(--gold-light); }
+  .projector-text p { font-size:13px; color:rgba(255,255,255,0.7); line-height:1.5; }
+  .projector-actions { display:flex; gap:10px; flex-wrap:wrap; }
+  .btn-projector { background:var(--gold); color:var(--brown); border:none; border-radius:8px; padding:12px 20px; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:700; cursor:pointer; transition:all 0.2s; }
+  .btn-projector:hover { background:var(--gold-light); transform:translateY(-1px); }
+  .btn-projector-outline { background:transparent; color:var(--gold-light); border:1.5px solid rgba(240,208,128,0.4); border-radius:8px; padding:11px 18px; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; cursor:pointer; transition:all 0.2s; }
+  .btn-projector-outline:hover { border-color:var(--gold-light); }
+
+  /* ── LAGU TABLE ── */
+  .lagu-table { width:100%; border-collapse:collapse; font-size:13px; }
+  .lagu-table th { text-align:left; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--brown-light); font-weight:600; padding:10px 12px; border-bottom:2px solid rgba(201,168,76,0.2); }
+  .lagu-table td { padding:12px 12px; border-bottom:1px solid rgba(201,168,76,0.1); vertical-align:top; }
+  .lagu-table tr:hover td { background:var(--cream); }
+  .timestamp-badge { background:var(--cream-dark); border:1px solid rgba(201,168,76,0.3); border-radius:6px; padding:3px 10px; font-size:12px; font-weight:700; color:var(--brown); font-family:monospace; }
+  .status-badge { display:inline-block; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600; }
+  .status-badge.synth { background:#E3F2FD; color:#1565C0; }
+  .status-badge.mp3 { background:#E8F5E9; color:var(--green); }
+
+  /* ── KOMEDIAN TABLE ── */
+  .komedian-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(180px,1fr)); gap:12px; }
+  .komedian-card { background:var(--cream); border:1.5px solid rgba(201,168,76,0.2); border-radius:12px; padding:14px; display:flex; gap:12px; align-items:center; }
+  .komedian-photo { width:48px; height:48px; border-radius:50%; background:var(--cream-dark); border:1.5px solid rgba(201,168,76,0.3); object-fit:cover; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:1.4rem; overflow:hidden; }
+  .komedian-photo img { width:100%; height:100%; object-fit:cover; }
+  .komedian-info { flex:1; min-width:0; }
+  .komedian-info .k-name { font-size:13px; font-weight:700; color:var(--brown); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .komedian-info .k-sub { font-size:11px; color:var(--brown-light); }
+
+  /* ── STEP GUIDE ── */
+  .step-guide { counter-reset:step-counter; }
+  .step-item { display:flex; gap:16px; margin-bottom:20px; }
+  .step-num { width:32px; height:32px; border-radius:50%; background:var(--green); color:var(--gold-light); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; flex-shrink:0; }
+  .step-body h4 { font-size:14px; font-weight:700; color:var(--brown); margin-bottom:4px; }
+  .step-body p { font-size:13px; color:var(--brown-light); line-height:1.6; }
+  .step-body code { background:var(--cream-dark); border:1px solid rgba(201,168,76,0.3); border-radius:4px; padding:2px 8px; font-size:12px; font-family:monospace; color:var(--brown); }
+
+  /* ── ALERT ── */
+  .alert { border-radius:10px; padding:14px 18px; font-size:13px; line-height:1.6; margin-bottom:16px; }
+  .alert-info { background:#EEF6FF; border:1px solid #BFDBFE; color:#1E40AF; }
+  .alert-warn { background:#FFFBEB; border:1px solid #FDE68A; color:#92400E; }
+  .alert-success { background:#F0FDF4; border:1px solid #BBF7D0; color:#14532D; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    .sidebar { transform:translateX(-100%); transition:transform 0.3s; }
+    .sidebar.open { transform:translateX(0); }
+    .main-content { margin-left: 0; }
+    .notif-bar { left: 0; }
+    .topbar { padding: 12px 16px; }
+    .page-content { padding: 16px; }
+  }
+
+  /* ── SECTION DIVIDER ── */
+  .section-divider { display:flex; align-items:center; gap:12px; margin:24px 0; }
+  .section-divider span { font-size:12px; letter-spacing:2px; text-transform:uppercase; color:var(--gold); font-weight:600; white-space:nowrap; }
+  .section-divider::before, .section-divider::after { content:''; flex:1; height:1px; background:rgba(201,168,76,0.25); }
+
+  .instr-box { background:var(--cream-dark); border-left:4px solid var(--gold); border-radius:0 8px 8px 0; padding:14px 18px; font-size:13px; color:var(--brown-light); line-height:1.7; margin-bottom:16px; }
+  .instr-box strong { color:var(--brown); }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-title">Rasmita's Family<br>Gathering 2026</div>
+    <div class="logo-sub">Admin Panel</div>
+    <span class="sidebar-badge">HOST ONLY</span>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Utama</div>
+    <a class="nav-item active" onclick="showPanel('dashboard')" href="#">
+      <span class="nav-icon">📊</span> Dashboard
+    </a>
+    <a class="nav-item" onclick="showPanel('players')" href="#">
+      <span class="nav-icon">👥</span> Daftar Peserta
+    </a>
+    <a class="nav-item" onclick="showPanel('settings')" href="#">
+      <span class="nav-icon">⚙️</span> Pengaturan Event
+    </a>
+    <a class="nav-item" onclick="showPanel('projector')" href="#">
+      <span class="nav-icon">📽️</span> Panduan Proyektor
+    </a>
+
+    <div class="nav-section-label">Data Game</div>
+    <a class="nav-item" onclick="showPanel('photos')" href="#">
+      <span class="nav-icon">📸</span> Foto Keluarga
+    </a>
+    <a class="nav-item" onclick="showPanel('komedian')" href="#">
+      <span class="nav-icon">🎭</span> Komedian (Game 5)
+    </a>
+    <a class="nav-item" onclick="showPanel('lagu')" href="#">
+      <span class="nav-icon">🎵</span> Lagu (Game 6)
+    </a>
+
+    <div class="nav-section-label">Kontrol Game</div>
+    <a class="nav-item" onclick="showPanel('game-control')" href="#">
+      <span class="nav-icon">🎮</span> Buka/Tutup Game
+    </a>
+    <a class="nav-item" onclick="showPanel('game1-admin')" href="#">
+      <span class="nav-icon">🃏</span> Game 1 — Memory Match
+    </a>
+    <a class="nav-item" onclick="showPanel('game2-admin')" href="#">
+      <span class="nav-icon">🔍</span> Game 2 — Tebak Siapa
+    </a>
+    <a class="nav-item" onclick="showPanel('game3-admin')" href="#">
+      <span class="nav-icon">🗳️</span> Game 3 — Siapa Paling
+    </a>
+    <a class="nav-item" onclick="showPanel('game4-admin')" href="#">
+      <span class="nav-icon">⏳</span> Game 4 — Timeline
+    </a>
+    <a class="nav-item" onclick="showPanel('game5-admin')" href="#">
+      <span class="nav-icon">🎭</span> Game 5 — Mirip Siapa
+    </a>
+    <a class="nav-item" onclick="showPanel('game6-admin')" href="#">
+      <span class="nav-icon">🎵</span> Game 6 — Tebak Lagu
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <a href="rasmita-family-gathering-2026.html" target="_blank" class="btn-launch">🚀 Buka Game (Player)</a>
+    <button onclick="exportAllData()" class="btn-launch-outline">💾 Export Semua Data</button>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main-content">
+  <div class="notif-bar" id="notifBar"></div>
+
+  <div class="topbar">
+    <div class="topbar-title" id="topbarTitle">📊 Dashboard</div>
+    <div class="topbar-right">
+      <div class="room-code-badge" id="topRoomCode">FAM2026</div>
+      <button class="btn btn-outline btn-sm" onclick="saveAllToStorage()">💾 Simpan</button>
+    </div>
+  </div>
+
+  <div class="page-content">
+
+    <!-- ════════════════════════════════ DASHBOARD ════════════════════════════════ -->
+    <div class="panel-page active" id="panel-dashboard">
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-label">Peserta Terdaftar</div><div class="stat-value green" id="statPlayers">0</div></div>
+        <div class="stat-card"><div class="stat-label">Game Dibuka</div><div class="stat-value gold" id="statGames">0 / 6</div></div>
+        <div class="stat-card"><div class="stat-label">Foto Keluarga</div><div class="stat-value" id="statPhotos">0 / 20</div></div>
+        <div class="stat-card"><div class="stat-label">Kode Room</div><div class="stat-value gold" style="font-size:1.5rem;letter-spacing:3px" id="statRoom">FAM2026</div></div>
+      </div>
+
+      <div class="projector-card">
+        <div class="projector-icon">📽️</div>
+        <div class="projector-text">
+          <h3>Mode Proyektor — Tampilkan ke Layar Besar</h3>
+          <p>Buka game di laptop/PC yang terhubung ke proyektor atau TV. Peserta main dari HP masing-masing, hasil tampil di layar besar untuk semua nonton bersama.</p>
+        </div>
+        <div class="projector-actions">
+          <a href="rasmita-family-gathering-2026.html" target="_blank" class="btn-projector">🖥️ Buka di Tab Baru</a>
+          <button onclick="showPanel('projector')" class="btn-projector-outline">📖 Panduan Lengkap</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span>🎮</span> Status Game</div>
+        <div class="game-toggle-grid" id="dashGameStatus"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span>⚡</span> Aksi Cepat</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn btn-gold" onclick="openAllGames()">▶ Buka Semua Game</button>
+          <button class="btn btn-outline" onclick="closeAllGames()">⏹ Tutup Semua Game</button>
+          <button class="btn btn-outline" onclick="showPanel('photos')">📸 Upload Foto Keluarga</button>
+          <button class="btn btn-outline" onclick="showPanel('lagu')">🎵 Setting Lagu</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════ PESERTA ════════════════════════════════ -->
+    <div class="panel-page" id="panel-players">
+      <div class="card">
+        <div class="card-title"><span>👥</span> Daftar Peserta Terdaftar</div>
+        <div class="alert alert-info">Peserta yang sudah masuk room akan muncul di sini. Data tersimpan di browser lokal.</div>
+        <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+          <button class="btn btn-outline btn-sm" onclick="addDemoPlayers()">+ Tambah Demo Pemain</button>
+          <button class="btn btn-danger btn-sm" onclick="clearPlayers()">🗑️ Kosongkan Daftar</button>
+        </div>
+        <table class="players-table">
+          <thead><tr><th>#</th><th>Foto</th><th>Nama</th><th>Status</th><th>Aksi</th></tr></thead>
+          <tbody id="playersTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════ SETTINGS ════════════════════════════════ -->
+    <div class="panel-page" id="panel-settings">
+      <div class="card">
+        <div class="card-title"><span>⚙️</span> Pengaturan Event</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nama Event</label>
+            <input type="text" id="inputEventName" placeholder="Rasmita's Family Gathering 2026" maxlength="60">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Tanggal</label>
+            <input type="text" id="inputEventDate" placeholder="28 Maret 2026" maxlength="30">
+          </div>
+          <div class="form-group">
+            <label>Lokasi</label>
+            <input type="text" id="inputEventVenue" placeholder="Wisma Mandiri, Bandung" maxlength="60">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group" style="max-width:200px">
+            <label>Kode Room</label>
+            <input type="text" id="inputRoomCode" placeholder="FAM2026" maxlength="10" style="text-transform:uppercase;letter-spacing:3px;text-align:center">
+          </div>
+        </div>
+        <button class="btn btn-gold" onclick="saveEventSettings()">💾 Simpan Pengaturan</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span>🗑️</span> Reset Data</div>
+        <div class="alert alert-warn">⚠️ Reset akan menghapus data yang tersimpan di browser ini secara permanen.</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn btn-danger" onclick="resetPhotos()">🖼️ Reset Foto Keluarga</button>
+          <button class="btn btn-danger" onclick="resetPlayers()">👥 Reset Daftar Pemain</button>
+          <button class="btn btn-danger" onclick="resetAll()">💥 Reset Semua Data</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════ PROYEKTOR ════════════════════════════════ -->
+    <div class="panel-page" id="panel-projector">
+      <div class="card">
+        <div class="card-title"><span>📽️</span> Panduan Setup Proyektor & TV</div>
+        <div class="alert alert-success">✅ <strong>Konsep utama:</strong> Game berjalan di browser. Admin buka di laptop → proyektor/TV tampilkan ke layar besar. Peserta main dari HP masing-masing.</div>
+
+        <div class="section-divider"><span>Opsi Koneksi</span></div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-bottom:24px;">
+          <div style="background:var(--cream);border:1.5px solid rgba(201,168,76,0.3);border-radius:12px;padding:18px;">
+            <div style="font-size:1.5rem;margin-bottom:8px">🔌</div>
+            <h4 style="font-size:14px;font-weight:700;color:var(--brown);margin-bottom:6px">Opsi A — Kabel HDMI (Paling Stabil)</h4>
+            <p style="font-size:13px;color:var(--brown-light);line-height:1.6">1. Colok HDMI dari laptop ke proyektor/TV<br>2. Laptop: <strong>Display Setting → Extend/Duplicate</strong><br>3. Pindah browser ke layar proyektor<br>4. Tekan <strong>F11</strong> untuk fullscreen<br>5. Peserta scan QR atau buka URL di HP</p>
+          </div>
+          <div style="background:var(--cream);border:1.5px solid rgba(201,168,76,0.3);border-radius:12px;padding:18px;">
+            <div style="font-size:1.5rem;margin-bottom:8px">📡</div>
+            <h4 style="font-size:14px;font-weight:700;color:var(--brown);margin-bottom:6px">Opsi B — Screen Mirroring Wireless</h4>
+            <p style="font-size:13px;color:var(--brown-light);line-height:1.6"><strong>Windows:</strong> Win+K → pilih TV (Miracast)<br><strong>Mac:</strong> Menu bar → AirPlay → pilih Apple TV<br><strong>Android:</strong> Smart View/Screen Cast<br><strong>iPhone:</strong> AirPlay ke Apple TV<br>⚠️ Pastikan HP & TV di WiFi yang sama</p>
+          </div>
+          <div style="background:var(--cream);border:1.5px solid rgba(201,168,76,0.3);border-radius:12px;padding:18px;">
+            <div style="font-size:1.5rem;margin-bottom:8px">🌐</div>
+            <h4 style="font-size:14px;font-weight:700;color:var(--brown);margin-bottom:6px">Opsi C — Deploy Online (Terbaik)</h4>
+            <p style="font-size:13px;color:var(--brown-light);line-height:1.6">1. Upload ke Netlify/Vercel (gratis)<br>2. Dapatkan URL publik<br>3. Admin buka URL di laptop → proyektor<br>4. Peserta buka URL yang sama di HP<br>✅ Tidak perlu satu jaringan WiFi</p>
+          </div>
+        </div>
+
+        <div class="section-divider"><span>Alur Acara dengan Proyektor</span></div>
+
+        <div class="step-guide">
+          <div class="step-item">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <h4>Sebelum Acara Dimulai (H-30 menit)</h4>
+              <p>Nyalakan proyektor/TV. Hubungkan laptop. Buka <code>rasmita-family-gathering-2026.html</code> di browser Chrome/Edge. Fullscreen dengan <code>F11</code>. Pastikan semua foto keluarga sudah diupload di Admin → Foto Keluarga.</p>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <h4>Peserta Masuk (Registrasi)</h4>
+              <p>Tampilkan halaman landing di proyektor. MC umumkan: <em>"Buka browser di HP kalian, ketik URL ini, lalu masukkan nama dan kode room <strong id="announcedCode">FAM2026</strong>"</em>. Jika deploy online, tampilkan QR code URL-nya.</p>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <h4>Buka Game Satu Per Satu</h4>
+              <p>Di Admin Panel ini, buka game satu per satu via tab <strong>Kontrol Game</strong>. Setelah klik "Buka Game", peserta langsung bisa klik game tersebut dari lobby HP masing-masing.</p>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <h4>Saat Game Berlangsung</h4>
+              <p>Layar proyektor tetap di halaman lobby atau game yang sedang aktif. MC membaca aturan dari <strong>ATURAN-GAME.md</strong>. Untuk Game 3 (Voting), tunjukkan hasil di proyektor setelah semua vote masuk.</p>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <h4>Umumkan Pemenang</h4>
+              <p>Setiap game selesai, tampilkan leaderboard di proyektor. Untuk Game 6 (Tebak Lagu), layar sing-along sangat bagus ditampilkan di layar besar agar semua bisa ikut bernyanyi bersama!</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-divider"><span>Tips Teknis</span></div>
+        <div class="instr-box">
+          <strong>Browser terbaik:</strong> Google Chrome atau Microsoft Edge (bukan Safari untuk audio Game 6)<br>
+          <strong>Resolusi proyektor:</strong> Set ke 1920×1080 untuk tampilan terbaik<br>
+          <strong>Audio Game 6:</strong> Sambungkan speaker eksternal ke laptop untuk suara lebih keras<br>
+          <strong>Jika layar hitam:</strong> Tekan F11 lagi, atau cek kabel HDMI<br>
+          <strong>Backup plan:</strong> Screenshot semua game sebagai cadangan jika internet mati
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════ FOTO KELUARGA ════════════════════════════════ -->
+    <div class="panel-page" id="panel-photos">
+      <div class="card">
+        <div class="card-title"><span>📸</span> Upload Foto Anggota Keluarga</div>
+        <div class="alert alert-info">Foto ini digunakan di Game 1 (Memory Match), Game 2 (Tebak Siapa), Game 3 (Voting), dan Game 4 (Timeline). Upload minimal <strong>10 foto</strong> agar semua game berjalan optimal (15–20 foto ideal).</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;">
+          <button class="btn btn-gold" onclick="addMember()">+ Tambah Anggota</button>
+          <button class="btn btn-outline" onclick="importPhotosJSON()">📂 Import JSON</button>
+          <button class="btn btn-outline" onclick="exportMemberData()">📋 Export Data</button>
+          <button class="btn btn-danger" onclick="clearAllPhotos()">🗑️ Hapus Semua Foto</button>
+        </div>
+        <div class="photo-grid" id="uploadGrid"></div>
+        <input type="file" id="photoFileInput" accept="image/*" style="display:none" onchange="handlePhotoUpload(event)">
+        <input type="file" id="importJsonInput" accept=".json" style="display:none" onchange="handleImportJSON(event)">
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════ KOMEDIAN ════════════════════════════════ -->
+    <div class="panel-page" id="panel-komedian">
+      <div class="card">
+        <div class="card-title"><span>🎭</span> Game 5 — Database Komedian</div>
+        <div class="alert alert-info">
+          Database komedian sudah tersedia di dalam kode game (200 komedian). Di sini kamu bisa lihat dan upload foto untuk komedian pilihan. Foto bersifat opsional — jika tidak diupload, muncul emoji 🎭.
+        </div>
+        <div class="alert alert-warn">
+          💡 <strong>Cara paling mudah:</strong> Jalankan script <code>scrape_komedian.py</code> yang disertakan untuk mengambil foto otomatis, lalu hasilnya upload massal di sini.
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;">
+          <button class="btn btn-gold" onclick="document.getElementById('komedianBulkInput').click()">📂 Upload Foto Massal</button>
+          <button class="btn btn-outline" onclick="exportKomedianConfig()">📋 Export Config</button>
+        </div>
+        <input type="file" id="komedianBulkInput" accept="image/*" multiple style="display:none" onchange="handleKomedianBulkUpload(event)">
+
+        <p style="font-size:12px;color:var(--brown-light);margin-bottom:12px;">Format nama file: <code>01-sule.jpg</code>, <code>02-raditya-dika.jpg</code>, dst (sesuai urutan database)</p>
+        <div class="komedian-grid" id="komedianGrid"></div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════ LAGU ════════════════════════════════ -->
+    <div class="panel-page" id="panel-lagu">
+      <div class="card">
+        <div class="card-title"><span>🎵</span> Game 6 — Setting Lagu</div>
+        <div class="alert alert-info">
+          Game 6 berjalan dengan <strong>melodi sintetis otomatis</strong> (tidak perlu file apapun). Untuk kualitas audio lebih baik, upload file MP3 intro lagu. Jika file tidak ada, otomatis fallback ke sintetis.
+        </div>
+
+        <table class="lagu-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Judul</th>
+              <th>Artis</th>
+              <th>Potong di</th>
+              <th>Mode Audio</th>
+              <th>Upload MP3</th>
+            </tr>
+          </thead>
+          <tbody id="laguTableBody"></tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span>✂️</span> Panduan Potong Audio</div>
+        <div class="instr-box">
+          <strong>Tool gratis online:</strong> <a href="https://online-audio-cutter.com" target="_blank" style="color:var(--green)">online-audio-cutter.com</a> atau <a href="https://mp3cut.net" target="_blank" style="color:var(--green)">mp3cut.net</a><br><br>
+          <strong>Langkah:</strong><br>
+          1. Download lagu dari sumber legal (Spotify, Apple Music, etc.)<br>
+          2. Buka online-audio-cutter.com → Upload file<br>
+          3. Potong sesuai timestamp di tabel atas<br>
+          4. Export sebagai MP3<br>
+          5. Rename file sesuai kolom "Nama File"<br>
+          6. Upload di tombol "Upload MP3" di tabel atas
+        </div>
+        <div class="alert alert-warn">
+          ⚠️ Setelah upload MP3, kamu perlu edit 2 baris kode di <code>rasmita-family-gathering-2026.html</code> untuk mengaktifkan mode MP3. Lihat panduan di README.md.
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════ GAME CONTROL ════════════════════════════════ -->
+    <div class="panel-page" id="panel-game-control">
+      <div class="card">
+        <div class="card-title"><span>🎮</span> Buka / Tutup Game</div>
+        <div class="alert alert-info">Peserta hanya bisa masuk game yang sudah kamu buka. Buka game satu per satu sesuai urutan acara untuk mengatur flow gathering.</div>
+        <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
+          <button class="btn btn-gold" onclick="openAllGames()">▶ Buka Semua</button>
+          <button class="btn btn-outline" onclick="closeAllGames()">⏹ Tutup Semua</button>
+        </div>
+        <div class="game-toggle-grid" id="gameControlGrid"></div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════ GAME 1 ADMIN ════════════════════════════════ -->
+    <div class="panel-page" id="panel-game1-admin">
+      <div class="card">
+        <div class="card-title"><span>🃏</span> Game 1 — Memory Match Foto</div>
+        <div class="tab-bar">
+          <button class="tab-btn active" onclick="switchTab('g1','info')">ℹ️ Info</button>
+          <button class="tab-btn" onclick="switchTab('g1','aturan')">📋 Aturan</button>
+          <button class="tab-btn" onclick="switchTab('g1','tips')">💡 Tips MC</button>
+        </div>
+        <div class="tab-panel active" id="g1-tab-info">
+          <div class="stat-grid" style="grid-template-columns:repeat(3,1fr)">
+            <div class="stat-card"><div class="stat-label">Max Pemain</div><div class="stat-value">2–4</div></div>
+            <div class="stat-card"><div class="stat-label">Durasi</div><div class="stat-value gold">15 mnt</div></div>
+            <div class="stat-card"><div class="stat-label">Min Foto</div><div class="stat-value green">8</div></div>
+          </div>
+          <div class="instr-box">Game ini membutuhkan <strong>foto anggota keluarga</strong>. Pastikan sudah upload minimal 8 foto di <strong>Foto Keluarga</strong>. Game membuat 8–15 pasang kartu dari foto yang ada.</div>
+          <button class="btn btn-gold" onclick="showPanel('photos')">📸 Upload Foto Keluarga →</button>
+        </div>
+        <div class="tab-panel" id="g1-tab-aturan">
+          <div class="step-guide">
+            <div class="step-item"><div class="step-num">1</div><div class="step-body"><h4>Mulai Giliran</h4><p>Satu pemain memegang HP. Tap kartu pertama → foto terbalik.</p></div></div>
+            <div class="step-item"><div class="step-num">2</div><div class="step-body"><h4>Tap Kartu Kedua</h4><p>Jika cocok → <strong>+10 poin</strong>, giliran berlanjut. Jika tidak cocok → kedua kartu tertutup, giliran berpindah.</p></div></div>
+            <div class="step-item"><div class="step-num">3</div><div class="step-body"><h4>Selesai</h4><p>Semua pasangan ditemukan. Pemain poin tertinggi = pemenang.</p></div></div>
+          </div>
+          <div class="instr-box">❌ Tidak boleh menunjuk/memberi tahu posisi kartu ke pemain lain. ✅ Boleh berteriak kegirangan!</div>
+        </div>
+        <div class="tab-panel" id="g1-tab-tips">
+          <div class="instr-box"><strong>Script MC:</strong><br><em>"Ingat-ingat posisi kartu yang sudah dibuka sebelumnya! Itu kunci menang game ini. Yang ingatannya bagus, waktunya unjuk gigi! 4 orang bergantian ya — 1 HP dibagi bersama."</em></div>
+          <div class="instr-box"><strong>Setup:</strong> Kumpulkan 2–4 orang per meja/grup. Satu orang pegang HP, yang lain nonton dan ingat posisi kartu.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════ GAME 2 ADMIN ════════════════════════════════ -->
+    <div class="panel-page" id="panel-game2-admin">
+      <div class="card">
+        <div class="card-title"><span>🔍</span> Game 2 — Tebak Siapa?</div>
+        <div class="tab-bar">
+          <button class="tab-btn active" onclick="switchTab('g2','info')">ℹ️ Info</button>
+          <button class="tab-btn" onclick="switchTab('g2','aturan')">📋 Aturan</button>
+          <button class="tab-btn" onclick="switchTab('g2','tips')">💡 Tips MC</button>
+        </div>
+        <div class="tab-panel active" id="g2-tab-info">
+          <div class="stat-grid" style="grid-template-columns:repeat(3,1fr)">
+            <div class="stat-card"><div class="stat-label">Pemain</div><div class="stat-value">Semua</div></div>
+            <div class="stat-card"><div class="stat-label">Durasi</div><div class="stat-value gold">20 mnt</div></div>
+            <div class="stat-card"><div class="stat-label">Poin Maks</div><div class="stat-value green">500</div></div>
+          </div>
+          <div class="instr-box">Foto anggota keluarga <strong>ditampilkan blur/terpotong</strong>, perlahan terlihat. Tebak lebih cepat = poin lebih besar. Semakin banyak foto yang diupload, semakin seru gamenya.</div>
+          <button class="btn btn-gold" onclick="showPanel('photos')">📸 Upload Foto Keluarga →</button>
+        </div>
+        <div class="tab-panel" id="g2-tab-aturan">
+          <div class="step-guide">
+            <div class="step-item"><div class="step-num">1</div><div class="step-body"><h4>Foto Muncul Buram</h4><p>Foto anggota keluarga tampil tersembunyi. Tiap pemain lihat di HP masing-masing.</p></div></div>
+            <div class="step-item"><div class="step-num">2</div><div class="step-body"><h4>Poin Menurun</h4><p>400–500 poin jika tebak saat masih blur. Makin lama menunggu, makin kecil poinnya (min 100).</p></div></div>
+            <div class="step-item"><div class="step-num">3</div><div class="step-body"><h4>Ketik Nama</h4><p>Tulis nama anggota keluarga di kolom jawaban. Ejaan tidak harus tepat — nama panggilan diterima.</p></div></div>
+          </div>
+          <div class="instr-box">❌ Dilarang tanya ke orang lain. ❌ Dilarang lihat HP orang lain. ✅ Nama panggilan boleh.</div>
+        </div>
+        <div class="tab-panel" id="g2-tab-tips">
+          <div class="instr-box"><strong>Script MC:</strong><br><em>"Foto pertama selalu yang paling susah karena masih blur total. Tapi kalau kamu kenal betul anggota keluarga ini, pasti bisa tebak dari rambut atau bentuk muka aja! Jangan tunggu foto jelas — rugi poin!"</em></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════ GAME 3 ADMIN ════════════════════════════════ -->
+    <div class="panel-page" id="panel-game3-admin">
+      <div class="card">
+        <div class="card-title"><span>🗳️</span> Game 3 — Siapa yang Paling...?</div>
+        <div class="tab-bar">
+          <button class="tab-btn active" onclick="switchTab('g3','info')">ℹ️ Info</button>
+          <button class="tab-btn" onclick="switchTab('g3','pertanyaan')">❓ Pertanyaan</button>
+          <button class="tab-btn" onclick="switchTab('g3','tips')">💡 Tips MC</button>
+        </div>
+        <div class="tab-panel active" id="g3-tab-info">
+          <div class="stat-grid" style="grid-template-columns:repeat(3,1fr)">
+            <div class="stat-card"><div class="stat-label">Pemain</div><div class="stat-value">Semua</div></div>
+            <div class="stat-card"><div class="stat-label">Pertanyaan</div><div class="stat-value gold">10</div></div>
+            <div class="stat-card"><div class="stat-label">Timer</div><div class="stat-value green">30 dtk</div></div>
+          </div>
+          <div class="instr-box">Game voting — semua pilih siapa anggota keluarga yang paling sesuai pertanyaan. Hasilnya <strong>sangat seru ditampilkan di proyektor!</strong> Yang paling sering dipilih masuk Hall of Fame.</div>
+        </div>
+        <div class="tab-panel" id="g3-tab-pertanyaan">
+          <div class="instr-box"><strong>10 Pertanyaan Voting yang Sudah Ada:</strong><br>
+            1. Siapa yang paling suka tidur?<br>
+            2. Siapa yang paling cerewet?<br>
+            3. Siapa yang paling sering telat?<br>
+            4. Siapa yang paling lebay kalau sakit?<br>
+            5. Siapa yang paling banyak makan?<br>
+            6. Siapa yang paling susah bangun pagi?<br>
+            7. Siapa yang paling gampang nangis?<br>
+            8. Siapa yang paling keras kepala?<br>
+            9. Siapa yang paling suka selfie?<br>
+            10. Siapa yang paling bawel kalau lapar?
+          </div>
+          <div class="alert alert-info">Untuk mengganti atau menambah pertanyaan, edit array <code>PERTANYAAN_G3</code> di file <code>rasmita-family-gathering-2026.html</code>.</div>
+        </div>
+        <div class="tab-panel" id="g3-tab-tips">
+          <div class="instr-box"><strong>Script MC:</strong><br><em>"Jujur ya! Kalau ada yang tersinggung... itu berarti semua sepakat! Ini bukan celaan, ini sayang! 😂 Yang paling sering dapat suara, nanti ada 'penghargaan' khusus!"</em></div>
+          <div class="instr-box"><strong>Pro tip proyektor:</strong> Tampilkan layar hasil voting di proyektor setelah semua orang submit. Reaksi langsung dijamin heboh!</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════ GAME 4 ADMIN ════════════════════════════════ -->
+    <div class="panel-page" id="panel-game4-admin">
+      <div class="card">
+        <div class="card-title"><span>⏳</span> Game 4 — Timeline Keluarga</div>
+        <div class="tab-bar">
+          <button class="tab-btn active" onclick="switchTab('g4','info')">ℹ️ Info</button>
+          <button class="tab-btn" onclick="switchTab('g4','setup')">🔧 Setup</button>
+          <button class="tab-btn" onclick="switchTab('g4','tips')">💡 Tips MC</button>
+        </div>
+        <div class="tab-panel active" id="g4-tab-info">
+          <div class="stat-grid" style="grid-template-columns:repeat(3,1fr)">
+            <div class="stat-card"><div class="stat-label">Ronde</div><div class="stat-value">3</div></div>
+            <div class="stat-card"><div class="stat-label">Foto/Ronde</div><div class="stat-value gold">5</div></div>
+            <div class="stat-card"><div class="stat-label">Poin Maks</div><div class="stat-value green">450</div></div>
+          </div>
+          <div class="instr-box">Susun 5 foto anggota keluarga dari <strong>termuda ke tertua</strong> dengan drag & drop. 3 ronde × 5 foto berbeda. Semakin cepat dan akurat = poin lebih besar.</div>
+        </div>
+        <div class="tab-panel" id="g4-tab-setup">
+          <div class="instr-box"><strong>Yang perlu disiapkan:</strong><br>
+            1. Upload minimal <strong>15 foto</strong> anggota keluarga (agar 3 ronde × 5 foto tidak ada foto yang diulang)<br>
+            2. Pastikan <strong>nama anggota keluarga</strong> sudah diisi dengan benar<br>
+            3. Data umur/kelahiran tidak diperlukan di sistem — game menggunakan urutan ID sebagai proxy usia
+          </div>
+          <button class="btn btn-gold" onclick="showPanel('photos')">📸 Upload Foto Keluarga →</button>
+        </div>
+        <div class="tab-panel" id="g4-tab-tips">
+          <div class="instr-box"><strong>Script MC:</strong><br><em>"Kamu tau nggak usia pasti semua anggota keluarga ini? Sekarang saatnya membuktikan! Kalau salah, berarti kamu kurang perhatian sama keluarga! 😄 Drag and drop foto dari kiri (termuda) ke kanan (tertua)!"</em></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════ GAME 5 ADMIN ════════════════════════════════ -->
+    <div class="panel-page" id="panel-game5-admin">
+      <div class="card">
+        <div class="card-title"><span>🎭</span> Game 5 — Kamu Mirip Siapa?</div>
+        <div class="tab-bar">
+          <button class="tab-btn active" onclick="switchTab('g5','info')">ℹ️ Info</button>
+          <button class="tab-btn" onclick="switchTab('g5','foto')">🖼️ Foto Komedian</button>
+          <button class="tab-btn" onclick="switchTab('g5','tips')">💡 Tips MC</button>
+        </div>
+        <div class="tab-panel active" id="g5-tab-info">
+          <div class="stat-grid" style="grid-template-columns:repeat(3,1fr)">
+            <div class="stat-card"><div class="stat-label">Database</div><div class="stat-value">200</div></div>
+            <div class="stat-card"><div class="stat-label">Pertanyaan</div><div class="stat-value gold">6</div></div>
+            <div class="stat-card"><div class="stat-label">Mode</div><div class="stat-value green" style="font-size:1rem">Individual</div></div>
+          </div>
+          <div class="instr-box">Kuis kepribadian — jawab 6 pertanyaan, cocokkan dengan 200 komedian Indonesia. Tidak ada poin kompetitif, murni hiburan. Hasil screenshot dan share ke grup!</div>
+        </div>
+        <div class="tab-panel" id="g5-tab-foto">
+          <div class="alert alert-info">Foto komedian bersifat opsional. Tanpa foto pun game tetap berjalan (tampil emoji 🎭).</div>
+          <div class="instr-box">
+            <strong>Cara tercepat tambah foto komedian:</strong><br>
+            1. Jalankan <code>python3 scrape_komedian.py</code> dari terminal<br>
+            2. Script otomatis download foto dari Wikipedia<br>
+            3. Hasil tersimpan di folder <code>komedian_photos/</code><br>
+            4. Upload semua foto massal di panel <strong>Komedian</strong><br><br>
+            <strong>Atau upload manual:</strong><br>
+            Pergi ke tab Komedian di sidebar → Upload Foto Massal
+          </div>
+          <button class="btn btn-gold" onclick="showPanel('komedian')">🎭 Kelola Foto Komedian →</button>
+        </div>
+        <div class="tab-panel" id="g5-tab-tips">
+          <div class="instr-box"><strong>Script MC:</strong><br><em>"Yang dapat hasil Nunung, Sule, atau Raditya Dika — selamat! Kamu ditakdirkan jadi bintang! Yang dapat komedian yang nggak kalian kenal... berarti kalian unik banget sampai algoritma bingung! 😂"</em></div>
+          <div class="instr-box"><strong>Ritual seru:</strong> Setelah semua dapat hasil, minta yang dapat komedian sama kumpul jadi satu grup. Foto bareng! Tampilkan hasilnya di proyektor.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════ GAME 6 ADMIN ════════════════════════════════ -->
+    <div class="panel-page" id="panel-game6-admin">
+      <div class="card">
+        <div class="card-title"><span>🎵</span> Game 6 — Tebak Lagu Indonesia</div>
+        <div class="tab-bar">
+          <button class="tab-btn active" onclick="switchTab('g6','info')">ℹ️ Info</button>
+          <button class="tab-btn" onclick="switchTab('g6','daftar')">🎼 Daftar Lagu</button>
+          <button class="tab-btn" onclick="switchTab('g6','singalong')">🎤 Sing-Along</button>
+          <button class="tab-btn" onclick="switchTab('g6','tips')">💡 Tips MC</button>
+        </div>
+        <div class="tab-panel active" id="g6-tab-info">
+          <div class="stat-grid" style="grid-template-columns:repeat(3,1fr)">
+            <div class="stat-card"><div class="stat-label">Jumlah Lagu</div><div class="stat-value">5</div></div>
+            <div class="stat-card"><div class="stat-label">Poin/Lagu</div><div class="stat-value gold">100</div></div>
+            <div class="stat-card"><div class="stat-label">Poin Maks</div><div class="stat-value green">500</div></div>
+          </div>
+          <div class="instr-box">Game berjalan otomatis dengan <strong>melodi sintetis</strong>. Untuk kualitas audio lebih baik, upload file MP3 intro lagu di tab <strong>Lagu</strong>. Setelah terjawab, lirik ditampilkan untuk sing-along bersama!</div>
+        </div>
+        <div class="tab-panel" id="g6-tab-daftar">
+          <table class="lagu-table">
+            <thead><tr><th>#</th><th>Judul</th><th>Artis</th><th>Tahun</th><th>Timestamp Potong</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td><strong>Keluarga Cemara</strong></td><td>Hedi Yunus</td><td>1996</td><td><span class="timestamp-badge">0:00 – 0:14</span></td></tr>
+              <tr><td>2</td><td><strong>Tabo Balik</strong></td><td>Pop Minang</td><td>Klasik</td><td><span class="timestamp-badge">0:00 – 0:12</span></td></tr>
+              <tr><td>3</td><td><strong>Kangen</strong></td><td>Dewa 19</td><td>1992</td><td><span class="timestamp-badge">0:05 – 0:18</span></td></tr>
+              <tr><td>4</td><td><strong>Laskar Pelangi</strong></td><td>Nidji</td><td>2008</td><td><span class="timestamp-badge">0:00 – 0:13</span></td></tr>
+              <tr><td>5</td><td><strong>Pergi Pagi Pulang Pagi</strong></td><td>Armada</td><td>2016</td><td><span class="timestamp-badge">0:00 – 0:11</span></td></tr>
+            </tbody>
+          </table>
+          <div class="instr-box" style="margin-top:16px"><strong>Nama file MP3:</strong> <code>lagu1.mp3</code>, <code>lagu2.mp3</code>, <code>lagu3.mp3</code>, <code>lagu4.mp3</code>, <code>lagu5.mp3</code><br>Taruh di folder yang sama dengan file HTML game.</div>
+        </div>
+        <div class="tab-panel" id="g6-tab-singalong">
+          <div class="instr-box"><strong>Fitur Sing-Along:</strong> Setelah tiap lagu terjawab, lirik bait pertama otomatis muncul di layar. Ini momen paling seru — tampilkan di proyektor agar semua orang bisa ikut bernyanyi!</div>
+          <div class="instr-box"><strong>Skenario proyektor ideal:</strong><br>1. Admin navigasi game ke layar proyektor/TV<br>2. Setelah lagu terjawab → lirik muncul besar di layar<br>3. MC: "Semua nyanyi bareng, satu... dua... tiga!"<br>4. Punya mikrofon? Lebih seru lagi!</div>
+        </div>
+        <div class="tab-panel" id="g6-tab-tips">
+          <div class="instr-box"><strong>Script MC:</strong><br><em>"Audio yang kalian dengar adalah nada sintetis — bukan rekaman asli. Kalau masih susah ditebak dari suara, tekan tombol 💡 Petunjuk! Yang langsung tahu tanpa petunjuk — berarti kamu legend musik Indonesia!"</em></div>
+          <div class="instr-box"><strong>Bonus seru:</strong> Minta satu orang maju ke depan dan nyanyi a cappella dari intro yang sudah diputar. Grup yang paling kompak dapat hadiah!</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /page-content -->
+</div><!-- /main-content -->
+
+<script>
+// ── DATA ──
+const GAMES_INFO = [
+  { id:1, title:"Memory Match Foto", icon:"🃏", desc:"Cocokkan pasangan foto keluarga" },
+  { id:2, title:"Tebak Siapa?", icon:"🔍", desc:"Tebak anggota dari foto blur" },
+  { id:3, title:"Siapa yang Paling...?", icon:"🗳️", desc:"Voting keluarga yang paling..." },
+  { id:4, title:"Timeline Keluarga", icon:"⏳", desc:"Susun dari termuda ke tertua" },
+  { id:5, title:"Kamu Mirip Siapa?", icon:"🎭", desc:"Match kepribadian dengan komedian" },
+  { id:6, title:"Tebak Lagu Indonesia", icon:"🎵", desc:"Dengar intro, tebak judulnya" },
+];
+
+let FAMILY_MEMBERS = [];
+let openGames = [];
+let players = [];
+let eventSettings = { name:"Rasmita's Family Gathering 2026", date:"28 Maret 2026", venue:"Wisma Mandiri, Bandung", roomCode:"FAM2026" };
+let komedianPhotos = {}; // id -> base64
+
+const LAGU_DATA = [
+  { id:1, judul:"Keluarga Cemara", artis:"Hedi Yunus", file:"lagu1.mp3", ts:"0:00 – 0:14" },
+  { id:2, judul:"Tabo Balik", artis:"Pop Minang", file:"lagu2.mp3", ts:"0:00 – 0:12" },
+  { id:3, judul:"Kangen", artis:"Dewa 19", file:"lagu3.mp3", ts:"0:05 – 0:18" },
+  { id:4, judul:"Laskar Pelangi", artis:"Nidji", file:"lagu4.mp3", ts:"0:00 – 0:13" },
+  { id:5, judul:"Pergi Pagi Pulang Pagi", artis:"Armada", file:"lagu5.mp3", ts:"0:00 – 0:11" },
+];
+
+const KOMEDIAN_TOP = [
+  {id:1,nama:"Sule",gender:"pria"},{id:2,nama:"Raditya Dika",gender:"pria"},{id:3,nama:"Ernest Prakasa",gender:"pria"},
+  {id:4,nama:"Bintang Emon",gender:"pria"},{id:5,nama:"Pandji",gender:"pria"},{id:6,nama:"Ge Pamungkas",gender:"pria"},
+  {id:7,nama:"Mongol Stres",gender:"pria"},{id:8,nama:"Soleh Solihun",gender:"pria"},{id:9,nama:"Arie Kriting",gender:"pria"},
+  {id:10,nama:"Kemal Palevi",gender:"pria"},{id:11,nama:"Coki Pardede",gender:"pria"},{id:12,nama:"Dzawin Nur",gender:"pria"},
+  {id:101,nama:"Nunung",gender:"wanita"},{id:102,nama:"Kiky Saputri",gender:"wanita"},{id:103,nama:"Soimah",gender:"wanita"},
+  {id:104,nama:"Arafah Rianti",gender:"wanita"},{id:105,nama:"Rina Nose",gender:"wanita"},{id:106,nama:"Tika Panggabean",gender:"wanita"},
+];
+
+// ── INIT ──
+loadAllFromStorage();
+renderAll();
+
+function loadAllFromStorage() {
+  try {
+    const ev = JSON.parse(localStorage.getItem('ras_event')||'{}');
+    if (ev.name) eventSettings = {...eventSettings, ...ev};
+    const m = JSON.parse(localStorage.getItem('ras_members')||'[]');
+    if (m.length) FAMILY_MEMBERS = m;
+    else initDefaultMembers();
+    const p = JSON.parse(localStorage.getItem('ras_players')||'[]');
+    if (p.length) players = p;
+    const og = JSON.parse(localStorage.getItem('ras_open_games')||'[]');
+    openGames = og;
+    const kp = JSON.parse(localStorage.getItem('ras_komedian_photos')||'{}');
+    komedianPhotos = kp;
+  } catch(e) {
+    initDefaultMembers();
+  }
+}
+
+function initDefaultMembers() {
+  FAMILY_MEMBERS = Array.from({length:20},(_,i)=>({id:i+1,nama:`Anggota ${i+1}`,foto:''}));
+}
+
+function renderAll() {
+  updateTopbar();
+  renderDashboard();
+  renderPhotoGrid();
+  renderGameControl();
+  renderPlayers();
+  renderLaguTable();
+  renderKomedianGrid();
+  renderSettings();
+}
+
+function saveAllToStorage() {
+  try {
+    localStorage.setItem('ras_event', JSON.stringify(eventSettings));
+    localStorage.setItem('ras_members', JSON.stringify(FAMILY_MEMBERS));
+    localStorage.setItem('ras_players', JSON.stringify(players));
+    localStorage.setItem('ras_open_games', JSON.stringify(openGames));
+    localStorage.setItem('ras_komedian_photos', JSON.stringify(komedianPhotos));
+    showNotif('✅ Semua data tersimpan!');
+  } catch(e) {
+    showNotif('⚠️ Gagal simpan — storage penuh?');
+  }
+}
+
+// ── NAVIGATION ──
+function showPanel(id) {
+  document.querySelectorAll('.panel-page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const panel = document.getElementById('panel-' + id);
+  if (panel) panel.classList.add('active');
+  const nav = document.querySelector(`.nav-item[onclick*="'${id}'"]`);
+  if (nav) nav.classList.add('active');
+  const titles = {
+    'dashboard':'📊 Dashboard','players':'👥 Daftar Peserta','settings':'⚙️ Pengaturan Event',
+    'projector':'📽️ Panduan Proyektor','photos':'📸 Foto Keluarga','komedian':'🎭 Komedian',
+    'lagu':'🎵 Lagu Game 6','game-control':'🎮 Kontrol Game',
+    'game1-admin':'🃏 Game 1 — Memory Match','game2-admin':'🔍 Game 2 — Tebak Siapa',
+    'game3-admin':'🗳️ Game 3 — Siapa Paling','game4-admin':'⏳ Game 4 — Timeline',
+    'game5-admin':'🎭 Game 5 — Mirip Siapa','game6-admin':'🎵 Game 6 — Tebak Lagu',
+  };
+  document.getElementById('topbarTitle').textContent = titles[id] || id;
+  window.scrollTo(0,0);
+}
+
+function switchTab(game, tab) {
+  const prefix = game + '-tab-';
+  document.querySelectorAll(`[id^="${prefix}"]`).forEach(p => p.classList.remove('active'));
+  document.getElementById(prefix + tab).classList.add('active');
+  // Update tab buttons
+  const card = document.getElementById(`panel-${game}-admin`);
+  if (card) {
+    card.querySelectorAll('.tab-btn').forEach(b => {
+      b.classList.toggle('active', b.getAttribute('onclick').includes(`'${tab}'`));
+    });
+  }
+}
+
+// ── TOPBAR ──
+function updateTopbar() {
+  document.getElementById('topRoomCode').textContent = eventSettings.roomCode || 'FAM2026';
+  const ac = document.getElementById('announcedCode');
+  if (ac) ac.textContent = eventSettings.roomCode || 'FAM2026';
+}
+
+// ── DASHBOARD ──
+function renderDashboard() {
+  const hasPhoto = FAMILY_MEMBERS.filter(m=>m.foto).length;
+  document.getElementById('statPlayers').textContent = players.length;
+  document.getElementById('statGames').textContent = openGames.length + ' / 6';
+  document.getElementById('statPhotos').textContent = hasPhoto + ' / ' + FAMILY_MEMBERS.length;
+  document.getElementById('statRoom').textContent = eventSettings.roomCode || 'FAM2026';
+
+  const grid = document.getElementById('dashGameStatus');
+  if (!grid) return;
+  grid.innerHTML = GAMES_INFO.map(g => {
+    const isOpen = openGames.includes(g.id);
+    return `<div class="game-toggle-card">
+      <div class="game-toggle-icon">${g.icon}</div>
+      <div class="game-toggle-info"><h4>${g.title}</h4><p>${g.desc}</p></div>
+      <label class="toggle-switch">
+        <input type="checkbox" ${isOpen?'checked':''} onchange="toggleGame(${g.id})">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>`;
+  }).join('');
+}
+
+// ── GAME CONTROL ──
+function renderGameControl() {
+  const grid = document.getElementById('gameControlGrid');
+  if (!grid) return;
+  grid.innerHTML = GAMES_INFO.map(g => {
+    const isOpen = openGames.includes(g.id);
+    return `<div class="game-toggle-card">
+      <div class="game-toggle-icon">${g.icon}</div>
+      <div class="game-toggle-info"><h4>${g.title}</h4><p>${g.desc}</p></div>
+      <label class="toggle-switch">
+        <input type="checkbox" ${isOpen?'checked':''} onchange="toggleGame(${g.id})">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>`;
+  }).join('');
+}
+
+function toggleGame(id) {
+  if (openGames.includes(id)) openGames = openGames.filter(g=>g!==id);
+  else openGames.push(id);
+  localStorage.setItem('ras_open_games', JSON.stringify(openGames));
+  renderDashboard();
+  renderGameControl();
+  showNotif(`Game ${id} ${openGames.includes(id)?'dibuka ✅':'ditutup'}`);
+}
+
+function openAllGames() {
+  openGames = GAMES_INFO.map(g=>g.id);
+  localStorage.setItem('ras_open_games', JSON.stringify(openGames));
+  renderDashboard(); renderGameControl();
+  showNotif('🎮 Semua game dibuka!');
+}
+
+function closeAllGames() {
+  openGames = [];
+  localStorage.setItem('ras_open_games', JSON.stringify(openGames));
+  renderDashboard(); renderGameControl();
+  showNotif('Semua game ditutup.');
+}
+
+// ── SETTINGS ──
+function renderSettings() {
+  ['inputEventName','inputEventDate','inputEventVenue','inputRoomCode'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const key = id.replace('input','').replace('Event','').toLowerCase();
+    const map = {eventname:'name',eventdate:'date',eventvenue:'venue',roomcode:'roomCode'};
+    el.value = eventSettings[map[key.replace('input','')] || key] || '';
+  });
+  document.getElementById('inputEventName').value = eventSettings.name || '';
+  document.getElementById('inputEventDate').value = eventSettings.date || '';
+  document.getElementById('inputEventVenue').value = eventSettings.venue || '';
+  document.getElementById('inputRoomCode').value = eventSettings.roomCode || 'FAM2026';
+}
+
+function saveEventSettings() {
+  eventSettings.name = document.getElementById('inputEventName').value.trim() || eventSettings.name;
+  eventSettings.date = document.getElementById('inputEventDate').value.trim() || eventSettings.date;
+  eventSettings.venue = document.getElementById('inputEventVenue').value.trim() || eventSettings.venue;
+  eventSettings.roomCode = (document.getElementById('inputRoomCode').value.trim() || 'FAM2026').toUpperCase();
+  localStorage.setItem('ras_event', JSON.stringify(eventSettings));
+  updateTopbar();
+  renderDashboard();
+  showNotif('✅ Pengaturan event disimpan!');
+}
+
+// ── PHOTOS ──
+let currentUploadId = null;
+
+function renderPhotoGrid() {
+  const grid = document.getElementById('uploadGrid');
+  if (!grid) return;
+  grid.innerHTML = FAMILY_MEMBERS.map(m => `
+    <div class="photo-item" onclick="triggerPhotoUpload(${m.id})">
+      <button class="photo-del" onclick="deleteMemberPhoto(event,${m.id})">✕</button>
+      ${m.foto
+        ? `<img src="${m.foto}" alt="${m.nama}">`
+        : `<div class="photo-placeholder">📷</div>`}
+      <div class="photo-name" contenteditable="true"
+        onblur="renameMember(${m.id},this.textContent)"
+        onclick="event.stopPropagation()">${m.nama}</div>
+      <div class="photo-status ${m.foto?'has-photo':''}">${m.foto?'✓ Ada foto':'Tap untuk upload'}</div>
+    </div>`).join('');
+}
+
+function triggerPhotoUpload(id) {
+  currentUploadId = id;
+  document.getElementById('photoFileInput').click();
+}
+
+function handlePhotoUpload(event) {
+  const file = event.target.files[0];
+  if (!file || !currentUploadId) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const MAX = 300;
+      let w=img.width, h=img.height;
+      if(w>h){h=Math.round(h*MAX/w);w=MAX;}else{w=Math.round(w*MAX/h);h=MAX;}
+      canvas.width=w; canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      const dataUrl = canvas.toDataURL('image/jpeg',0.8);
+      const m = FAMILY_MEMBERS.find(m=>m.id===currentUploadId);
+      if(m){ m.foto=dataUrl; saveMembersToStorage(); renderPhotoGrid(); renderDashboard(); showNotif('✅ Foto '+m.nama+' disimpan!'); }
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+  event.target.value='';
+}
+
+function renameMember(id, name) {
+  const m = FAMILY_MEMBERS.find(m=>m.id===id);
+  if(m && name.trim()){ m.nama=name.trim(); saveMembersToStorage(); }
+}
+
+function deleteMemberPhoto(event, id) {
+  event.stopPropagation();
+  const m = FAMILY_MEMBERS.find(m=>m.id===id);
+  if(m && confirm('Hapus foto '+m.nama+'?')){ m.foto=''; saveMembersToStorage(); renderPhotoGrid(); renderDashboard(); }
+}
+
+function addMember() {
+  const newId = Math.max(...FAMILY_MEMBERS.map(m=>m.id),0)+1;
+  FAMILY_MEMBERS.push({id:newId,nama:'Anggota '+newId,foto:''});
+  saveMembersToStorage(); renderPhotoGrid(); renderDashboard();
+  showNotif('Anggota baru ditambahkan');
+}
+
+function clearAllPhotos() {
+  if(!confirm('Hapus semua foto?')) return;
+  FAMILY_MEMBERS.forEach(m=>m.foto='');
+  saveMembersToStorage(); renderPhotoGrid(); renderDashboard();
+  showNotif('Semua foto dihapus');
+}
+
+function saveMembersToStorage() {
+  try { localStorage.setItem('ras_members', JSON.stringify(FAMILY_MEMBERS)); }
+  catch(e) { showNotif('⚠️ Storage penuh! Kurangi ukuran foto.'); }
+}
+
+function exportMemberData() {
+  const data = FAMILY_MEMBERS.map(m=>({id:m.id,nama:m.nama,hasFoto:!!m.foto}));
+  const blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'anggota-keluarga.json';
+  a.click();
+}
+
+function importPhotosJSON() { document.getElementById('importJsonInput').click(); }
+
+function handleImportJSON(event) {
+  const file = event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      data.forEach(d => {
+        const m = FAMILY_MEMBERS.find(m=>m.id===d.id);
+        if(m){ if(d.nama) m.nama=d.nama; if(d.foto) m.foto=d.foto; }
+      });
+      saveMembersToStorage(); renderPhotoGrid(); renderDashboard();
+      showNotif('✅ Data diimport!');
+    } catch(err) { showNotif('❌ File JSON tidak valid'); }
+  };
+  reader.readAsText(file);
+  event.target.value='';
+}
+
+// ── PLAYERS ──
+function renderPlayers() {
+  const tbody = document.getElementById('playersTableBody');
+  if(!tbody) return;
+  tbody.innerHTML = players.length ? players.map((p,i) => `
+    <tr>
+      <td style="color:var(--brown-light)">${i+1}</td>
+      <td><div class="player-avatar-sm">${p[0].toUpperCase()}</div></td>
+      <td style="font-weight:600">${p}</td>
+      <td><span class="dot-online"></span><span style="font-size:12px;color:#4CAF50">Online</span></td>
+      <td><button class="btn btn-danger btn-sm" onclick="removePlayer('${p}')">Hapus</button></td>
+    </tr>`).join('')
+  : '<tr><td colspan="5" style="color:var(--brown-light);font-size:13px;text-align:center;padding:24px">Belum ada pemain. Peserta yang masuk room akan muncul di sini.</td></tr>';
+}
+
+function addDemoPlayers() {
+  const demos = ['Budi Santoso','Sari Dewi','Rudi Hartono','Rina Kusuma','Ahmad Fauzi','Maya Putri'];
+  demos.forEach(d=>{ if(!players.includes(d)) players.push(d); });
+  localStorage.setItem('ras_players', JSON.stringify(players));
+  renderPlayers(); renderDashboard();
+  showNotif('Demo pemain ditambahkan');
+}
+
+function removePlayer(name) {
+  players = players.filter(p=>p!==name);
+  localStorage.setItem('ras_players', JSON.stringify(players));
+  renderPlayers(); renderDashboard();
+}
+
+function clearPlayers() {
+  if(!confirm('Hapus semua pemain dari daftar?')) return;
+  players = [];
+  localStorage.setItem('ras_players', JSON.stringify(players));
+  renderPlayers(); renderDashboard();
+}
+
+// ── LAGU ──
+function renderLaguTable() {
+  const tbody = document.getElementById('laguTableBody');
+  if(!tbody) return;
+  tbody.innerHTML = LAGU_DATA.map(l => `
+    <tr>
+      <td><strong>${l.id}</strong></td>
+      <td>${l.judul}</td>
+      <td style="color:var(--brown-light)">${l.artis}</td>
+      <td><span class="timestamp-badge">${l.ts}</span></td>
+      <td><span class="status-badge synth" id="lagu-status-${l.id}">🔊 Sintetis</span></td>
+      <td>
+        <button class="btn btn-outline btn-sm" onclick="uploadLagu(${l.id})">Upload ${l.file}</button>
+        <input type="file" id="lagu-input-${l.id}" accept="audio/mp3,audio/mpeg" style="display:none" onchange="handleLaguUpload(event,${l.id})">
+      </td>
+    </tr>`).join('');
+}
+
+function uploadLagu(id) {
+  document.getElementById('lagu-input-'+id).click();
+}
+
+function handleLaguUpload(event, id) {
+  const file = event.target.files[0];
+  if(!file) return;
+  const badge = document.getElementById('lagu-status-'+id);
+  if(badge){ badge.className='status-badge mp3'; badge.textContent='🎵 MP3 Siap'; }
+  showNotif(`✅ ${file.name} siap! Taruh file ini di folder yang sama dengan HTML game.`);
+  event.target.value='';
+}
+
+// ── KOMEDIAN ──
+function renderKomedianGrid() {
+  const grid = document.getElementById('komedianGrid');
+  if(!grid) return;
+  grid.innerHTML = KOMEDIAN_TOP.map(k => {
+    const photo = komedianPhotos[k.id];
+    return `<div class="komedian-card">
+      <div class="komedian-photo" onclick="uploadKomedianPhoto(${k.id})">
+        ${photo ? `<img src="${photo}" alt="${k.nama}">` : k.nama[0].toUpperCase()}
+      </div>
+      <div class="komedian-info">
+        <div class="k-name">${k.nama}</div>
+        <div class="k-sub">${photo?'✓ Ada foto':'Klik upload'} · ID ${k.id}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+let currentKomedianId = null;
+function uploadKomedianPhoto(id) {
+  currentKomedianId = id;
+  document.getElementById('komedianBulkInput').click();
+}
+
+function handleKomedianBulkUpload(event) {
+  const files = Array.from(event.target.files);
+  let processed = 0;
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX = 200; let w=img.width,h=img.height;
+        if(w>h){h=Math.round(h*MAX/w);w=MAX;}else{w=Math.round(w*MAX/h);h=MAX;}
+        canvas.width=w; canvas.height=h;
+        canvas.getContext('2d').drawImage(img,0,0,w,h);
+        const dataUrl = canvas.toDataURL('image/jpeg',0.8);
+        // Parse ID from filename: 01-sule.jpg -> 1
+        const match = file.name.match(/^(\d+)/);
+        const id = match ? parseInt(match[1]) : currentKomedianId;
+        if(id) komedianPhotos[id] = dataUrl;
+        processed++;
+        if(processed === files.length) {
+          localStorage.setItem('ras_komedian_photos', JSON.stringify(komedianPhotos));
+          renderKomedianGrid();
+          showNotif(`✅ ${processed} foto komedian diupload!`);
+        }
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+  event.target.value='';
+}
+
+function exportKomedianConfig() {
+  const config = Object.entries(komedianPhotos).map(([id,foto])=>({id:parseInt(id),hasFoto:true}));
+  const blob = new Blob([JSON.stringify(config,null,2)],{type:'application/json'});
+  const a = document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='komedian-config.json'; a.click();
+}
+
+// ── RESET ──
+function resetPhotos() {
+  if(!confirm('Reset semua foto keluarga?')) return;
+  FAMILY_MEMBERS.forEach(m=>m.foto='');
+  saveMembersToStorage(); renderPhotoGrid(); renderDashboard();
+  showNotif('Foto keluarga direset');
+}
+function resetPlayers() {
+  if(!confirm('Hapus daftar pemain?')) return;
+  players=[]; localStorage.setItem('ras_players','[]');
+  renderPlayers(); renderDashboard();
+}
+function resetAll() {
+  if(!confirm('RESET SEMUA DATA? Tidak bisa dikembalikan!')) return;
+  ['ras_event','ras_members','ras_players','ras_open_games','ras_komedian_photos'].forEach(k=>localStorage.removeItem(k));
+  location.reload();
+}
+
+// ── EXPORT ──
+function exportAllData() {
+  const all = {
+    event: eventSettings,
+    members: FAMILY_MEMBERS.map(m=>({id:m.id,nama:m.nama,hasFoto:!!m.foto})),
+    players,
+    openGames,
+    exported: new Date().toISOString()
+  };
+  const blob = new Blob([JSON.stringify(all,null,2)],{type:'application/json'});
+  const a = document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='rasmita-data-export.json'; a.click();
+  showNotif('✅ Data diekspor!');
+}
+
+// ── NOTIF ──
+function showNotif(msg) {
+  const n = document.getElementById('notifBar');
+  n.textContent = msg;
+  n.classList.add('show');
+  setTimeout(()=>n.classList.remove('show'),3000);
+}
+</script>
+</body>
+</html>
