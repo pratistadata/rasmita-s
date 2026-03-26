@@ -1352,18 +1352,18 @@
       <input type="text" id="playerName" placeholder="Tulis namamu di sini..." maxlength="30">
     </div>
     <div class="form-group">
-      <label>Kode Room</label>
-      <input type="text" id="roomCode" placeholder="Contoh: FAM2026" maxlength="10" style="text-transform:uppercase;letter-spacing:4px;text-align:center">
-    </div>
-    <div class="form-group">
       <label>Foto Profil <span style="font-weight:400;text-transform:none;color:var(--brown-light);letter-spacing:0;font-size:11px">(opsional)</span></label>
       <div style="display:flex;align-items:center;gap:14px;">
-        <div id="regPhotoPreview" onclick="document.getElementById('regPhotoInput').click()" style="width:68px;height:68px;border-radius:50%;background:var(--cream-dark);border:2px dashed rgba(201,168,76,0.5);display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;flex-shrink:0;transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='rgba(201,168,76,0.5)'">
-          <span id="regPhotoIcon" style="font-size:1.6rem">📷</span>
+        <div id="regPhotoPreview" onclick="document.getElementById('regPhotoInput').click()" style="width:80px;height:80px;border-radius:50%;background:var(--cream-dark);border:2px dashed rgba(201,168,76,0.5);display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;flex-shrink:0;transition:border-color 0.2s;box-shadow:0 2px 8px rgba(0,0,0,0.1);" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='rgba(201,168,76,0.5)'">
+          <span id="regPhotoIcon" style="font-size:1.8rem">📷</span>
         </div>
-        <div style="font-size:12px;color:var(--brown-light);line-height:1.6">Tap gambar untuk upload foto.<br>Akan dipakai sebagai foto profil<br>di semua game nanti.</div>
+        <div>
+          <div style="font-size:13px;color:var(--brown);font-weight:600;margin-bottom:4px">Upload Foto Profil</div>
+          <div style="font-size:11px;color:var(--brown-light);line-height:1.6">Tap lingkaran di kiri untuk pilih foto.<br>Tampil di profil game kamu.</div>
+          <button type="button" onclick="document.getElementById('regPhotoInput').click()" style="margin-top:6px;padding:5px 12px;background:var(--green);color:var(--gold-light);border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;">📷 Pilih Foto</button>
+        </div>
       </div>
-      <input type="file" id="regPhotoInput" accept="image/*" style="display:none" onchange="handleRegPhoto(event)">
+      <input type="file" id="regPhotoInput" accept="image/*" capture="environment" style="display:none" onchange="handleRegPhoto(event)">
     </div>
     <button class="btn-primary" onclick="joinRoom()">Masuk ke Lobby 🎉</button>
   </div>
@@ -1394,9 +1394,19 @@
     <div class="ornament" style="font-size:1rem; margin-bottom:0.5rem;">✦ ✦ ✦</div>
     <h2>Selamat Datang, <span id="welcomeName" style="color:var(--gold)">Tamu</span>! 🎊</h2>
     <p style="color:var(--brown-light);font-size:14px;margin-top:4px">Rasmita's Family Gathering 2026</p>
-    <div style="margin:0.5rem 0; font-size:13px; color:var(--brown-light)">Room Code:</div>
-    <div class="room-code" id="displayRoomCode">FAM2026</div>
     <p style="font-size:13px;color:var(--brown-light);margin-top:8px">Tunggu host membuka permainan...</p>
+    <button onclick="showG5ResultsModal()" style="margin-top:12px;padding:8px 20px;background:transparent;border:1.5px solid var(--gold);border-radius:20px;color:var(--gold-dark);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;letter-spacing:0.5px;">🎭 Lihat Hasil Mirip Siapa Semua Peserta</button>
+  </div>
+
+  <!-- Modal hasil G5 -->
+  <div id="g5Modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:999;padding:1rem;overflow-y:auto;" onclick="if(event.target===this)this.style.display='none'">
+    <div style="background:var(--cream);border-radius:16px;max-width:500px;margin:0 auto;overflow:hidden;">
+      <div style="background:var(--green);padding:1rem 1.5rem;display:flex;justify-content:space-between;align-items:center;">
+        <div style="font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--gold-light);font-weight:700;">🎭 Hasil — Kamu Mirip Siapa?</div>
+        <button onclick="document.getElementById('g5Modal').style.display='none'" style="background:none;border:none;color:var(--gold-light);font-size:1.3rem;cursor:pointer;">✕</button>
+      </div>
+      <div id="g5ModalContent" style="padding:1rem 1.5rem;max-height:70vh;overflow-y:auto;"></div>
+    </div>
   </div>
 
   <div class="games-grid" id="gamesGrid">
@@ -1827,6 +1837,20 @@ const FAMILY_MEMBERS = [
   { id: 20, nama: "Anggota 20", foto: "" },
 ];
 
+// ===== FOTO BERBEDA PER GAME =====
+// Game 1 (Memory Match): foto 0-7 (8 anggota)
+// Game 2 (Tebak Siapa): foto 8-17 (10 anggota)
+// Game 3 (Siapa Paling): foto 0-19 (semua, untuk voting)
+// Game 4 (Timeline): foto 0-14 per ronde (5 per ronde)
+function getPhotosForGame(gameId) {
+  const withPhoto = FAMILY_MEMBERS.filter(m => m.foto);
+  const all = FAMILY_MEMBERS;
+  if (gameId === 1) return all.slice(0, 8);
+  if (gameId === 2) return all.slice(8, 18);
+  if (gameId === 4) return all.slice(0, 15); // 3 ronde x 5
+  return all; // game 3 dan lainnya pakai semua
+}
+
 const PERTANYAAN_G3 = [
   "Siapa yang paling suka tidur?",
   "Siapa yang paling cerewet?",
@@ -1852,211 +1876,104 @@ const PERTANYAAN_G3 = [
 
 const COMEDIANS = {
   pria: [
-    { id:1, nama:"Sule", usia:44, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"lebay", komentar:"Selamat! Kamu setara Raja Komedi Indonesia. Kalau ngomong, semua orang bisa lupa nama sendiri karena ketawa!" },
-    { id:2, nama:"Andre Taulany", usia:50, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"kalem", komentar:"Wah mirip Andre! Gayamu kalem tapi punchline-mu tajam kayak silet. Orang nggak sadar sudah tertawa sebelum sadar kenapa!" },
-    { id:3, nama:"Komeng", usia:56, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"polos", komentar:"Spontan! Uhuy! Kamu punya wajah datar tapi bikin orang pingsan ketawa. Komeng bangga punya kembaran!" },
-    { id:4, nama:"Cak Lontong", usia:52, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Selamat, otakmu sama njlimet-nya dengan Cak Lontong! Kalimatmu bikin orang mikir dulu 5 menit baru ngakak!" },
-    { id:5, nama:"Raditya Dika", usia:39, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Mirip Raditya Dika! Hidupmu penuh kejadian absurd yang kalau diceritain bisa jadi buku bestseller!" },
-    { id:6, nama:"Dodit Mulyanto", usia:36, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"polos", komentar:"Wajahmu innocent kayak Dodit tapi omonganmu... ya Allah. Selamat, kamu komedian berkedok orang baik-baik!" },
-    { id:7, nama:"Pandji Pragiwaksono", usia:42, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Seperti Pandji, kamu tipe yang bisa bikin kritik sosial jadi bahan ketawa. Berbahaya tapi menghibur!" },
-    { id:8, nama:"Wendi Cagur", usia:42, postur:"gemuk", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Mirip Wendi! Ekspresi mukamu bisa bikin suasana mendung jadi cerah. Aset nasional nih!" },
-    { id:9, nama:"Denny Cagur", usia:40, postur:"gemuk", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Wah duo Cagur versi baru! Energimu selevel Denny, sekali masuk ruangan semua langsung ngakak!" },
-    { id:10, nama:"Indra Jegel", usia:35, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"polos", komentar:"Logat Medanmu sekental Indra Jegel! Belum ngomong apa-apa, orang sudah siap-siap ketawa duluan!" },
-    { id:11, nama:"Bintang Emon", usia:31, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Fresh kayak Bintang Emon! Observasimu tentang kehidupan sehari-hari bisa bikin orang nangis ketawa!" },
-    { id:12, nama:"Ernest Prakasa", usia:43, postur:"sedang", rambut:"lurus", kumis:false, kacamata:true, karakter:"cerdas", komentar:"Mirip Ernest! Kamu tipe komedian intelektual yang bikin penonton merasa pintar padahal baru saja ditertawakan!" },
-    { id:13, nama:"Parto Patrio", usia:57, postur:"gemuk", rambut:"botak", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Wibawa Parto ada di dirimu! Kamu pemimpin yang bisa bikin sidang serius jadi pentas komedi tanpa disadari!" },
-    { id:14, nama:"Tukul Arwana", usia:60, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"lebay", komentar:"Kembali ke laptop! Seperti Tukul, kamu punya catchphrase yang sekali diucapkan langsung ikonik selamanya!" },
-    { id:15, nama:"Coki Pardede", usia:33, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Deep kayak Coki! Humor gelapmu sebenarnya kritik sosial yang dibalut tawa. Philosopher berkedok komedian!" },
-    { id:16, nama:"Boris Bokir", usia:36, postur:"gemuk", rambut:"keriting", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Boris banget! Rambut dan energimu sama-sama sulit dikendalikan. Tapi justru itu yang bikin semua tertawa!" },
-    { id:17, nama:"Abdur Arsyad", usia:36, postur:"kurus", rambut:"keriting", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Seperti Abdur, kamu bisa angkat cerita kampung halaman jadi komedi berkelas. Lokalitas adalah kekuatanmu!" },
-    { id:18, nama:"Arie Kriting", usia:38, postur:"kurus", rambut:"keriting", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Arie Kriting versi baru! Kamu bangga dengan identitas aslimu dan itu justru yang paling menghibur!" },
-    { id:19, nama:"Tretan Muslim", usia:35, postur:"gemuk", rambut:"lurus", kumis:true, kacamata:false, karakter:"polos", komentar:"Seperti Tretan, kamu punya kemampuan ajaib: bicara hal gila dengan muka serius. Itu bakat langka!" },
-    { id:20, nama:"Desta", usia:44, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"kalem", komentar:"Mirip Desta! Gaya santaimu menipu semua orang. Di balik ketenangan itu tersimpan lawakan yang siap meledak!" },
-    { id:21, nama:"Aziz Gagap", usia:47, postur:"gemuk", rambut:"lurus", kumis:false, kacamata:false, karakter:"polos", komentar:"Ga-ga-ga-gak ada yang bisa ngalahin spontanitasmu! Kayak Aziz, keluguan adalah senjata utamamu!" },
-    { id:22, nama:"Eko Patrio", usia:53, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Semangat juang kayak Eko Patrio! Kamu bisa tertawa di tengah badai sekalipun. Itu baru komedian sejati!" },
-    { id:23, nama:"Nugraha Arief", usia:40, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Analitis kayak Nugraha! Kamu bisa membedah situasi absurd dengan logika yang malah makin lucu!" },
-    { id:24, nama:"Ge Pamungkas", usia:35, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Tajam kayak Ge Pamungkas! Observasi hidupmu begitu presisi sampai orang terlambat sadar sudah disindir!" },
-    { id:25, nama:"Arief Muhammad", usia:34, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"kalem", komentar:"Konten-mu selalu relate kayak Arief! Kamu tahu persis apa yang bikin generasi sekarang ngakak!" },
-    { id:26, nama:"Mongol Stres", usia:42, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Stres tapi tetap lucu kayak Mongol! Kamu bisa mengubah frustrasi jadi bahan komedi paling segar!" },
-    { id:27, nama:"Kemal Palevi", usia:36, postur:"sedang", rambut:"lurus", kumis:true, kacamata:false, karakter:"kalem", komentar:"Stylish dan lucu kayak Kemal! Kamu buktikan bahwa gaya dan humor bisa berjalan beriringan dengan sempurna!" },
-    { id:28, nama:"Ryan Adriandhy", usia:37, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Seperti Ryan, kamu storyteller ulung yang bisa bikin cerita sederhana terasa epik dan lucu sekaligus!" },
-    { id:29, nama:"Mamat Alkatiri", usia:48, postur:"sedang", rambut:"lurus", kumis:true, kacamata:false, karakter:"kalem", komentar:"Tenang tapi mematikan kayak Mamat! Lawakan terencana matangmu selalu landing sempurna tanpa tergesa-gesa!" },
-    { id:30, nama:"Soleh Solihun", usia:43, postur:"kurus", rambut:"lurus", kumis:false, kacamata:true, karakter:"cerdas", komentar:"Intelektual kayak Soleh! Kamu bawa humor ke level yang membuat penonton belajar sambil tertawa terpingkal!" },
-    { id:31, nama:"Fico Fachriza", usia:32, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Energi muda kayak Fico! Kamu bawa angin segar ke dunia komedi dengan gaya yang autentik dan relatable!" },
-    { id:32, nama:"Ridwan Remin", usia:33, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"polos", komentar:"Polos tapi nyelekit kayak Ridwan! Wajah innocentmu adalah topeng sempurna untuk lawakan yang tak terduga!" },
-    { id:33, nama:"Dzawin Nur", usia:30, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Seperti Dzawin, kamu punya perspektif unik yang bikin orang melihat dunia dari sudut yang sama sekali berbeda!" },
-    { id:34, nama:"Muhadkly Acho", usia:38, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Tajam seperti Acho! Kritikmu dibalut humor sehingga yang dikritik pun ikut tertawa. Skill level: dewa!" },
-    { id:35, nama:"Babe Cabita", usia:40, postur:"gemuk", rambut:"keriting", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Penuh semangat kayak Babe! Kamu bisa membuat audiens terpingkal hanya dari cara kamu masuk panggung!" },
-    { id:36, nama:"Akbar Kobar", usia:34, postur:"gemuk", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Mengguncang panggung kayak Akbar! Energimu sebesar posturmu dan itu adalah kombinasi mematikan di atas panggung!" },
-    { id:37, nama:"Yudha Keling", usia:36, postur:"kurus", rambut:"keriting", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Mirip Yudha Keling! Kamu punya charisma alami yang bikin semua mata tertuju padamu begitu kamu mulai bicara!" },
-    { id:38, nama:"Ronal Surapradja", usia:45, postur:"gemuk", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Totalitas kayak Ronal! Kamu tidak setengah-setengah dalam apapun, termasuk dalam membuat orang tertawa keras!" },
-    { id:39, nama:"Adi Setiawan", usia:38, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"kalem", komentar:"Konsisten kayak Adi! Kamu bukan tipe yang meledak sekali, tapi yang terus-menerus menghibur tanpa henti!" },
-    { id:40, nama:"Sammy Notaslimboy", usia:39, postur:"gemuk", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Bangga dengan diri sendiri kayak Sammy! Kamu buktikan bahwa percaya diri adalah bahan bakar humor terbaik!" },
-    { id:41, nama:"Wendy Walters", usia:38, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Multitalenta kayak Wendy! Humor musikmu membuktikan kamu bisa menghibur dari dua arah sekaligus!" },
-    { id:42, nama:"Didi Mahardika", usia:41, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"kalem", komentar:"Seperti Didi, kamu simpan kejutan di setiap kalimat. Penonton tidak pernah tahu kapan bom tawa akan meledak!" },
-    { id:43, nama:"Rigen Rakelna", usia:36, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"polos", komentar:"Humble kayak Rigen! Kamu tidak perlu tampil berlebihan karena bakat aslimu sudah cukup bikin semua orang jatuh cinta!" },
-    { id:44, nama:"Insan Nur Akbar", usia:32, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Kritis kayak Insan! Mata tajammu melihat ironi di mana-mana dan kamu ubah jadi materi stand-up yang mengena!" },
-    { id:45, nama:"Alex Cendana", usia:34, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Dinamis kayak Alex! Kamu bisa menyesuaikan diri dengan siapapun dan tetap lucu di semua situasi!" },
-    { id:46, nama:"Nopek Novian", usia:30, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"polos", komentar:"Viral kayak Nopek! Kontenmu selalu punya timing sempurna yang bikin orang replay berkali-kali!" },
-    { id:47, nama:"Kiky Saputra", usia:33, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Energik kayak Kiky! Panggung seperti menyala begitu kamu naik. Ini bukan kebetulan, ini bakat!" },
-    { id:48, nama:"Fajar Nugra", usia:31, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Observatif kayak Fajar! Hal-hal kecil yang orang lewatkan justru jadi material emas di tanganmu!" },
-    { id:49, nama:"Bang Emen", usia:46, postur:"gemuk", rambut:"botak", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Legenda Betawi hidup! Kayak Bang Emen, kamu membawa budaya lokal ke panggung nasional dengan bangga!" },
-    { id:50, nama:"Iwel Sastra", usia:50, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Veteran sejati kayak Iwel! Jam terbangmu membuat setiap penampilan terasa sempurna dan penuh kalkulasi!" },
-    { id:51, nama:"Aming", usia:47, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"lebay", komentar:"Lebay tapi ikonik kayak Aming! Overdramatic-mu bukan kelebihan, itu adalah senjata utama yang tak tertandingi!" },
-    { id:52, nama:"Olga Syahputra", usia:38, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"lebay", komentar:"Legenda tak terlupakan kayak Olga! Energimu mengisi ruangan dan membuat semua orang merasa istimewa!" },
-    { id:53, nama:"Peppy", usia:43, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Host handal kayak Peppy! Kamu bisa mengelola chaos dan tetap menghibur. Bakat yang sangat langka!" },
-    { id:54, nama:"Andhika Pratama", usia:38, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"kalem", komentar:"Good-looking dan lucu kayak Andhika! Kamu kombinasi sempurna yang bikin semua kalangan terpesona!" },
-    { id:55, nama:"Desta", usia:44, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"kalem", komentar:"Karismatik kayak Desta! Kehadiranmu memberikan rasa nyaman sekaligus siap mengundang tawa kapanpun!" },
-    { id:56, nama:"Vincent Ryan Rompies", usia:43, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Duo legend kayak Vincent! Partner terbaikmu adalah lawan bicara yang bisa kamu jadikan bahan lawakan!" },
-    { id:57, nama:"Raffi Ahmad", usia:37, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Entertainer sejati kayak Raffi! Kamu tahu cara membuat semua mata tertuju padamu di manapun kamu berada!" },
-    { id:58, nama:"Baim Wong", usia:41, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Content creator kayak Baim! Hidupmu sendiri adalah reality show terlaris yang membuat jutaan orang terhibur!" },
-    { id:59, nama:"Ruben Onsu", usia:40, postur:"gemuk", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Hangat kayak Ruben! Senyummu adalah pintu masuk yang membuat semua orang merasa diterima dan nyaman!" },
-    { id:60, nama:"Billy Syahputra", usia:38, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"lebay", komentar:"Drama queen kayak Billy! Kemampuanmu mendramatisasi situasi biasa menjadi epik adalah anugerah langka!" },
-    { id:61, nama:"Judika", usia:41, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Serius tapi bisa lucu kayak Judika! Ketika kamu mulai bercanda, orang tidak siap dan langsung terpingkal!" },
-    { id:62, nama:"Denny Sumargo", usia:41, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Penuh kejutan kayak Densu! Di balik wajah seriusmu, tersimpan humor yang siap meledak kapanpun!" },
-    { id:63, nama:"Choki Sitohang", usia:39, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"MC andal kayak Choki! Kamu punya kemampuan membaca suasana yang membuatmu selalu tampil di momen tepat!" },
-    { id:64, nama:"Hengky Kurniawan", usia:42, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"kalem", komentar:"Humble kayak Hengky! Kamu tidak perlu berteriak untuk diperhatikan. Kharismamu berbicara lebih keras dari kata-kata!" },
-    { id:65, nama:"Farhan", usia:52, postur:"kurus", rambut:"lurus", kumis:false, kacamata:true, karakter:"cerdas", komentar:"Intelektual kayak Farhan! Kamu punya referensi yang luas dan bisa mengubah topik berat jadi obrolan santai!" },
-    { id:66, nama:"Irfan Hakim", usia:47, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Profesional kayak Irfan! Kamu bisa menghibur semua usia dari anak kecil sampai kakek nenek sekaligus!" },
-    { id:67, nama:"Rian D'Masiv", usia:37, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"kalem", komentar:"Merakyat kayak Rian! Kesederhanaanmu justru yang membuat semua orang merasa dekat dan nyaman bersamamu!" },
-    { id:68, nama:"Ryan D'Masiv", usia:38, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"polos", komentar:"Genuine kayak Ryan! Kamu tidak perlu pura-pura lucu karena ketulusanmu sendiri adalah humor paling mengena!" },
-    { id:69, nama:"Pandji Pragiwaksono", usia:42, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Berani kayak Pandji! Kamu tidak takut angkat topik berat karena kamu tahu cara membungkusnya dengan humor!" },
-    { id:70, nama:"Asep Sunandar", usia:55, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"polos", komentar:"Maestro tradisi kayak Asep! Kamu menjaga warisan budaya tetap hidup dengan cara yang relevan dan menghibur!" },
-    { id:71, nama:"Tike Priyatnakusuma", usia:50, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Bisa masuk semua genre kayak Tike! Dari drama serius hingga komedi ringan, kamu kuasai semua dengan gemilang!" },
-    { id:72, nama:"Isa Bajaj", usia:41, postur:"gemuk", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Loyal kayak Isa! Kamu tipe teman yang selalu bisa diandalkan untuk menghibur di saat semua orang butuh tawa!" },
-    { id:73, nama:"Kang Sule Junior", usia:25, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"lebay", komentar:"Generasi penerus! Kayak penerus legenda, kamu bawa gaya sendiri yang unik tapi tetap menghibur dari dalam!" },
-    { id:74, nama:"Arap Gotong Royong", usia:34, postur:"gemuk", rambut:"lurus", kumis:false, kacamata:false, karakter:"polos", komentar:"Unexpected kayak Arap! Kamu sering diremehkan di awal, tapi akhir ceritanya semua orang kagum dan tertawa!" },
-    { id:75, nama:"Dedi Suardi", usia:45, postur:"sedang", rambut:"botak", kumis:true, kacamata:false, karakter:"kalem", komentar:"Bijak kayak tetua kampung! Kamu punya kebijaksanaan yang disampaikan dengan cara jenaka yang tidak menggurui!" },
-    { id:76, nama:"Sapri Pantun", usia:48, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"polos", komentar:"Naturalis kayak Sapri! Tidak ada yang dibuat-buat dari dirimu dan itu justru yang membuat semua orang tertawa!" },
-    { id:77, nama:"Ucok Baba", usia:43, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Unik kayak Ucok! Keunikanmu adalah kekuatan terbesar. Berbeda dari keramaian selalu menjadi yang paling diingat!" },
-    { id:78, nama:"Iko Uwais", usia:36, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"kalem", komentar:"Serius tapi punya selera humor tinggi kayak Iko! Ketika kamu tersenyum, dunia terasa lebih aman dan bahagia!" },
-    { id:79, nama:"Joe Taslim", usia:42, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"kalem", komentar:"Cool kayak Joe! Kamu tipe yang tidak banyak bicara, tapi ketika bicara, semua orang langsung mendengarkan!" },
-    { id:80, nama:"Reza Rahadian", usia:37, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Aktor berbakat kayak Reza! Kamu bisa memainkan semua peran termasuk peran jadi orang yang paling lucu di ruangan!" },
-    { id:81, nama:"Vino G Bastian", usia:38, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"kalem", komentar:"Hangat dan autentik kayak Vino! Kepribadian aslimu lebih menarik dari karakter apapun yang pernah kamu perankan!" },
-    { id:82, nama:"Adipati Dolken", usia:32, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Fresh kayak Adipati! Kamu membawa energi baru yang membuat semua orang merasa muda dan bersemangat!" },
-    { id:83, nama:"Lukman Sardi", usia:52, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Berkarakter kuat kayak Lukman! Setiap kata yang kamu ucapkan terasa penuh makna dan kelas tersendiri!" },
-    { id:84, nama:"Hamish Daud", usia:37, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"kalem", komentar:"Internasional kayak Hamish! Perspektifmu yang luas membuat humor dan pandanganmu selalu segar dan unik!" },
-    { id:85, nama:"Deddy Corbuzier", usia:48, postur:"sedang", rambut:"botak", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Provokator positif kayak Deddy! Kamu suka menantang pemikiran orang dan itu justru yang membuat semua tertarik!" },
-    { id:86, nama:"Helmy Yahya", usia:58, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Visioner kayak Helmy! Kamu selalu selangkah lebih maju dan punya cara unik untuk menyampaikan ide-ide besarmu!" },
-    { id:87, nama:"Tomy Soeharto", usia:60, postur:"gemuk", rambut:"lurus", kumis:false, kacamata:false, karakter:"kalem", komentar:"Berpengaruh kayak orang bersejarah! Kehadiranmu selalu meninggalkan kesan yang dalam dan tak terlupakan!" },
-    { id:88, nama:"Sandy Tiar", usia:35, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Storyteller ulung kayak Sandy! Kamu bisa membuat cerita biasa menjadi luar biasa dengan cara penyampaianmu!" },
-    { id:89, nama:"Rizky Febian", usia:26, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Berbakat kayak Rizky! Kamu punya natural talent yang membuat semua yang kamu lakukan terasa mudah dan menghibur!" },
-    { id:90, nama:"Aurel Hermansyah", usia:24, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Muda dan bersemangat! Energimu yang muda dan segar adalah aset yang membuat semua terhibur tanpa upaya!" },
-    { id:91, nama:"Al Ghazali", usia:26, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Next gen kayak Al! Kamu punya semua yang dibutuhkan untuk menjadi ikon generasi berikutnya yang menghibur!" },
-    { id:92, nama:"Atta Halilintar", usia:27, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Viral sejati kayak Atta! Apapun yang kamu lakukan selalu bisa menjadi trending topic yang dibicarakan semua orang!" },
-    { id:93, nama:"Fiki Naki", usia:24, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Multi-language kayak Fiki! Kamu bisa menghubungkan dunia karena humormu melampaui batasan bahasa!" },
-    { id:94, nama:"Kunto Aji", usia:33, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"kalem", komentar:"Introspektif kayak Kunto Aji! Kamu sering berpikir dalam tapi bisa mengungkapkannya dengan cara yang mengena hati!" },
-    { id:95, nama:"Fiersa Besari", usia:34, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Penyair jiwa kayak Fiersa! Kata-katamu bisa membuat orang tertawa sambil merenung. Kombinasi yang sangat langka!" },
-    { id:96, nama:"Ariel Noah", usia:41, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"kalem", komentar:"Fenomenal kayak Ariel! Kehadiranmu selalu membuat suasana berubah drastis menjadi lebih meriah dan berenergi!" },
-    { id:97, nama:"Once Mekel", usia:51, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"kalem", komentar:"Elegan kayak Once! Kamu punya ketenangan yang membuat semua orang percaya bahwa segala sesuatu akan baik-baik saja!" },
-    { id:98, nama:"Tompi", usia:48, postur:"kurus", rambut:"lurus", kumis:true, kacamata:false, karakter:"kalem", komentar:"Smooth kayak Tompi! Apapun situasinya, kamu bisa menavigasinya dengan gaya dan keanggunan yang memikat!" },
-    { id:99, nama:"Glenn Fredly", usia:44, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"kalem", komentar:"Penuh kasih kayak Glenn! Kehangatan yang kamu bawa membuat setiap interaksi terasa bermakna dan berharga!" },
-    { id:100, nama:"Giring Nidji", usia:39, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Semangat tak padam kayak Giring! Kamu selalu optimis dan energimu menginspirasi semua orang di sekitarmu!" },
+    // ===== KOMEDIAN LAWAS / LEGENDARIS =====
+    { id:1, nama:"Ateng", usia:70, postur:"pendek", rambut:"lurus", kumis:false, kacamata:false, karakter:"polos", komentar:"Waaah, kamu setara Ateng — legenda komedi Indonesia! Slapstick dan ekspresi mukamu bikin semua orang ngakak tanpa bisa berhenti!" },
+    { id:2, nama:"Gepeng", usia:65, postur:"pendek", rambut:"lurus", kumis:false, kacamata:false, karakter:"polos", komentar:"Duet legendaris kayak Gepeng! Partnermu adalah kuncimu. Bersama orang yang tepat, humor simpelmu jadi luar biasa!" },
+    { id:3, nama:"Benyamin S", usia:70, postur:"sedang", rambut:"lurus", kumis:true, kacamata:false, karakter:"ekspresif", komentar:"Betawi aseli kayak Benyamin! Logat dan gaya hidupmu yang otentik adalah komedian alami yang tak tertandingi!" },
+    { id:4, nama:"Bing Slamet", usia:75, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Maestro komedi kayak Bing Slamet! Kamu punya jiwa entertainer sejati yang menghibur lintas generasi!" },
+    { id:5, nama:"Dono Warkop", usia:70, postur:"sedang", rambut:"lurus", kumis:false, kacamata:true, karakter:"cerdas", komentar:"Pinter tapi sering apes kayak Dono! Humor intelektualmu selalu bikin orang mikir dulu baru ngakak belakangan!" },
+    { id:6, nama:"Kasino Warkop", usia:68, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"lebay", komentar:"Centil dan eksplosif kayak Kasino! Ekspresi muka dan gaya bicaramu bikin situasi paling serius jadi lucu!" },
+    { id:7, nama:"Indro Warkop", usia:65, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"kalem", komentar:"Cool dan survive kayak Indro! Kamu tipe yang tenang tapi selalu punya timing terbaik untuk punchline mematikan!" },
+    { id:8, nama:"Pak Tile", usia:75, postur:"gemuk", rambut:"lurus", kumis:true, kacamata:false, karakter:"polos", komentar:"Legendaris kayak Pak Tile! Gayamu yang polos dan lugu menipu semua orang — di balik itu tersimpan humor tajam!" },
+    { id:9, nama:"Asmuni Srimulat", usia:75, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"polos", komentar:"Srimulat legend kayak Asmuni! Kamu punya keahlian membikin suasana cair hanya dari cara kamu berdiri di panggung!" },
+    { id:10, nama:"Basuki Srimulat", usia:72, postur:"gemuk", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Gemoy dan menggemaskan kayak Basuki! Postur dan ekspresimu sendiri sudah bikin orang senyum sebelum kamu ngomong!" },
+    // ===== KOMEDIAN ERA 90-2000AN =====
+    { id:11, nama:"Sule", usia:44, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"lebay", komentar:"Raja Komedi Indonesia! Kayak Sule, kalau kamu ngomong semua orang lupa nama sendiri karena kebanyakan ketawa!" },
+    { id:12, nama:"Andre Taulany", usia:50, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"kalem", komentar:"Mirip Andre! Gayamu kalem tapi punchline-mu tajam kayak silet. Orang nggak sadar sudah tertawa sebelum sadar kenapa!" },
+    { id:13, nama:"Komeng", usia:56, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"polos", komentar:"Spontan! Uhuy! Kamu punya wajah datar tapi bikin orang pingsan ketawa. Komeng bangga punya kembaran!" },
+    { id:14, nama:"Cak Lontong", usia:52, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Otakmu njlimet kayak Cak Lontong! Kalimatmu bikin orang mikir dulu 5 menit baru ngakak keras!" },
+    { id:15, nama:"Tukul Arwana", usia:60, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"lebay", komentar:"Kembali ke laptop! Seperti Tukul, catchphrase-mu sekali diucapkan langsung ikonik selamanya!" },
+    { id:16, nama:"Aziz Gagap", usia:47, postur:"gemuk", rambut:"lurus", kumis:false, kacamata:false, karakter:"polos", komentar:"Ga-ga-ga-gak ada yang bisa ngalahin spontanitasmu! Kayak Aziz, keluguan adalah senjata utamamu!" },
+    { id:17, nama:"Eko Patrio", usia:53, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Semangat juang kayak Eko Patrio! Kamu bisa tertawa di tengah badai sekalipun. Itu baru komedian sejati!" },
+    { id:18, nama:"Parto Patrio", usia:57, postur:"gemuk", rambut:"botak", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Wibawa Parto ada di dirimu! Kamu pemimpin yang bisa bikin sidang serius jadi pentas komedi tanpa disadari!" },
+    { id:19, nama:"Olga Syahputra", usia:38, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"lebay", komentar:"Legenda tak terlupakan kayak Olga! Energimu mengisi ruangan dan membuat semua orang merasa istimewa!" },
+    { id:20, nama:"Tike Priyatnakusuma", usia:50, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Bisa masuk semua genre kayak Tike! Dari drama serius hingga komedi ringan, kamu kuasai semua dengan gemilang!" },
+    { id:21, nama:"Wendi Cagur", usia:42, postur:"gemuk", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Mirip Wendi! Ekspresi mukamu bisa bikin suasana mendung jadi cerah. Aset nasional nih!" },
+    { id:22, nama:"Denny Cagur", usia:40, postur:"gemuk", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Duo Cagur versi baru! Energimu selevel Denny, sekali masuk ruangan semua langsung ngakak!" },
+    { id:23, nama:"Aming", usia:47, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"lebay", komentar:"Lebay tapi ikonik kayak Aming! Overdramatic-mu bukan kelebihan, itu senjata utama yang tak tertandingi!" },
+    { id:24, nama:"Iwel Sastra", usia:50, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Veteran sejati kayak Iwel! Jam terbangmu membuat setiap penampilan terasa sempurna dan penuh kalkulasi!" },
+    { id:25, nama:"Indra Jegel", usia:35, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"polos", komentar:"Logat Medanmu sekental Indra Jegel! Belum ngomong apa-apa, orang sudah siap-siap ketawa duluan!" },
+    // ===== STAND-UP ERA MODERN =====
+    { id:26, nama:"Raditya Dika", usia:39, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Mirip Raditya Dika! Hidupmu penuh kejadian absurd yang kalau diceritain bisa jadi buku bestseller!" },
+    { id:27, nama:"Ernest Prakasa", usia:43, postur:"sedang", rambut:"lurus", kumis:false, kacamata:true, karakter:"cerdas", komentar:"Mirip Ernest! Komedian intelektual yang bikin penonton merasa pintar padahal baru saja ditertawakan!" },
+    { id:28, nama:"Dodit Mulyanto", usia:36, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"polos", komentar:"Wajahmu innocent kayak Dodit tapi omonganmu... ya Allah. Komedian berkedok orang baik-baik!" },
+    { id:29, nama:"Pandji Pragiwaksono", usia:42, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Seperti Pandji, kamu bisa bikin kritik sosial jadi bahan ketawa. Berbahaya tapi menghibur!" },
+    { id:30, nama:"Bintang Emon", usia:31, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Fresh kayak Bintang Emon! Observasimu tentang kehidupan sehari-hari bikin orang nangis ketawa!" },
+    { id:31, nama:"Ge Pamungkas", usia:35, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Tajam kayak Ge Pamungkas! Observasi hidupmu begitu presisi sampai orang terlambat sadar sudah disindir!" },
+    { id:32, nama:"Coki Pardede", usia:33, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Deep kayak Coki! Humor gelapmu sebenarnya kritik sosial yang dibalut tawa. Philosopher berkedok komedian!" },
+    { id:33, nama:"Mongol Stres", usia:42, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Stres tapi tetap lucu kayak Mongol! Kamu bisa mengubah frustrasi jadi bahan komedi paling segar!" },
+    { id:34, nama:"Abdur Arsyad", usia:36, postur:"kurus", rambut:"keriting", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Seperti Abdur, kamu bisa angkat cerita kampung halaman jadi komedi berkelas. Lokalitas adalah kekuatanmu!" },
+    { id:35, nama:"Arie Kriting", usia:38, postur:"kurus", rambut:"keriting", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Arie Kriting versi baru! Kamu bangga dengan identitas aslimu dan itu justru yang paling menghibur!" },
+    { id:36, nama:"Boris Bokir", usia:36, postur:"gemuk", rambut:"keriting", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Boris banget! Rambut dan energimu sama-sama sulit dikendalikan. Tapi justru itu yang bikin semua tertawa!" },
+    { id:37, nama:"Tretan Muslim", usia:35, postur:"gemuk", rambut:"lurus", kumis:true, kacamata:false, karakter:"polos", komentar:"Seperti Tretan, kamu punya kemampuan ajaib: bicara hal gila dengan muka serius. Bakat langka!" },
+    { id:38, nama:"Ryan Adriandhy", usia:37, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Seperti Ryan, kamu storyteller ulung yang bisa bikin cerita sederhana terasa epik dan lucu sekaligus!" },
+    { id:39, nama:"Soleh Solihun", usia:43, postur:"kurus", rambut:"lurus", kumis:false, kacamata:true, karakter:"cerdas", komentar:"Intelektual kayak Soleh! Kamu bawa humor ke level yang membuat penonton belajar sambil tertawa terpingkal!" },
+    { id:40, nama:"Dzawin Nur", usia:30, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Seperti Dzawin, kamu punya perspektif unik yang bikin orang melihat dunia dari sudut yang berbeda!" },
+    { id:41, nama:"Muhadkly Acho", usia:38, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Tajam seperti Acho! Kritikmu dibalut humor sehingga yang dikritik pun ikut tertawa. Skill level: dewa!" },
+    { id:42, nama:"Babe Cabita", usia:40, postur:"gemuk", rambut:"keriting", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Penuh semangat kayak Babe! Kamu bisa membuat audiens terpingkal hanya dari cara kamu masuk panggung!" },
+    { id:43, nama:"Nopek Novian", usia:30, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"polos", komentar:"Viral kayak Nopek! Kontenmu selalu punya timing sempurna yang bikin orang replay berkali-kali!" },
+    { id:44, nama:"Ridwan Remin", usia:33, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"polos", komentar:"Polos tapi nyelekit kayak Ridwan! Wajah innocentmu adalah topeng sempurna untuk lawakan yang tak terduga!" },
+    { id:45, nama:"Kiky Saputra", usia:33, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Energik kayak Kiky! Panggung seperti menyala begitu kamu naik. Ini bukan kebetulan, ini bakat!" },
+    { id:46, nama:"Fajar Nugra", usia:31, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Observatif kayak Fajar! Hal-hal kecil yang orang lewatkan justru jadi material emas di tanganmu!" },
+    { id:47, nama:"Fico Fachriza", usia:32, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Energi muda kayak Fico! Kamu bawa angin segar ke dunia komedi dengan gaya yang autentik!" },
+    { id:48, nama:"Akbar Kobar", usia:34, postur:"gemuk", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Mengguncang panggung kayak Akbar! Energimu sebesar posturmu dan itu kombinasi mematikan di panggung!" },
+    { id:49, nama:"Kemal Palevi", usia:36, postur:"sedang", rambut:"lurus", kumis:true, kacamata:false, karakter:"kalem", komentar:"Stylish dan lucu kayak Kemal! Kamu buktikan bahwa gaya dan humor bisa berjalan beriringan dengan sempurna!" },
+    { id:50, nama:"Desta", usia:44, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"kalem", komentar:"Mirip Desta! Gaya santaimu menipu semua orang. Di balik ketenangan itu tersimpan lawakan yang siap meledak!" },
+    { id:51, nama:"Bang Emen", usia:46, postur:"gemuk", rambut:"botak", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Legenda Betawi hidup! Kayak Bang Emen, kamu membawa budaya lokal ke panggung nasional dengan bangga!" },
+    { id:52, nama:"Sapri Pantun", usia:48, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"polos", komentar:"Naturalis kayak Sapri! Tidak ada yang dibuat-buat dari dirimu dan itu justru yang membuat semua orang tertawa!" },
+    { id:53, nama:"Ucok Baba", usia:43, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Unik kayak Ucok! Keunikanmu adalah kekuatan terbesar. Berbeda dari keramaian selalu menjadi yang paling diingat!" },
+    { id:54, nama:"Rigen Rakelna", usia:36, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"polos", komentar:"Humble kayak Rigen! Kamu tidak perlu tampil berlebihan karena bakat aslimu sudah cukup bikin semua orang jatuh cinta!" },
+    { id:55, nama:"Yudha Keling", usia:36, postur:"kurus", rambut:"keriting", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Mirip Yudha Keling! Kamu punya charisma alami yang bikin semua mata tertuju padamu begitu kamu mulai bicara!" },
+    { id:56, nama:"Ronal Surapradja", usia:45, postur:"gemuk", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Totalitas kayak Ronal! Kamu tidak setengah-setengah dalam apapun, termasuk dalam membuat orang tertawa keras!" },
+    { id:57, nama:"Arap Gotong Royong", usia:34, postur:"gemuk", rambut:"lurus", kumis:false, kacamata:false, karakter:"polos", komentar:"Unexpected kayak Arap! Kamu sering diremehkan di awal, tapi akhir ceritanya semua orang kagum dan tertawa!" },
+    { id:58, nama:"Peppy", usia:43, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Host handal kayak Peppy! Kamu bisa mengelola chaos dan tetap menghibur. Bakat yang sangat langka!" },
+    { id:59, nama:"Mamat Alkatiri", usia:48, postur:"sedang", rambut:"lurus", kumis:true, kacamata:false, karakter:"kalem", komentar:"Tenang tapi mematikan kayak Mamat! Lawakan terencana matangmu selalu landing sempurna!" },
+    { id:60, nama:"Wendy Walters", usia:38, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Multitalenta kayak Wendy! Humor musikmu membuktikan kamu bisa menghibur dari dua arah sekaligus!" },
+    { id:61, nama:"Insan Nur Akbar", usia:32, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Kritis kayak Insan! Mata tajammu melihat ironi di mana-mana dan kamu ubah jadi materi stand-up yang mengena!" },
+    { id:62, nama:"Farhan", usia:52, postur:"kurus", rambut:"lurus", kumis:false, kacamata:true, karakter:"cerdas", komentar:"Intelektual kayak Farhan! Kamu punya referensi yang luas dan bisa mengubah topik berat jadi obrolan santai!" },
+    { id:63, nama:"Deddy Corbuzier", usia:48, postur:"sedang", rambut:"botak", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Provokator positif kayak Deddy! Kamu suka menantang pemikiran orang dan itu justru yang membuat semua tertarik!" },
+    { id:64, nama:"Irfan Hakim", usia:47, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Profesional kayak Irfan! Kamu bisa menghibur semua usia dari anak kecil sampai kakek nenek sekaligus!" },
+    { id:65, nama:"Sammy Notaslimboy", usia:39, postur:"gemuk", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Bangga dengan diri sendiri kayak Sammy! Percaya diri adalah bahan bakar humor terbaik!" },
   ],
   wanita: [
-    { id:101, nama:"Nunung", usia:59, postur:"gemuk", rambut:"lurus", karakter:"lebay", komentar:"Selamat! Seperti Nunung legend, energimu mengisi seluruh panggung. Ketawamu menular dan senyummu bikin dunia cerah!" },
-    { id:102, nama:"Soimah", usia:43, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Bawel dan menggemaskan kayak Soimah! Sekali kamu bicara, semua orang berhenti dan mendengarkan sambil senyum-senyum!" },
-    { id:103, nama:"Rina Nose", usia:38, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Eksplosif kayak Rina Nose! Energimu membuktikan kamu bisa bertahan di antara komedian paling lucu!" },
-    { id:104, nama:"Asri Welas", usia:43, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Welas asih kayak Asri! Humormu hangat dan mengundang tapi tiba-tiba bikin orang tersedak ketawa. Berbahaya!" },
-    { id:105, nama:"Kiky Saputri", usia:31, postur:"kurus", rambut:"lurus", karakter:"cerdas", komentar:"Berani kayak Kiky! Stand-up comedy-mu yang kritis tapi lucu membuktikan kamu bukan komedian biasa. Luar biasa!" },
-    { id:106, nama:"Ayu Ting Ting", usia:32, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Bohoso opo iku? Kayak Ayu, kamu punya charm alami yang bikin orang suka padamu bahkan sebelum kamu berkomedi!" },
-    { id:107, nama:"Fitri Tropica", usia:38, postur:"sedang", rambut:"lurus", karakter:"lebay", komentar:"Tropical vibes kayak Fitri! Pembawaan ceriamu seperti sinar matahari yang selalu menghangatkan suasana!" },
-    { id:108, nama:"Tika Panggabean", usia:45, postur:"gemuk", rambut:"lurus", karakter:"ekspresif", komentar:"Totalitas kayak Tika! Kamu all-in dalam berkomedi. Tidak ada setengah-setengah, selalu maksimal dan menghibur!" },
-    { id:109, nama:"Melaney Ricardo", usia:43, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Blak-blakan kayak Melaney! Kejujuranmu dalam berkomedi adalah kekuatan terbesar. Tidak ada filter, semua keluar!" },
+    // ===== KOMEDIAN WANITA LAWAS =====
+    { id:101, nama:"Mpok Nori", usia:75, postur:"gemuk", rambut:"lurus", karakter:"polos", komentar:"Legenda Betawi ada di jiwamu! Seperti Mpok Nori, kamu simpan kelucuan dalam kesederhanaan. Rare talent!" },
+    { id:102, nama:"Tuti Suprapto (Tarzan)", usia:72, postur:"gemuk", rambut:"lurus", karakter:"ekspresif", komentar:"Srimulat queen! Kamu punya kemampuan langka: bikin semua orang terpingkal hanya dari gestur tubuhmu saja!" },
+    { id:103, nama:"Nunung", usia:59, postur:"gemuk", rambut:"lurus", karakter:"lebay", komentar:"Seperti Nunung legend, energimu mengisi seluruh panggung. Ketawamu menular dan senyummu bikin dunia cerah!" },
+    { id:104, nama:"Soimah", usia:43, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Bawel dan menggemaskan kayak Soimah! Sekali kamu bicara, semua orang berhenti dan mendengarkan sambil senyum!" },
+    { id:105, nama:"Rina Nose", usia:38, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Eksplosif kayak Rina Nose! Energimu membuktikan kamu bisa bertahan di antara komedian paling lucu!" },
+    { id:106, nama:"Asri Welas", usia:43, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Welas asih kayak Asri! Humormu hangat dan mengundang tapi tiba-tiba bikin orang tersedak ketawa!" },
+    { id:107, nama:"Tika Panggabean", usia:45, postur:"gemuk", rambut:"lurus", karakter:"ekspresif", komentar:"Totalitas kayak Tika! Kamu all-in dalam berkomedi. Tidak ada setengah-setengah, selalu maksimal!" },
+    { id:108, nama:"Fitri Tropica", usia:38, postur:"sedang", rambut:"lurus", karakter:"lebay", komentar:"Tropical vibes kayak Fitri! Pembawaan ceriamu seperti sinar matahari yang selalu menghangatkan suasana!" },
+    { id:109, nama:"Kiky Saputri", usia:31, postur:"kurus", rambut:"lurus", karakter:"cerdas", komentar:"Berani kayak Kiky! Stand-up comedy-mu yang kritis tapi lucu membuktikan kamu bukan komedian biasa!" },
     { id:110, nama:"Arafah Rianti", usia:29, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"TikTok queen kayak Arafah! Kontenmu selalu relate dengan kehidupan sehari-hari dan bikin orang ngerasa less alone!" },
-    { id:111, nama:"Hesti Purwadinata", usia:37, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Presenter lucu kayak Hesti! Kamu bisa membuat topik serius jadi ringan dan menyenangkan. Skill berharga!" },
-    { id:112, nama:"Nycta Gina", usia:39, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Spontan kayak Nycta! Reaksi spontanmu terhadap kejadian sehari-hari selalu lebih lucu dari komedi terencana manapun!" },
-    { id:113, nama:"Sarah Sechan", usia:44, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Talk show queen kayak Sarah! Kemampuanmu menggali cerita lucu dari siapapun adalah superpower yang luar biasa!" },
-    { id:114, nama:"Cinta Laura", usia:30, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Aku tuh orangnya kayak Cinta Laura! Ungkapan ikonikmu sendiri adalah bukti kamu bisa menjadi meme hidup yang dicintai!" },
-    { id:115, nama:"Ria Ricis", usia:28, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Content queen kayak Ria Ricis! Apapun kamu lakukan bisa jadi konten yang menghibur jutaan orang!" },
-    { id:116, nama:"Gisella Anastasia", usia:32, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Gisel banget! Tawa lepasmu yang terkenal adalah senjata paling menggemaskan dalam arsenal humormu!" },
-    { id:117, nama:"Ayu Dewi", usia:40, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Host handal kayak Ayu Dewi! Kamu bisa mengendalikan suasana dan bikin semua tamu merasa nyaman dan lucu!" },
-    { id:118, nama:"Mpok Nori", usia:70, postur:"gemuk", rambut:"lurus", karakter:"polos", komentar:"Legenda Betawi ada di jiwamu! Seperti Mpok Nori, kamu simpan kelucuan dalam kesederhanaan. Rare talent!" },
-    { id:119, nama:"Olla Ramlan", usia:41, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Spontan kayak Olla! Kamu tidak perlu persiapan untuk jadi lucu. Natural comedian yang selalu ada di momen tepat!" },
+    { id:111, nama:"Melaney Ricardo", usia:43, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Blak-blakan kayak Melaney! Kejujuranmu dalam berkomedi adalah kekuatan terbesar. Tidak ada filter, semua keluar!" },
+    { id:112, nama:"Hesti Purwadinata", usia:37, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Presenter lucu kayak Hesti! Kamu bisa membuat topik serius jadi ringan dan menyenangkan. Skill berharga!" },
+    { id:113, nama:"Nycta Gina", usia:39, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Spontan kayak Nycta! Reaksi spontanmu terhadap kejadian sehari-hari selalu lebih lucu dari komedi terencana!" },
+    { id:114, nama:"Sarah Sechan", usia:44, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Talk show queen kayak Sarah! Kemampuanmu menggali cerita lucu dari siapapun adalah superpower yang luar biasa!" },
+    { id:115, nama:"Cinta Laura", usia:30, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Aku tuh orangnya kayak Cinta Laura! Ungkapan ikonikmu sendiri adalah bukti kamu bisa jadi meme hidup yang dicintai!" },
+    { id:116, nama:"Ayu Ting Ting", usia:32, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Bohoso opo iku? Kayak Ayu, kamu punya charm alami yang bikin orang suka sebelum kamu berkomedi!" },
+    { id:117, nama:"Ria Ricis", usia:28, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Content queen kayak Ria Ricis! Apapun kamu lakukan bisa jadi konten yang menghibur jutaan orang!" },
+    { id:118, nama:"Ayu Dewi", usia:40, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Host handal kayak Ayu Dewi! Kamu bisa mengendalikan suasana dan bikin semua tamu merasa nyaman dan lucu!" },
+    { id:119, nama:"Gisella Anastasia", usia:32, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Gisel banget! Tawa lepasmu yang terkenal adalah senjata paling menggemaskan dalam arsenal humormu!" },
     { id:120, nama:"Rizky Inggar", usia:28, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Pemenang Anugerah Komedi! Seperti Rizky Inggar, kamu diakui semua kalangan sebagai komedian terbaik masa kini!" },
-    { id:121, nama:"Nabilah Ayu", usia:26, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Idol yang menghibur kayak Nabilah! Kamu punya kemampuan membuat semua orang bahagia hanya dengan senyumanmu!" },
-    { id:122, nama:"Awkarin", usia:26, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Berani dan autentik kayak Awkarin! Kamu tidak peduli penilaian orang dan itu justru yang membuat semua orang terpesona!" },
-    { id:123, nama:"Rachel Vennya", usia:27, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Relatable kayak Rachel! Cerita hidupmu yang jujur membuat semua orang merasa tidak sendirian dalam perjuangan!" },
-    { id:124, nama:"Awkarin", usia:26, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Pemberani kayak Awkarin! Kamu selalu jujur pada diri sendiri dan itulah kekuatan terbesar yang kamu miliki!" },
-    { id:125, nama:"Nagita Slavina", usia:35, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Anggun dan menghibur kayak Nagita! Senyummu adalah senjata rahasia yang membuat semua orang luluh!" },
-    { id:126, nama:"Nikita Willy", usia:30, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Elegan kayak Nikita! Kamu membuktikan bahwa cantik dan lucu adalah kombinasi yang bisa berjalan beriringan!" },
-    { id:127, nama:"Prilly Latuconsina", usia:27, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Multitalenta kayak Prilly! Kamu bisa akting serius sekaligus menghibur dengan natural. Bakat yang sangat langka!" },
-    { id:128, nama:"Raisa", usia:33, postur:"kurus", rambut:"lurus", karakter:"kalem", komentar:"Lembut kayak Raisa! Kehadiranmu selalu membawa ketenangan dan kehangatan yang membuat semua orang nyaman!" },
-    { id:129, nama:"Isyana Sarasvati", usia:30, postur:"kurus", rambut:"lurus", karakter:"cerdas", komentar:"Klasik dan modern kayak Isyana! Kamu punya kedalaman yang membuat setiap interaksi denganmu sangat berharga!" },
-    { id:130, nama:"Agnez Mo", usia:37, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"World class kayak Agnez! Standar tinggimu membuktikan bahwa kamu tidak pernah puas dengan yang biasa-biasa saja!" },
-    { id:131, nama:"Bunga Citra Lestari", usia:40, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Timeless kayak BCL! Kamu punya kualitas yang tidak lekang oleh waktu dan selalu relevan di setiap generasi!" },
-    { id:132, nama:"Rossa", usia:45, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Diva legendaris kayak Rossa! Totalitasmu dalam setiap penampilan adalah inspirasi bagi semua orang di sekitarmu!" },
-    { id:133, nama:"Krisdayanti", usia:49, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Diva tak tertandingi kayak KD! Kamu punya aura yang membuat semua orang berhenti dan memperhatikanmu!" },
-    { id:134, nama:"Titiek Puspa", usia:85, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Legenda abadi kayak Titiek Puspa! Kebijaksanaanmu adalah harta tak ternilai yang terus menginspirasi generasi!" },
-    { id:135, nama:"Evi Tamala", usia:52, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Dangdut queen kayak Evi! Energimu membuat semua kaki ingin bergoyang dan semua hati ikut bahagia!" },
-    { id:136, nama:"Inul Daratista", usia:43, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Energetik kayak Inul! Semangatmu yang tak pernah padam adalah bukti bahwa passion adalah bahan bakar terbaik!" },
-    { id:137, nama:"Via Vallen", usia:29, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Hits factory kayak Via! Apapun yang kamu sentuh langsung menjadi viral dan digemari semua kalangan!" },
-    { id:138, nama:"Nella Kharisma", usia:27, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Konsisten kayak Nella! Kamu terus berkarya tanpa henti dan itu adalah bukti dedikasi yang luar biasa!" },
-    { id:139, nama:"Happy Asmara", usia:24, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Gembira kayak namamu! Kamu punya kemampuan alami untuk membuat suasana menjadi lebih ceria dan bersemangat!" },
-    { id:140, nama:"Yura Yunita", usia:33, postur:"sedang", rambut:"lurus", karakter:"cerdas", komentar:"Artistik kayak Yura! Cara pandangmu yang unik membuat apapun yang kamu hasilkan selalu memiliki nilai seni tinggi!" },
-    { id:141, nama:"Lyodra Ginting", usia:21, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Prodigy kayak Lyodra! Di usiamu yang muda kamu sudah memiliki kemampuan yang membuat semua orang kagum!" },
-    { id:142, nama:"Tiara Andini", usia:20, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Rising star kayak Tiara! Kamu baru mulai tapi sudah membuat semua orang yakin masa depanmu sangat cerah!" },
-    { id:143, nama:"Ziva Magnolya", usia:21, postur:"kurus", rambut:"lurus", karakter:"kalem", komentar:"Pure talent kayak Ziva! Bakatmu yang murni dan tulus adalah nilai yang paling berharga di industri hiburan!" },
-    { id:144, nama:"Marion Jola", usia:23, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Berani tampil beda kayak Marion! Kamu tidak takut menjadi diri sendiri dan itu yang membuat semua orang mencintaimu!" },
-    { id:145, nama:"Ghea Indrawari", usia:24, postur:"sedang", rambut:"lurus", karakter:"cerdas", komentar:"Musisi berbakat kayak Ghea! Selera musikmu yang tinggi mencerminkan kedewasaan berpikir yang jauh melampaui usiamu!" },
-    { id:146, nama:"Ardhito Pramono", usia:27, postur:"sedang", rambut:"lurus", karakter:"kalem", komentar:"Cool dan stylish kayak Ardhito! Kamu punya vibe yang unik yang membuat semua orang ingin tahu lebih banyak tentangmu!" },
-    { id:147, nama:"Pamela Bowie", usia:34, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Penuh warna kayak Pamela! Kamu membawa kegembiraan dan keceriaan ke manapun kamu pergi. Sunshine of the party!" },
-    { id:148, nama:"Wulan Guritno", usia:43, postur:"kurus", rambut:"lurus", karakter:"kalem", komentar:"Ageless kayak Wulan! Kamu membuktikan bahwa kecantikan dan pesona sejati tidak mengenal batas usia!" },
-    { id:149, nama:"Dian Sastrowardoyo", usia:42, postur:"kurus", rambut:"lurus", karakter:"cerdas", komentar:"Cerdas dan cantik kayak Dian! Kamu buktikan bahwa otak dan penampilan bisa bersinergi menjadi paket sempurna!" },
-    { id:150, nama:"Marsha Timothy", usia:40, postur:"sedang", rambut:"lurus", karakter:"cerdas", komentar:"Aktris berbakat kayak Marsha! Kemampuanmu membaca situasi dan beradaptasi membuat kamu selalu tampil memukau!" },
-    { id:151, nama:"Adinia Wirasti", usia:38, postur:"kurus", rambut:"lurus", karakter:"cerdas", komentar:"Berkarakter kuat kayak Adinia! Setiap peran yang kamu mainkan meninggalkan kesan mendalam yang tak terlupakan!" },
-    { id:152, nama:"Tara Basro", usia:34, postur:"kurus", rambut:"lurus", karakter:"cerdas", komentar:"Visioner kayak Tara! Kamu selalu melihat peluang di mana orang lain hanya melihat rintangan. Luar biasa!" },
-    { id:153, nama:"Chicco Jerikho", usia:38, postur:"sedang", rambut:"lurus", karakter:"kalem", komentar:"Dedikasi tinggi kayak Chicco! Kamu tidak pernah setengah-setengah dalam apapun yang kamu lakukan!" },
-    { id:154, nama:"Tatjana Saphira", usia:27, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Bersinar kayak Tatjana! Kamu punya bakat alami yang membuat semua orang langsung jatuh cinta saat melihatmu!" },
-    { id:155, nama:"Pevita Pearce", usia:30, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Action queen kayak Pevita! Kamu buktikan bahwa perempuan bisa jadi kuat, berani, dan menghibur sekaligus!" },
-    { id:156, nama:"Andien", usia:39, postur:"kurus", rambut:"lurus", karakter:"kalem", komentar:"Filosofis kayak Andien! Cara berpikirmu yang mendalam membuat setiap percakapan denganmu selalu berkesan!" },
-    { id:157, nama:"Dira Sugandi", usia:41, postur:"sedang", rambut:"lurus", karakter:"cerdas", komentar:"Jazz queen kayak Dira! Kamu punya jiwa seni yang dalam dan cara berekspresi yang sangat autentik dan khas!" },
-    { id:158, nama:"Ruth Sahanaya", usia:57, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Legenda tak lekang waktu kayak Ruth! Standar profesionalisme yang kamu tunjukkan menjadi acuan bagi generasi muda!" },
-    { id:159, nama:"Titi DJ", usia:55, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Ikon era 90an kayak Titi DJ! Kamu adalah simbol kejayaan musik Indonesia yang selalu dirindukan semua generasi!" },
-    { id:160, nama:"Melly Goeslaw", usia:50, postur:"sedang", rambut:"lurus", karakter:"cerdas", komentar:"Pencipta lagu jenius kayak Melly! Kata-katamu selalu menembus hati karena berasal dari tempat yang paling dalam!" },
-    { id:161, nama:"Dewi Sandra", usia:43, postur:"sedang", rambut:"lurus", karakter:"kalem", komentar:"Transformasi inspiratif kayak Dewi! Perjalanan hidupmu mengajarkan bahwa perubahan terbaik dimulai dari dalam!" },
-    { id:162, nama:"Mulan Jameela", usia:43, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Rock diva kayak Mulan! Kamu punya keberanian untuk tampil beda dan itu yang membuat kamu selalu diingat!" },
-    { id:163, nama:"Nidji Vocalist", usia:38, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Idealis kayak Nidji! Kamu punya prinsip kuat yang tidak mudah goyah. Integritas adalah mahkota terindahmu!" },
-    { id:164, nama:"Sherina Munaf", usia:33, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Child prodigy yang berkembang kayak Sherina! Kamu terus tumbuh dan berkembang tanpa kehilangan esensi aslimu!" },
-    { id:165, nama:"Maudy Ayunda", usia:30, postur:"kurus", rambut:"lurus", karakter:"cerdas", komentar:"Brilian kayak Maudy! Kamu membuktikan bahwa berprestasi di akademik dan hiburan bisa dilakukan sekaligus!" },
-    { id:166, nama:"Raissa Anggiani", usia:18, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Generasi baru yang cerah kayak Raissa! Masa depan ada di tanganmu dan semua orang tidak sabar melihat perkembanganmu!" },
-    { id:167, nama:"Putri Ariani", usia:18, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Inspirasi dunia kayak Putri Ariani! Kamu membuktikan bahwa keterbatasan hanyalah perspektif yang bisa diubah!" },
-    { id:168, nama:"Hanin Dhiya", usia:24, postur:"kurus", rambut:"lurus", karakter:"kalem", komentar:"Melodi hati kayak Hanin! Suaramu bisa menyentuh hati orang bahkan sebelum mereka mengerti kata-katanya!" },
-    { id:169, nama:"Yovie Widianto", usia:52, postur:"sedang", rambut:"lurus", karakter:"cerdas", komentar:"Maestro kayak Yovie! Kamu punya pemahaman mendalam tentang apa yang membuat hati orang tergerak dan bahagia!" },
-    { id:170, nama:"Anggun C Sasmi", usia:51, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Global artist kayak Anggun! Kamu punya kualitas yang diakui dunia karena bakat dan kerja kerasmu yang luar biasa!" },
-    { id:171, nama:"Lesti Kejora", usia:24, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Juara sejati kayak Lesti! Perjalananmu dari bawah ke puncak adalah inspirasi nyata bagi semua yang bermimpi besar!" },
-    { id:172, nama:"Ayu Lestari", usia:40, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Konsisten kayak Ayu! Kamu terus hadir dan berkarya tanpa terpengaruh tren sesaat. Itu adalah ketangguhan sejati!" },
-    { id:173, nama:"Dewi Yull", usia:62, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Veteran panggung kayak Dewi Yull! Pengalamanmu adalah kitab hidup yang penuh pelajaran berharga!" },
-    { id:174, nama:"Hetty Koes Endang", usia:68, postur:"sedang", rambut:"lurus", karakter:"kalem", komentar:"Klasik tak lekang kayak Hetty! Kamu adalah bukti nyata bahwa kualitas sejati tidak pernah ketinggalan zaman!" },
-    { id:175, nama:"Ike Nurjanah", usia:50, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Penuh semangat kayak Ike! Kamu selalu memberikan 100% dalam setiap momen dan itu yang membuat semua kagum!" },
-    { id:176, nama:"Nafa Urbach", usia:43, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Abadi kayak Nafa! Kamu membuktikan bahwa pesona sejati tidak pernah pudar meski waktu terus berjalan!" },
-    { id:177, nama:"Paramitha Rusady", usia:55, postur:"sedang", rambut:"lurus", karakter:"kalem", komentar:"Elegan tanpa batas kayak Paramitha! Keanggunanmu adalah inspirasi bagi semua wanita dari segala generasi!" },
-    { id:178, nama:"Chrisye", usia:60, postur:"kurus", rambut:"lurus", karakter:"kalem", komentar:"Legenda musik kayak Chrisye! Kelembutanmu dalam menyampaikan pesan membuat semua kata terasa seperti puisi!" },
-    { id:179, nama:"Ikke Nurjanah", usia:50, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Queen of dangdut kayak Ikke! Energimu di atas panggung selalu berhasil membuat semua kaki tak bisa diam!" },
-    { id:180, nama:"Elvy Sukaesih", usia:73, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Ratu dangdut abadi kayak Elvy! Kontribusimu dalam musik Indonesia adalah warisan yang akan terus hidup selamanya!" },
-    { id:181, nama:"Camelia Malik", usia:59, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Berpengaruh kayak Camelia! Jejak langkahmu dalam industri hiburan membuka jalan bagi banyak generasi setelahmu!" },
-    { id:182, nama:"Dewi Persik", usia:38, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Bold dan percaya diri kayak Dewi Persik! Kamu tidak pernah takut menjadi diri sendiri dan itu kekuatan terbesarmu!" },
-    { id:183, nama:"Zaskia Gotik", usia:31, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Fun dan menggemaskan kayak Zaskia! Keceriaanmu yang tulus membuat semua orang merasa bahagia berada di dekatmu!" },
-    { id:184, nama:"Ayu Azhari", usia:51, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Legenda tak terlupakan kayak Ayu Azhari! Pesonamu telah memikat hati jutaan orang selama puluhan tahun!" },
-    { id:185, nama:"Tamara Bleszynski", usia:51, postur:"kurus", rambut:"lurus", karakter:"kalem", komentar:"Ikonik kayak Tamara! Kehadiranmu selalu memberikan kesan mendalam yang bertahan lama di benak semua orang!" },
-    { id:186, nama:"Luna Maya", usia:40, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Selalu fresh kayak Luna! Kamu terus berinovasi dan reinventing yourself sehingga selalu relevan di setiap era!" },
-    { id:187, nama:"Gracia Indri", usia:30, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Penuh pesona kayak Gracia! Kombinasi bakat dan kepribadianmu yang hangat membuat semua orang jatuh hati!" },
-    { id:188, nama:"Putri Marino", usia:30, postur:"kurus", rambut:"lurus", karakter:"cerdas", komentar:"Depth kayak Putri! Di balik penampilanmu yang anggun tersimpan kecerdasan dan kedalaman yang membuat semua kagum!" },
-    { id:189, nama:"Sheila Marcia", usia:35, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Survivor sejati kayak Sheila! Perjalanan hidupmu mengajarkan bahwa kekuatan sejati lahir dari tantangan terberat!" },
-    { id:190, nama:"Angel Karamoy", usia:31, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Energetik kayak Angel! Kamu selalu membawa suasana positif yang menular ke semua orang di sekitarmu!" },
-    { id:191, nama:"Dara JKT48", usia:22, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Idol spirit kayak Dara! Semangatmu dalam berkarya dan menghibur fans adalah inspirasi bagi semua penggemar setiamu!" },
-    { id:192, nama:"Shinta Bachir", usia:36, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Penuh warna kayak Shinta! Hidupmu yang berwarna adalah bukti bahwa keberanian menghadapi hidup menghasilkan keindahan!" },
-    { id:193, nama:"Aurel Hermansyah", usia:24, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Next gen star kayak Aurel! Kamu membawa semangat dan energi yang membuat orang-orang yang lebih tua pun ikut bersemangat!" },
-    { id:194, nama:"Acha Septriasa", usia:33, postur:"kurus", rambut:"lurus", karakter:"cerdas", komentar:"Bertumbuh kayak Acha! Kamu terus berkembang dengan integritas yang membuat semua orang bangga melihatmu!" },
-    { id:195, nama:"Ratu Felisha", usia:35, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Charming kayak Ratu! Kamu punya daya tarik natural yang membuat semua orang ingin berada di dekatmu!" },
-    { id:196, nama:"Sarwendah", usia:31, postur:"sedang", rambut:"lurus", karakter:"kalem", komentar:"Sabar dan bijaksana kayak Sarwendah! Ketenanganmu dalam menghadapi situasi apapun adalah kekuatan yang luar biasa!" },
-    { id:197, nama:"Reni Anggraeni", usia:40, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Profesional sejati kayak Reni! Kamu selalu memberikan yang terbaik dalam setiap pekerjaan tanpa terkecuali!" },
-    { id:198, nama:"Tya Ariestya", usia:38, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Hangat kayak Tya! Keramahanmu yang tulus membuat semua orang merasa diterima dan dihargai di dekatmu!" },
-    { id:199, nama:"Widi Mulia", usia:43, postur:"sedang", rambut:"lurus", karakter:"kalem", komentar:"Keluarga adalah segalanya kayak Widi! Prioritasmu yang jelas membuat semua keputusanmu terasa bijak dan bermakna!" },
-    { id:200, nama:"Annisa Pohan", usia:42, postur:"kurus", rambut:"lurus", karakter:"kalem", komentar:"Anggun dan berkarakter kayak Annisa! Kamu membuktikan bahwa kombinasi kecantikan dan integritas adalah yang terkuat!" },
+    { id:121, nama:"Awkarin", usia:26, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Berani dan autentik kayak Awkarin! Kamu tidak peduli penilaian orang dan itu justru yang membuat semua terpesona!" },
+    { id:122, nama:"Olla Ramlan", usia:41, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Spontan kayak Olla! Kamu tidak perlu persiapan untuk jadi lucu. Natural comedian yang selalu ada di momen tepat!" },
+    { id:123, nama:"Nabilah Ayu", usia:26, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Idol yang menghibur kayak Nabilah! Kemampuan membuat semua orang bahagia hanya dengan senyumanmu!" },
+    { id:124, nama:"Nagita Slavina", usia:35, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Anggun dan menghibur kayak Nagita! Senyummu adalah senjata rahasia yang membuat semua orang luluh!" },
+    { id:125, nama:"Via Vallen", usia:29, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Hits factory kayak Via! Apapun yang kamu sentuh langsung menjadi viral dan digemari semua kalangan!" },
   ]
 };
-
 // ===== APP STATE =====
 let state = {
   currentPage: 'landing',
@@ -2142,20 +2059,23 @@ function handleRegPhoto(event) {
 
 function joinRoom() {
   const name = document.getElementById('playerName').value.trim();
-  const code = document.getElementById('roomCode').value.trim().toUpperCase();
   if (!name) { showNotif('Masukkan namamu dulu ya! 😊'); return; }
-  if (!code) { showNotif('Masukkan kode room dulu!'); return; }
 
-  // Validate room code against saved setting
-  const validCode = state.savedRoomCode || 'FAM2026';
-  if (code !== validCode) { showNotif('Kode room salah! Tanya host. 🔐'); return; }
-
+  const code = state.savedRoomCode || 'FAM2026';
   state.playerName = name;
   state.roomCode = code;
   if (state.playerPhoto) state.playerPhotos[name] = state.playerPhoto;
   document.getElementById('welcomeName').textContent = name;
   document.getElementById('displayRoomCode').textContent = code;
   if (!state.players.includes(name)) state.players.push(name);
+  // Save to localStorage for projector view
+  try {
+    const allPlayers = JSON.parse(localStorage.getItem('ras_players') || '[]');
+    if (!allPlayers.find(p => p.name === name)) {
+      allPlayers.push({ name, photo: state.playerPhoto || '', joinedAt: Date.now() });
+      localStorage.setItem('ras_players', JSON.stringify(allPlayers));
+    }
+  } catch(e) {}
   showNotif('Berhasil masuk! Selamat datang, ' + name + ' 🎉');
   showLobby();
 }
@@ -2190,7 +2110,7 @@ function openGame(id) {
 // ===== GAME 1: MEMORY MATCH =====
 function initGame1() {
   showPage('game1');
-  const members = FAMILY_MEMBERS.slice(0, 15);
+  const members = getPhotosForGame(1).slice(0, 8);
   // Create pairs
   let cards = [...members, ...members].map((m, i) => ({...m, cardId: i, flipped: false, matched: false}));
   // Shuffle
@@ -2269,7 +2189,7 @@ function flipCard(idx) {
         showNotif('Cocok! +10 poin 🎉');
         renderG1();
         // Check win
-        if (state.g1Matched.length === FAMILY_MEMBERS.slice(0,15).length) {
+        if (state.g1Matched.length === getPhotosForGame(1).slice(0,8).length) {
           showG1Result();
         }
       } else {
@@ -2295,7 +2215,7 @@ function restartGame1() { initGame1(); }
 // ===== GAME 2: TEBAK SIAPA =====
 function initGame2() {
   showPage('game2');
-  state.g2Members = [...FAMILY_MEMBERS].sort(() => Math.random() - 0.5);
+  state.g2Members = [...getPhotosForGame(2)].sort(() => Math.random() - 0.5);
   state.g2CurrentIdx = 0;
   state.g2Score = 0;
   state.g2Scores = {};
@@ -2404,7 +2324,7 @@ function loadG3Question() {
   document.getElementById('g3SubmitBtn').disabled = false;
 
   // Render vote grid
-  const members = FAMILY_MEMBERS.slice(0, 20);
+  const members = getPhotosForGame(3).slice(0, 20);
   document.getElementById('voteGrid').innerHTML = members.map(m => `
     <div class="vote-card" id="vc_${m.id}" onclick="selectVote(${m.id})">
       ${m.foto ? `<img src="${m.foto}" alt="${m.nama}">` :
@@ -2434,7 +2354,7 @@ function submitVote() {
   if (state.selectedVote) {
     state.g3Votes[state.selectedVote] = (state.g3Votes[state.selectedVote] || 0) + 1;
     // Simulate other votes
-    FAMILY_MEMBERS.slice(0, 10).forEach(m => {
+    getPhotosForGame(3).slice(0, 10).forEach(m => {
       if (Math.random() > 0.6) {
         state.g3Votes[m.id] = (state.g3Votes[m.id] || 0) + 1;
       }
@@ -2529,7 +2449,8 @@ function loadG4Ronde() {
   document.getElementById('g4Timer').textContent = 60;
 
   // Pick 5 members with "usia" field for this ronde
-  const pool = FAMILY_MEMBERS.slice((state.g4Ronde - 1) * 5, state.g4Ronde * 5)
+  const g4Pool = getPhotosForGame(4);
+  const pool = g4Pool.slice((state.g4Ronde - 1) * 5, state.g4Ronde * 5)
     .map((m, i) => ({ ...m, usia: 20 + i * 8 }));
   state.g4Current = [...pool].sort(() => Math.random() - 0.5);
   state.g4Answer = [];
@@ -2707,9 +2628,56 @@ function showG5Result() {
   document.getElementById('komedianName').textContent = winner.nama;
   document.getElementById('persenBadge').textContent = persen + '% Mirip';
   document.getElementById('komentarLucu').textContent = winner.komentar;
+
+  // 💾 Simpan hasil ke localStorage supaya bisa dilihat di proyektor/room
+  try {
+    const allResults = JSON.parse(localStorage.getItem('ras_g5_results') || '[]');
+    const existingIdx = allResults.findIndex(r => r.player === state.playerName);
+    const entry = {
+      player: state.playerName,
+      photo: state.playerPhoto || state.playerPhotos[state.playerName] || '',
+      komedian: winner.nama,
+      persen: persen,
+      komentar: winner.komentar,
+      gender: gender,
+      timestamp: Date.now()
+    };
+    if (existingIdx >= 0) allResults[existingIdx] = entry;
+    else allResults.push(entry);
+    localStorage.setItem('ras_g5_results', JSON.stringify(allResults));
+  } catch(e) {}
 }
 
 function restartGame5() { initGame5(); }
+
+function showG5ResultsModal() {
+  const modal = document.getElementById('g5Modal');
+  const content = document.getElementById('g5ModalContent');
+  try {
+    const results = JSON.parse(localStorage.getItem('ras_g5_results') || '[]');
+    if (results.length === 0) {
+      content.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--brown-light)">🎭<br><br>Belum ada peserta yang main Game 5.<br>Main dulu ya!</div>';
+    } else {
+      const sorted = [...results].sort((a,b) => b.timestamp - a.timestamp);
+      content.innerHTML = sorted.map(r => `
+        <div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid rgba(201,168,76,0.2);">
+          <div style="width:48px;height:48px;border-radius:50%;background:var(--cream-dark);border:2px solid var(--gold);flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:1.2rem;">
+            ${r.photo ? `<img src="${r.photo}" style="width:100%;height:100%;object-fit:cover;">` : '👤'}
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:600;color:var(--brown);font-size:14px;">${r.player}</div>
+            <div style="font-size:12px;color:var(--brown-light);">mirip dengan</div>
+            <div style="font-weight:700;color:var(--green);font-size:15px;">🎭 ${r.komedian}</div>
+          </div>
+          <div style="background:var(--gold);color:var(--brown);font-size:11px;font-weight:700;padding:4px 10px;border-radius:12px;flex-shrink:0;">${r.persen}%</div>
+        </div>
+      `).join('');
+    }
+  } catch(e) {
+    content.innerHTML = '<div style="padding:1rem;color:var(--brown-light)">Gagal memuat data.</div>';
+  }
+  modal.style.display = 'block';
+}
 
 // ===== ADMIN =====
 
@@ -2953,27 +2921,15 @@ function showNotif(msg) {
 const LAGU_INDONESIA = [
   {
     id: 1,
-    judul: "Keluarga Cemara",
-    artis: "Hedi Yunus",
+    judul: "Harta yang Paling Berharga",
+    artis: "Hedi Yunus (OST Keluarga Cemara)",
     tahun: 1996,
     emoji: "🏡",
-    petunjuk: "Lagu tema dari sinetron legendaris keluarga Indonesia tahun 90-an",
-    lirik: "Harta yang paling berharga adalah keluarga
-Istana yang paling indah adalah keluarga
-Puisi yang paling bermakna adalah keluarga
-Mutiara tiada tara adalah keluarga
-
-Selamat pagi Emak, selamat pagi Abah
-Mentari hari ini berseri indah...",
-    pilihan: ["Keluarga Cemara", "Harta Berharga", "Bintang di Surga", "Kau Adalah"],
-    jawaban: "Keluarga Cemara",
-    intro_nada: "Sol Mi Fa Sol Do Re Mi Fa Sol...",
-    // ─── AUDIO FILE (opsional) ───────────────────────────────
-    // audio_file: "lagu1.mp3",
-    // ✂️ POTONG: menit 0:00 – 0:14 (14 detik pertama — melodi intro sebelum vokal masuk)
-    // intro_start: 0,
-    // intro_end: 14
-    // ─────────────────────────────────────────────────────────
+    petunjuk: "OST sinetron keluarga legendaris tahun 90-an — anthem keluarga Indonesia!",
+    lirik: "Harta yang paling berharga adalah keluarga\nIstana yang paling indah adalah keluarga\nPuisi yang paling bermakna adalah keluarga\nMutiara tiada tara adalah keluarga\n\nSelamat pagi Emak, selamat pagi Abah\nMentari hari ini berseri indah...",
+    pilihan: ["Harta yang Paling Berharga", "Satu Nusa Satu Bangsa", "Bintang di Surga", "Rumah Kita"],
+    jawaban: "Harta yang Paling Berharga",
+    intro_nada: [261,329,392,329,261,196,220,261],
   },
   {
     id: 2,
@@ -2981,100 +2937,84 @@ Mentari hari ini berseri indah...",
     artis: "Pop Minang / Tradisional",
     tahun: 1990,
     emoji: "🎶",
-    petunjuk: "Lagu daerah Minang yang familiar — tentang kerinduan kampung halaman",
-    lirik: "Tabo balik ka nagari
-Tampek lahia den barinduang
-Tagak di lereng Singgalang
-Mandanga bunyi talempong...
-
-Di siko den marantau jauah
-Hati rindu ka kampuang...",
+    petunjuk: "Lagu Minang kerinduan kampung halaman — familiar buat yang punya darah Minang!",
+    lirik: "Tabo balik ka nagari\nTampek lahia den barinduang\nTagak di lereng Singgalang\nMandanga bunyi talempong...\n\nDi siko den marantau jauah\nHati rindu ka kampuang...",
     pilihan: ["Tabo Balik", "Ayam Den Lapeh", "Kampuang Nan Jauh Di Mato", "Tak Tong Tong"],
     jawaban: "Tabo Balik",
-    intro_nada: "Do Re Mi Sol Mi Re Do La Sol...",
-    // ─── AUDIO FILE (opsional) ───────────────────────────────
-    // audio_file: "lagu2.mp3",
-    // ✂️ POTONG: menit 0:00 – 0:12 (12 detik pertama — bagian melodi pembuka)
-    // intro_start: 0,
-    // intro_end: 12
-    // ─────────────────────────────────────────────────────────
+    intro_nada: [261,293,329,392,329,293,261,220],
   },
   {
     id: 3,
-    judul: "Kangen",
-    artis: "Dewa 19",
-    tahun: 1992,
-    emoji: "💕",
-    petunjuk: "Lagu band rock legendaris Indonesia era 90-an tentang kerinduan",
-    lirik: "Kau begitu sempurna di mataku
-Kau bagaikan tiada yang lain
-Resahku yang selalu membuatku
-Tak dapat melupakan dirimu
-Kuingin kau tahu
-Kuingin kau mengerti
-Betapa aku sangat merindukanmu
-Walau kutahu kau telah pergi...",
-    pilihan: ["Kangen", "Laskar Pelangi", "Separuh Aku", "Sempurna"],
-    jawaban: "Kangen",
-    intro_nada: "Mi Re Do La Sol La Mi Re...",
-    // ─── AUDIO FILE (opsional) ───────────────────────────────
-    // audio_file: "lagu3.mp3",
-    // ✂️ POTONG: menit 0:05 – 0:18 (lewati 5 detik intro gitar, ambil masuk vokal pertama)
-    // intro_start: 5,
-    // intro_end: 18
-    // ─────────────────────────────────────────────────────────
+    judul: "Goyang Dumang",
+    artis: "Cita Citata",
+    tahun: 2014,
+    emoji: "🕺",
+    petunjuk: "Lagu dangdut hits yang pasti bikin semua langsung joget — ayoo goyang!",
+    lirik: "Goyang dumang, goyang dumang\nGoyang dumang, goyang dumang\nGoyang goyang goyang dumang\nGoyang goyang goyang dumang\n\nDumang dumang dumang dang\nAyo kita goyang bersama-sama\nJangan malu-malu, ayoo bergoyang!",
+    pilihan: ["Goyang Dumang", "Madu dan Racun", "Seksi Seksi", "Kereta Malam"],
+    jawaban: "Goyang Dumang",
+    intro_nada: [392,392,440,392,349,330,349,392],
   },
   {
     id: 4,
+    judul: "Madu dan Racun",
+    artis: "Duo Kribo",
+    tahun: 1981,
+    emoji: "🍯",
+    petunjuk: "Lagu jadul era 80-an yang sampai sekarang masih bikin goyang — klasik abadi!",
+    lirik: "Kau adalah madu\nKau adalah racun\nKau bisa jadi obat\nKau bisa membunuhku\n\nKau adalah segalanya\nKau adalah hidupku\nTanpa kamu aku tiada apa-apanya\nCintamu membutakanku!",
+    pilihan: ["Madu dan Racun", "Bento", "Kopi Dangdut", "Bang Bang Tut"],
+    jawaban: "Madu dan Racun",
+    intro_nada: [330,349,392,440,392,349,330,294],
+  },
+  {
+    id: 5,
+    judul: "Asal Kau Bahagia",
+    artis: "Armada",
+    tahun: 2017,
+    emoji: "💕",
+    petunjuk: "Lagu galau hits yang selalu jadi sing-along seru — semua pasti hafal liriknya!",
+    lirik: "Mungkin memang sudah takdir kita\nHarus berjalan sendiri-sendiri\nDan perpisahan ini bukan akhir segalanya\nMasih ada hari esok yang indah\n\nAsal kau bahagia, ku kan mengikhlaskan\nAsal kau bahagia, walau bukan bersamaku...",
+    pilihan: ["Asal Kau Bahagia", "Pergi Pagi Pulang Pagi", "Mau Dibawa Kemana", "Tegar"],
+    jawaban: "Asal Kau Bahagia",
+    intro_nada: [294,330,349,392,349,330,294,261],
+  },
+  {
+    id: 6,
+    judul: "Satu Satu Aku Sayang Ibu",
+    artis: "Lagu Anak Tradisional",
+    tahun: 1970,
+    emoji: "❤️",
+    petunjuk: "Lagu anak Indonesia yang SEMUA orang hafal dari SD — dari generasi manapun!",
+    lirik: "Satu satu aku sayang ibu\nDua dua juga sayang ayah\nTiga tiga sayang adik kakak\nSatu dua tiga sayang semuanya\n\nAyo kita nyanyikan bersama\nDengan hati yang gembira!",
+    pilihan: ["Satu Satu Aku Sayang Ibu", "Balonku", "Pelangi", "Bintang Kecil"],
+    jawaban: "Satu Satu Aku Sayang Ibu",
+    intro_nada: [261,261,329,329,392,392,329,0],
+  },
+  {
+    id: 7,
     judul: "Laskar Pelangi",
     artis: "Nidji",
     tahun: 2008,
     emoji: "🌈",
-    petunjuk: "Lagu soundtrack film fenomenal tentang anak-anak sekolah di Belitung",
-    lirik: "Mimpi adalah kunci
-Untuk kita menaklukkan dunia
-Berlarilah tanpa lelah
-Sampai engkau meraihnya
-Laskar pelangi, takkan terikat waktu
-Bebaskan mimpimu di angkasa
-Raih bintang di jiwa
-Mimpilah yang besar
-Hingga hidupmu bermakna...",
+    petunjuk: "OST film fenomenal tentang semangat anak bangsa — anthem generasi 2000an!",
+    lirik: "Mimpi adalah kunci\nUntuk kita menaklukkan dunia\nBerlarilah tanpa lelah\nSampai engkau meraihnya\n\nLaskar pelangi, takkan terikat waktu\nBebaskan mimpimu di angkasa\nRaih bintang di jiwa, mimpilah yang besar!",
     pilihan: ["Garuda di Dadaku", "Laskar Pelangi", "Sang Pemimpi", "Dealova"],
     jawaban: "Laskar Pelangi",
-    intro_nada: "Sol Sol Mi Sol La Sol Mi Re...",
-    // ─── AUDIO FILE (opsional) ───────────────────────────────
-    // audio_file: "lagu4.mp3",
-    // ✂️ POTONG: menit 0:00 – 0:13 (langsung dari awal, vokal masuk di detik ke-13)
-    // intro_start: 0,
-    // intro_end: 13
-    // ─────────────────────────────────────────────────────────
+    intro_nada: [392,392,349,392,440,392,349,330],
   },
   {
-    id: 5,
-    judul: "Pergi Pagi Pulang Pagi",
-    artis: "Armada",
-    tahun: 2016,
-    emoji: "🌙",
-    petunjuk: "Lagu hits yang sering diputar di radio tentang pasangan yang pulang subuh",
-    lirik: "Kamu pergi pagi, pulang juga pagi
-Kamu pergi malam, pulang juga pagi
-Kamu jalan-jalan, bersama siapa?
-Kamu jalan-jalan, sama siapa?
-Kenapa kamu, tak bilang padaku
-Kenapa kamu, tak cerita padaku
-Aku gelisah, menunggumu
-Aku resah, menunggumu...",
-    pilihan: ["Asal Kau Bahagia", "Pergi Pagi Pulang Pagi", "Mau Dibawa Kemana", "Awas"],
-    jawaban: "Pergi Pagi Pulang Pagi",
-    intro_nada: "Sol Mi Fa Sol La Sol Mi Fa Re...",
-    // ─── AUDIO FILE (opsional) ───────────────────────────────
-    // audio_file: "lagu5.mp3",
-    // ✂️ POTONG: menit 0:00 – 0:11 (11 detik pertama sebelum vokal masuk)
-    // intro_start: 0,
-    // intro_end: 11
-    // ─────────────────────────────────────────────────────────
-  }
+    id: 8,
+    judul: "Kangen",
+    artis: "Dewa 19",
+    tahun: 1992,
+    emoji: "💿",
+    petunjuk: "Lagu rock legendaris Indonesia era 90-an — Ahmad Dhani di masa kejayaannya!",
+    lirik: "Kau begitu sempurna di mataku\nKau bagaikan tiada yang lain\nResahku yang selalu membuatku\nTak dapat melupakan dirimu\n\nKuingin kau tahu, kuingin kau mengerti\nBetapa aku sangat merindukanmu...",
+    pilihan: ["Kangen", "Separuh Aku", "Sempurna", "Pupus"],
+    jawaban: "Kangen",
+    intro_nada: [349,330,294,261,220,261,294,330],
+  },
 ];
 
 let g6AudioCtx = null;
@@ -3145,17 +3085,21 @@ function setWavePlay(play) {
   });
 }
 
-function playMelodi(nada_str, onEnd) {
+function playMelodi(nada, onEnd) {
   const ctx = getAudioCtx();
-  const noteMap = { 'Do':261.63,'Re':293.66,'Mi':329.63,'Fa':349.23,'Sol':392,'La':440,'Si':493.88 };
-  // Parse simple nada string
-  const notes = [];
-  const parts = nada_str.replace(/\.\.\./g,'').trim().split(/\s+/);
-  parts.forEach(p => {
-    const clean = p.replace(/,/g,'');
-    if (noteMap[clean]) notes.push(noteMap[clean]);
-    else if (clean === 'Sol') notes.push(392);
-  });
+  let notes = [];
+  
+  // Support both array [261,329,...] and string "Do Re Mi..."
+  if (Array.isArray(nada)) {
+    notes = nada.filter(f => f > 0);
+  } else {
+    const noteMap = { 'Do':261.63,'Re':293.66,'Mi':329.63,'Fa':349.23,'Sol':392,'La':440,'Si':493.88 };
+    const parts = nada.replace(/\.\.\./g,'').trim().split(/\s+/);
+    parts.forEach(p => {
+      const clean = p.replace(/,/g,'');
+      if (noteMap[clean]) notes.push(noteMap[clean]);
+    });
+  }
 
   if (notes.length === 0) { if(onEnd) onEnd(); return; }
 
@@ -3163,8 +3107,8 @@ function playMelodi(nada_str, onEnd) {
   gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
   gainNode.connect(ctx.destination);
 
-  const noteDur = 0.4;
-  const gap = 0.05;
+  const noteDur = 0.38;
+  const gap = 0.06;
   notes.forEach((freq, i) => {
     playTone(freq, ctx.currentTime + i * (noteDur + gap), noteDur, ctx, gainNode);
   });
