@@ -1,0 +1,3333 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rasmita's Family Gathering 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #C9A84C;
+    --gold-light: #F0D080;
+    --gold-dark: #8B6914;
+    --cream: #FDF8EE;
+    --cream-dark: #F5EDD8;
+    --brown: #3D2B1F;
+    --brown-light: #6B4C3B;
+    --green: #2D5016;
+    --green-light: #4A7C2A;
+    --red: #8B1A1A;
+    --white: #FFFFFF;
+    --shadow: 0 4px 24px rgba(61,43,31,0.15);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--brown);
+    min-height: 100vh;
+  }
+
+  /* BATIK PATTERN BACKGROUND */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image: 
+      radial-gradient(circle at 20px 20px, rgba(201,168,76,0.08) 2px, transparent 2px),
+      radial-gradient(circle at 60px 60px, rgba(201,168,76,0.05) 1px, transparent 1px);
+    background-size: 80px 80px, 80px 80px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .page { position: relative; z-index: 1; }
+
+  /* ===== LANDING PAGE ===== */
+  #landing {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    text-align: center;
+  }
+
+  .ornament {
+    color: var(--gold);
+    font-size: 2rem;
+    letter-spacing: 8px;
+    margin-bottom: 1rem;
+    opacity: 0.7;
+  }
+
+  .landing-badge {
+    background: var(--green);
+    color: var(--gold-light);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 6px 20px;
+    border-radius: 2px;
+    margin-bottom: 1.5rem;
+    display: inline-block;
+  }
+
+  .landing-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.5rem, 8vw, 5rem);
+    font-weight: 900;
+    color: var(--brown);
+    line-height: 1.1;
+    margin-bottom: 0.5rem;
+  }
+
+  .landing-title span { color: var(--gold); }
+
+  .landing-sub {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1rem, 3vw, 1.5rem);
+    color: var(--brown-light);
+    font-style: italic;
+    margin-bottom: 0.5rem;
+  }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 1.5rem auto;
+    width: fit-content;
+  }
+
+  .divider-line {
+    width: 60px;
+    height: 1px;
+    background: var(--gold);
+    opacity: 0.5;
+  }
+
+  .divider-diamond {
+    width: 8px;
+    height: 8px;
+    background: var(--gold);
+    transform: rotate(45deg);
+  }
+
+  .event-info {
+    background: var(--white);
+    border: 1px solid rgba(201,168,76,0.3);
+    border-radius: 12px;
+    padding: 1.5rem 2.5rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow);
+  }
+
+  .event-info p {
+    font-size: 14px;
+    color: var(--brown-light);
+    margin-bottom: 4px;
+  }
+
+  .event-info strong {
+    font-size: 16px;
+    color: var(--brown);
+    font-weight: 600;
+  }
+
+  .join-form {
+    background: var(--white);
+    border: 1px solid rgba(201,168,76,0.3);
+    border-radius: 16px;
+    padding: 2rem;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: var(--shadow);
+    margin-bottom: 1rem;
+  }
+
+  .join-form h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    color: var(--brown);
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+
+  .form-group { margin-bottom: 1rem; }
+
+  .form-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: var(--brown-light);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .form-group input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1.5px solid rgba(201,168,76,0.3);
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: var(--brown);
+    background: var(--cream);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .form-group input:focus { border-color: var(--gold); }
+
+  .btn-primary {
+    width: 100%;
+    padding: 14px;
+    background: var(--green);
+    color: var(--gold-light);
+    border: none;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: all 0.2s;
+  }
+
+  .btn-primary:hover { background: var(--green-light); transform: translateY(-1px); }
+
+  .admin-link {
+    font-size: 12px;
+    color: var(--brown-light);
+    text-decoration: none;
+    opacity: 0.6;
+    margin-top: 1rem;
+    display: block;
+    text-align: center;
+  }
+
+  .admin-link:hover { opacity: 1; }
+
+  /* ===== LOBBY ===== */
+  #lobby {
+    min-height: 100vh;
+    padding: 2rem;
+    display: none;
+  }
+
+  .lobby-header {
+    text-align: center;
+    padding: 2rem 0;
+    margin-bottom: 2rem;
+  }
+
+  .lobby-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    color: var(--brown);
+    margin-bottom: 0.5rem;
+  }
+
+  .room-code {
+    display: inline-block;
+    background: var(--green);
+    color: var(--gold-light);
+    font-size: 2.5rem;
+    font-weight: 700;
+    letter-spacing: 8px;
+    padding: 12px 32px;
+    border-radius: 8px;
+    margin: 1rem 0;
+    font-family: 'Playfair Display', serif;
+  }
+
+  .games-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .game-card {
+    background: var(--white);
+    border: 1px solid rgba(201,168,76,0.3);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    transition: all 0.25s;
+    position: relative;
+    overflow: hidden;
+    min-height: 220px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .game-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: var(--gold);
+  }
+
+  .game-card:hover { transform: translateY(-6px); box-shadow: 0 12px 40px rgba(61,43,31,0.25); }
+
+  .game-card.locked { opacity: 0.5; cursor: not-allowed; }
+  .game-card.locked:hover { transform: none; box-shadow: var(--shadow); }
+  .game-card.active::before { background: var(--green); }
+
+  .game-number {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .game-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    color: var(--brown);
+    margin-bottom: 10px;
+  }
+
+  .game-desc {
+    font-size: 13px;
+    color: var(--brown-light);
+    line-height: 1.6;
+    margin-bottom: 1.2rem;
+    flex: 1;
+  }
+
+  .game-status {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    padding: 6px 16px;
+    border-radius: 20px;
+    display: inline-block;
+  }
+
+  .status-locked { background: #f5f5f5; color: #999; }
+  .status-open { background: #E8F5E9; color: var(--green); }
+  .status-playing { background: #FFF8E1; color: var(--gold-dark); }
+
+  /* ===== GAME PAGES ===== */
+  .game-page {
+    display: none;
+    min-height: 100vh;
+    padding: 1.5rem;
+  }
+
+  .game-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(201,168,76,0.3);
+  }
+
+  .back-btn {
+    background: none;
+    border: 1px solid rgba(201,168,76,0.4);
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--brown-light);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .back-btn:hover { background: var(--cream-dark); }
+
+  .game-header-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    color: var(--brown);
+  }
+
+  /* ===== GAME 1: MEMORY MATCH ===== */
+  .player-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .player-tab {
+    padding: 8px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    border: 1.5px solid rgba(201,168,76,0.3);
+    background: var(--white);
+    color: var(--brown-light);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .player-tab.active {
+    background: var(--green);
+    color: var(--gold-light);
+    border-color: var(--green);
+  }
+
+  .score-display {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .score-box {
+    background: var(--white);
+    border: 1px solid rgba(201,168,76,0.3);
+    border-radius: 10px;
+    padding: 10px 18px;
+    text-align: center;
+    min-width: 100px;
+  }
+
+  .score-box.current { border-color: var(--green); background: #E8F5E9; }
+  .score-box .score-name { font-size: 11px; color: var(--brown-light); margin-bottom: 4px; }
+  .score-box .score-val { font-size: 22px; font-weight: 700; color: var(--brown); font-family: 'Playfair Display', serif; }
+  .score-box.current .score-val { color: var(--green); }
+
+  .memory-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  @media (max-width: 500px) {
+    .memory-grid { grid-template-columns: repeat(5, 1fr); }
+  }
+
+  .mem-card {
+    aspect-ratio: 3/4;
+    cursor: pointer;
+    perspective: 600px;
+  }
+
+  .mem-inner {
+    width: 100%; height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.4s ease;
+    border-radius: 8px;
+  }
+
+  .mem-card.flipped .mem-inner,
+  .mem-card.matched .mem-inner { transform: rotateY(180deg); }
+
+  .mem-front, .mem-back {
+    position: absolute;
+    width: 100%; height: 100%;
+    backface-visibility: hidden;
+    border-radius: 8px;
+    border: 1px solid rgba(201,168,76,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .mem-front {
+    background: var(--green);
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .mem-front-pattern {
+    font-size: 18px;
+    opacity: 0.4;
+    color: var(--gold-light);
+  }
+
+  .mem-back {
+    transform: rotateY(180deg);
+    background: var(--white);
+    flex-direction: column;
+    padding: 4px;
+  }
+
+  .mem-back img {
+    width: 100%;
+    height: 70%;
+    object-fit: cover;
+    border-radius: 4px;
+  }
+
+  .mem-back .mem-name {
+    font-size: 9px;
+    font-weight: 600;
+    color: var(--brown);
+    text-align: center;
+    margin-top: 3px;
+    line-height: 1.2;
+  }
+
+  .mem-card.matched .mem-back {
+    border-color: var(--green);
+    background: #E8F5E9;
+  }
+
+  .mem-card.matched .mem-name { color: var(--green); }
+
+  /* ===== GAME 2: TEBAK SIAPA ===== */
+  .reveal-container {
+    position: relative;
+    width: 260px;
+    height: 320px;
+    margin: 0 auto 2rem;
+    overflow: hidden;
+    border-radius: 12px;
+    border: 2px solid rgba(201,168,76,0.4);
+    box-shadow: var(--shadow);
+  }
+
+  .reveal-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .reveal-mask {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: var(--brown);
+    transition: clip-path 1.5s ease;
+  }
+
+  .answer-form {
+    max-width: 400px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .answer-input {
+    width: 100%;
+    padding: 14px 20px;
+    border: 2px solid rgba(201,168,76,0.4);
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    color: var(--brown);
+    background: var(--white);
+    outline: none;
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+
+  .answer-input:focus { border-color: var(--gold); }
+
+  .poin-display {
+    font-family: 'Playfair Display', serif;
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--gold);
+    text-align: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .poin-label { font-size: 12px; color: var(--brown-light); text-align: center; margin-bottom: 1.5rem; }
+
+  .progress-bar {
+    width: 100%;
+    height: 6px;
+    background: rgba(201,168,76,0.2);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--gold);
+    border-radius: 3px;
+    transition: width 1s linear;
+  }
+
+  /* ===== GAME 3: SIAPA PALING ===== */
+  .question-display {
+    text-align: center;
+    background: var(--white);
+    border: 1px solid rgba(201,168,76,0.3);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow);
+  }
+
+  .question-text {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.3rem, 4vw, 2rem);
+    color: var(--brown);
+    margin-bottom: 0.5rem;
+  }
+
+  .question-timer {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--gold);
+    font-family: 'Playfair Display', serif;
+  }
+
+  .vote-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 12px;
+    margin: 0 auto;
+    max-width: 700px;
+  }
+
+  .vote-card {
+    background: var(--white);
+    border: 2px solid rgba(201,168,76,0.3);
+    border-radius: 12px;
+    padding: 12px 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .vote-card:hover { border-color: var(--gold); transform: scale(1.03); }
+  .vote-card.selected { border-color: var(--green); background: #E8F5E9; }
+
+  .vote-card img {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 6px;
+    border: 2px solid rgba(201,168,76,0.3);
+  }
+
+  .vote-card .vote-name {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--brown);
+    line-height: 1.2;
+  }
+
+  /* HASIL VOTE */
+  .result-card {
+    background: var(--white);
+    border: 1px solid rgba(201,168,76,0.3);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow);
+    text-align: center;
+  }
+
+  .result-winner-img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--gold);
+    margin: 0 auto 1rem;
+    display: block;
+  }
+
+  .result-winner-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    color: var(--brown);
+    margin-bottom: 0.5rem;
+  }
+
+  .vote-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .vote-bar-name { font-size: 13px; color: var(--brown); width: 100px; text-align: right; flex-shrink: 0; }
+
+  .vote-bar-wrap {
+    flex: 1;
+    height: 20px;
+    background: var(--cream-dark);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .vote-bar-fill {
+    height: 100%;
+    background: var(--gold);
+    border-radius: 10px;
+    transition: width 0.8s ease;
+  }
+
+  .vote-bar-pct { font-size: 12px; color: var(--brown-light); width: 35px; flex-shrink: 0; }
+
+  /* ===== GAME 4: TIMELINE ===== */
+  .timeline-instruction {
+    text-align: center;
+    background: var(--white);
+    border: 1px solid rgba(201,168,76,0.3);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    font-size: 14px;
+    color: var(--brown-light);
+    box-shadow: var(--shadow);
+  }
+
+  .timeline-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .timeline-card {
+    background: var(--white);
+    border: 2px solid rgba(201,168,76,0.3);
+    border-radius: 12px;
+    padding: 12px;
+    width: 120px;
+    text-align: center;
+    cursor: grab;
+    transition: all 0.2s;
+    box-shadow: var(--shadow);
+  }
+
+  .timeline-card:active { cursor: grabbing; transform: scale(0.97); }
+  .timeline-card img {
+    width: 70px; height: 70px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(201,168,76,0.3);
+    margin-bottom: 6px;
+  }
+  .timeline-card .tl-name { font-size: 11px; font-weight: 600; color: var(--brown); }
+  .timeline-card .tl-pos { font-size: 10px; color: var(--brown-light); }
+
+  .answer-slots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    min-height: 100px;
+    background: rgba(201,168,76,0.05);
+    border: 2px dashed rgba(201,168,76,0.3);
+    border-radius: 12px;
+    padding: 12px;
+    align-items: center;
+  }
+
+  .answer-slot {
+    width: 80px; height: 90px;
+    border: 2px dashed rgba(201,168,76,0.4);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: var(--gold);
+    transition: all 0.2s;
+  }
+
+  .answer-slot.filled { border-style: solid; border-color: var(--green); }
+
+  /* ===== GAME 5: MIRIP SIAPA ===== */
+  .quiz-container {
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  .quiz-step {
+    background: var(--white);
+    border: 1px solid rgba(201,168,76,0.3);
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: var(--shadow);
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+
+  .quiz-q {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    color: var(--brown);
+    margin-bottom: 1.5rem;
+  }
+
+  .quiz-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 10px;
+  }
+
+  .quiz-opt {
+    padding: 12px;
+    border: 1.5px solid rgba(201,168,76,0.3);
+    border-radius: 10px;
+    background: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--brown);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 500;
+  }
+
+  .quiz-opt:hover { border-color: var(--gold); background: var(--cream-dark); }
+  .quiz-opt.selected { background: var(--green); color: var(--gold-light); border-color: var(--green); }
+
+  .quiz-progress {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    margin-bottom: 1rem;
+  }
+
+  .quiz-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: rgba(201,168,76,0.3);
+    transition: background 0.2s;
+  }
+
+  .quiz-dot.done { background: var(--green); }
+  .quiz-dot.active { background: var(--gold); }
+
+  /* HASIL MIRIP */
+  .mirip-result {
+    background: var(--white);
+    border: 1px solid rgba(201,168,76,0.3);
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: var(--shadow);
+    text-align: center;
+    display: none;
+  }
+
+  .mirip-vs {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .mirip-person {
+    text-align: center;
+  }
+
+  .mirip-person img {
+    width: 100px; height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--gold);
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  .mirip-person .mp-placeholder {
+    width: 100px; height: 100px;
+    border-radius: 50%;
+    background: var(--cream-dark);
+    border: 3px solid var(--gold);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: var(--gold);
+  }
+
+  .mirip-person .mp-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    color: var(--brown);
+    font-weight: 700;
+  }
+
+  .vs-badge {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    color: var(--gold);
+    font-weight: 700;
+  }
+
+  .persen-badge {
+    background: var(--green);
+    color: var(--gold-light);
+    font-size: 2rem;
+    font-weight: 700;
+    font-family: 'Playfair Display', serif;
+    padding: 12px 28px;
+    border-radius: 40px;
+    margin: 1rem auto;
+    display: inline-block;
+    letter-spacing: 1px;
+  }
+
+  .komentar-lucu {
+    font-style: italic;
+    color: var(--brown-light);
+    font-size: 14px;
+    line-height: 1.6;
+    margin: 1rem 0;
+    padding: 1rem;
+    background: var(--cream);
+    border-radius: 8px;
+    border-left: 3px solid var(--gold);
+  }
+
+  /* ===== ADMIN PANEL ===== */
+  #admin {
+    display: none;
+    min-height: 100vh;
+    padding: 2rem;
+  }
+
+  .admin-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(201,168,76,0.3);
+    flex-wrap: gap;
+    gap: 1rem;
+  }
+
+  .admin-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    color: var(--brown);
+  }
+
+  .admin-games {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .admin-game-card {
+    background: var(--white);
+    border: 1px solid rgba(201,168,76,0.3);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+  }
+
+  .admin-game-card h4 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    color: var(--brown);
+    margin-bottom: 0.5rem;
+  }
+
+  .admin-game-card p {
+    font-size: 12px;
+    color: var(--brown-light);
+    margin-bottom: 1rem;
+  }
+
+  .toggle-btn {
+    padding: 8px 20px;
+    border-radius: 8px;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    width: 100%;
+  }
+
+  .toggle-btn.open { background: var(--green); color: var(--gold-light); }
+  .toggle-btn.close { background: var(--red); color: white; }
+
+  .players-list {
+    background: var(--white);
+    border: 1px solid rgba(201,168,76,0.3);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+    margin-bottom: 1.5rem;
+  }
+
+  .players-list h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    color: var(--brown);
+    margin-bottom: 1rem;
+  }
+
+  .player-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(201,168,76,0.15);
+  }
+
+  .player-avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--green);
+    color: var(--gold-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  .player-name { font-size: 14px; color: var(--brown); font-weight: 500; }
+  .player-status { font-size: 11px; color: var(--green); margin-left: auto; }
+
+  /* ===== PODIUM ===== */
+  .podium {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 8px;
+    margin: 2rem auto;
+    max-width: 360px;
+  }
+
+  .podium-slot {
+    flex: 1;
+    text-align: center;
+  }
+
+  .podium-bar {
+    border-radius: 8px 8px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: white;
+  }
+
+  .podium-bar.first { background: var(--gold); height: 120px; }
+  .podium-bar.second { background: #B0B0B0; height: 90px; }
+  .podium-bar.third { background: #CD7F32; height: 70px; }
+
+  .podium-name { font-size: 12px; font-weight: 600; color: var(--brown); margin-top: 6px; }
+  .podium-score { font-size: 11px; color: var(--brown-light); }
+
+  /* ===== UTILITY ===== */
+  .btn-secondary {
+    padding: 10px 24px;
+    background: transparent;
+    border: 1.5px solid rgba(201,168,76,0.5);
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--brown-light);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-secondary:hover { background: var(--cream-dark); }
+
+  .btn-gold {
+    padding: 12px 28px;
+    background: var(--gold);
+    color: var(--brown);
+    border: none;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.3px;
+  }
+
+  .btn-gold:hover { background: var(--gold-light); transform: translateY(-1px); }
+
+  .notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: var(--green);
+    color: var(--gold-light);
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    z-index: 1000;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.3s;
+    pointer-events: none;
+  }
+
+  .notification.show { opacity: 1; transform: translateY(0); }
+
+  .center { text-align: center; }
+  .mt1 { margin-top: 1rem; }
+  .mt2 { margin-top: 2rem; }
+
+  .hall-of-fame {
+    background: var(--white);
+    border: 1px solid rgba(201,168,76,0.3);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow);
+  }
+
+  .hof-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    color: var(--brown);
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .hof-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 12px;
+    background: var(--cream);
+    border-radius: 10px;
+    margin-bottom: 8px;
+    border: 1px solid rgba(201,168,76,0.2);
+  }
+
+  .hof-item img {
+    width: 50px; height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--gold);
+    flex-shrink: 0;
+  }
+
+  .hof-placeholder {
+    width: 50px; height: 50px;
+    border-radius: 50%;
+    background: var(--cream-dark);
+    border: 2px solid var(--gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gold);
+    flex-shrink: 0;
+  }
+
+  .hof-info { flex: 1; }
+  .hof-info strong { font-size: 14px; color: var(--brown); display: block; }
+  .hof-info span { font-size: 12px; color: var(--brown-light); }
+  .hof-trophy { font-size: 1.5rem; }
+
+  /* ===== ADMIN UPLOAD PANEL ===== */
+  .upload-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 10px;
+    margin-top: 1rem;
+  }
+
+  .upload-item {
+    background: var(--cream);
+    border: 1.5px dashed rgba(201,168,76,0.4);
+    border-radius: 12px;
+    padding: 10px 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+
+  .upload-item:hover { border-color: var(--gold); background: var(--cream-dark); }
+  .upload-item.has-photo { border-style: solid; border-color: var(--green); }
+
+  .upload-item img {
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--gold);
+    margin-bottom: 6px;
+    display: block;
+    margin: 0 auto 6px;
+  }
+
+  .upload-placeholder {
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    background: var(--white);
+    border: 2px dashed rgba(201,168,76,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    margin: 0 auto 6px;
+    color: var(--gold);
+  }
+
+  .upload-member-name {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--brown);
+    margin-bottom: 3px;
+    line-height: 1.2;
+  }
+
+  .upload-hint { font-size: 9px; color: var(--gold-dark); }
+
+  .admin-section {
+    background: var(--white);
+    border: 1px solid rgba(201,168,76,0.3);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+    margin-bottom: 1.5rem;
+  }
+
+  .admin-section h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    color: var(--brown);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(201,168,76,0.2);
+  }
+
+  .admin-input-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+
+  .admin-input-row label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--brown-light);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    min-width: 100px;
+  }
+
+  .admin-input-row input {
+    flex: 1;
+    min-width: 160px;
+    padding: 8px 12px;
+    border: 1.5px solid rgba(201,168,76,0.3);
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--brown);
+    background: var(--cream);
+    outline: none;
+  }
+
+  .admin-input-row input:focus { border-color: var(--gold); }
+
+  .btn-save {
+    padding: 8px 20px;
+    background: var(--gold);
+    color: var(--brown);
+    border: none;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-save:hover { background: var(--gold-light); }
+
+  /* Watermark */
+  .event-watermark {
+    position: fixed;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 11px;
+    color: rgba(61,43,31,0.3);
+    letter-spacing: 1px;
+    text-align: center;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ===== GAME 6: TEBAK LAGU ===== */
+  @keyframes wave {
+    0%, 100% { height: 6px; }
+    50% { height: 24px; }
+  }
+  @keyframes spin-disc {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  .audio-wave {
+    width: 5px;
+    background: var(--gold-light);
+    border-radius: 3px;
+    height: 6px;
+    animation: wave 0.8s ease-in-out infinite;
+  }
+  .audio-wave:nth-child(1) { animation-delay: 0s; }
+  .audio-wave:nth-child(2) { animation-delay: 0.1s; }
+  .audio-wave:nth-child(3) { animation-delay: 0.2s; }
+  .audio-wave:nth-child(4) { animation-delay: 0.3s; }
+  .audio-wave:nth-child(5) { animation-delay: 0.4s; }
+  .audio-wave:nth-child(6) { animation-delay: 0.3s; }
+  .audio-wave:nth-child(7) { animation-delay: 0.2s; }
+  .audio-wave:nth-child(8) { animation-delay: 0.1s; }
+  .audio-wave.paused { animation-play-state: paused; }
+
+  .g6-choice {
+    background: var(--white);
+    border: 2px solid rgba(201,168,76,0.3);
+    border-radius: 12px;
+    padding: 14px 10px;
+    text-align: center;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--brown);
+    transition: all 0.2s;
+    line-height: 1.3;
+  }
+  .g6-choice:hover { border-color: var(--gold); background: var(--cream-dark); transform: scale(1.02); }
+  .g6-choice.correct { background: #E8F5E9; border-color: var(--green); color: var(--green); }
+  .g6-choice.wrong { background: #FFEBEE; border-color: #C62828; color: #C62828; }
+</style>
+</head>
+<body>
+
+<!-- NOTIFICATION -->
+<div class="notification" id="notif"></div>
+<div class="event-watermark">RASMITA'S FAMILY GATHERING 2026 · BANDUNG · WISMA MANDIRI</div>
+
+<!-- ===== LANDING PAGE ===== -->
+<div id="landing" class="page">
+  <div class="ornament">✦ ✦ ✦</div>
+  <div class="landing-badge">Family Gathering 2026</div>
+  <h1 class="landing-title">Rasmita's<br><span>Family</span></h1>
+  <p class="landing-sub">Gathering & Games</p>
+  <div class="divider">
+    <div class="divider-line"></div>
+    <div class="divider-diamond"></div>
+    <div class="divider-line"></div>
+  </div>
+  <div class="event-info">
+    <p>📅 28 Maret 2026 &nbsp;·&nbsp; 🏛️ Wisma Mandiri</p>
+    <strong>Bandung, Jawa Barat</strong>
+  </div>
+
+  <div class="join-form">
+    <h3>Masuk ke Permainan</h3>
+    <div class="form-group">
+      <label>Nama Kamu</label>
+      <input type="text" id="playerName" placeholder="Tulis namamu di sini..." maxlength="30">
+    </div>
+    <div class="form-group">
+      <label>Kode Room</label>
+      <input type="text" id="roomCode" placeholder="Contoh: FAM2026" maxlength="10" style="text-transform:uppercase;letter-spacing:4px;text-align:center">
+    </div>
+    <div class="form-group">
+      <label>Foto Profil <span style="font-weight:400;text-transform:none;color:var(--brown-light);letter-spacing:0;font-size:11px">(opsional)</span></label>
+      <div style="display:flex;align-items:center;gap:14px;">
+        <div id="regPhotoPreview" onclick="document.getElementById('regPhotoInput').click()" style="width:68px;height:68px;border-radius:50%;background:var(--cream-dark);border:2px dashed rgba(201,168,76,0.5);display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;flex-shrink:0;transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='rgba(201,168,76,0.5)'">
+          <span id="regPhotoIcon" style="font-size:1.6rem">📷</span>
+        </div>
+        <div style="font-size:12px;color:var(--brown-light);line-height:1.6">Tap gambar untuk upload foto.<br>Akan dipakai sebagai foto profil<br>di semua game nanti.</div>
+      </div>
+      <input type="file" id="regPhotoInput" accept="image/*" style="display:none" onchange="handleRegPhoto(event)">
+    </div>
+    <button class="btn-primary" onclick="joinRoom()">Masuk ke Lobby 🎉</button>
+  </div>
+
+  <a href="#" class="admin-link" onclick="showAdmin(); return false;">🔐 Masuk sebagai Host/Admin</a>
+
+  <div style="margin-top:1.5rem;width:100%;max-width:420px;">
+    <div class="divider" style="margin-bottom:1rem">
+      <div class="divider-line"></div>
+      <div class="divider-diamond"></div>
+      <div class="divider-line"></div>
+    </div>
+    <p style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:0.75rem;font-weight:600;text-align:center;">6 Mini Games Seru</p>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;">
+      <div style="background:var(--white);border:1px solid rgba(201,168,76,0.35);border-radius:20px;padding:6px 14px;font-size:12px;font-weight:600;color:var(--brown);">🃏 Memory Match</div>
+      <div style="background:var(--white);border:1px solid rgba(201,168,76,0.35);border-radius:20px;padding:6px 14px;font-size:12px;font-weight:600;color:var(--brown);">🔍 Tebak Siapa</div>
+      <div style="background:var(--white);border:1px solid rgba(201,168,76,0.35);border-radius:20px;padding:6px 14px;font-size:12px;font-weight:600;color:var(--brown);">🗳️ Siapa Paling</div>
+      <div style="background:var(--white);border:1px solid rgba(201,168,76,0.35);border-radius:20px;padding:6px 14px;font-size:12px;font-weight:600;color:var(--brown);">⏳ Timeline</div>
+      <div style="background:var(--white);border:1px solid rgba(201,168,76,0.35);border-radius:20px;padding:6px 14px;font-size:12px;font-weight:600;color:var(--brown);">🎭 Mirip Siapa</div>
+      <div style="background:var(--green);border:1px solid var(--green);border-radius:20px;padding:6px 14px;font-size:12px;font-weight:600;color:var(--gold-light);">🎵 Tebak Lagu</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== LOBBY ===== -->
+<div id="lobby" class="page">
+  <div class="lobby-header">
+    <div class="ornament" style="font-size:1rem; margin-bottom:0.5rem;">✦ ✦ ✦</div>
+    <h2>Selamat Datang, <span id="welcomeName" style="color:var(--gold)">Tamu</span>! 🎊</h2>
+    <p style="color:var(--brown-light);font-size:14px;margin-top:4px">Rasmita's Family Gathering 2026</p>
+    <div style="margin:0.5rem 0; font-size:13px; color:var(--brown-light)">Room Code:</div>
+    <div class="room-code" id="displayRoomCode">FAM2026</div>
+    <p style="font-size:13px;color:var(--brown-light);margin-top:8px">Tunggu host membuka permainan...</p>
+  </div>
+
+  <div class="games-grid" id="gamesGrid">
+    <!-- Filled by JS -->
+  </div>
+</div>
+
+<!-- ===== GAME 1: MEMORY MATCH ===== -->
+<div id="game1" class="game-page page">
+  <div class="game-header">
+    <button class="back-btn" onclick="showLobby()">← Kembali</button>
+    <div>
+      <div class="game-number">Game 01</div>
+      <div class="game-header-title">Memory Match Foto</div>
+    </div>
+  </div>
+
+  <div class="player-tabs" id="playerTabs"></div>
+  <div class="score-display" id="scoreDisplay"></div>
+
+  <div style="text-align:center;margin-bottom:1rem;">
+    <div id="turnAnnounce" style="font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--green);margin-bottom:8px;"></div>
+  </div>
+
+  <div class="memory-grid" id="memoryGrid"></div>
+
+  <div class="center mt2" id="game1Result" style="display:none">
+    <h3 style="font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--brown);margin-bottom:1rem;">🏆 Game Selesai!</h3>
+    <div class="podium" id="g1Podium"></div>
+    <button class="btn-gold mt1" onclick="restartGame1()">Main Lagi</button>
+  </div>
+</div>
+
+<!-- ===== GAME 2: TEBAK SIAPA ===== -->
+<div id="game2" class="game-page page">
+  <div class="game-header">
+    <button class="back-btn" onclick="showLobby()">← Kembali</button>
+    <div>
+      <div class="game-number">Game 02</div>
+      <div class="game-header-title">Tebak Siapa?</div>
+    </div>
+  </div>
+
+  <div id="g2Soal">
+    <div style="text-align:center;margin-bottom:1rem;">
+      <div style="font-size:12px;color:var(--brown-light);letter-spacing:2px;text-transform:uppercase;">Soal <span id="g2Num">1</span> dari <span id="g2Total">15</span></div>
+      <div class="progress-bar" style="max-width:400px;margin:8px auto 0">
+        <div class="progress-fill" id="g2Progress" style="width:0%"></div>
+      </div>
+    </div>
+
+    <div class="poin-display" id="g2Poin">500</div>
+    <div class="poin-label">Poin tersisa jika jawab sekarang</div>
+
+    <div class="reveal-container">
+      <img src="" id="g2Img" alt="Tebak siapa ini?" style="width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;">
+      <div class="reveal-mask" id="g2Mask"></div>
+    </div>
+
+    <div class="answer-form">
+      <input type="text" class="answer-input" id="g2Answer" placeholder="Siapa ini? Tulis namanya..." maxlength="40">
+      <button class="btn-gold" style="width:100%" onclick="submitG2()">Kirim Jawaban ✓</button>
+      <div id="g2Feedback" style="margin-top:1rem;font-size:14px;text-align:center;"></div>
+    </div>
+  </div>
+
+  <div id="g2Leaderboard" style="display:none;max-width:480px;margin:0 auto;">
+    <h3 style="font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--brown);text-align:center;margin-bottom:1.5rem;">🏆 Hasil Akhir</h3>
+    <div id="g2LBList"></div>
+    <div class="center mt1">
+      <button class="btn-gold" onclick="restartGame2()">Main Lagi</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== GAME 3: SIAPA PALING ===== -->
+<div id="game3" class="game-page page">
+  <div class="game-header">
+    <button class="back-btn" onclick="showLobby()">← Kembali</button>
+    <div>
+      <div class="game-number">Game 03</div>
+      <div class="game-header-title">Siapa yang Paling...?</div>
+    </div>
+  </div>
+
+  <div id="g3Voting">
+    <div class="question-display">
+      <div style="font-size:11px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:8px;">Pertanyaan <span id="g3Num">1</span> dari 5</div>
+      <div class="question-text" id="g3Question">Siapa yang paling suka tidur?</div>
+      <div style="margin-top:1rem;display:flex;align-items:center;justify-content:center;gap:8px;">
+        <div class="progress-bar" style="width:200px;margin:0">
+          <div class="progress-fill" id="g3Timer" style="width:100%"></div>
+        </div>
+        <div class="question-timer" id="g3TimerNum">30</div>
+      </div>
+    </div>
+
+    <div class="vote-grid" id="voteGrid"></div>
+
+    <div class="center mt2">
+      <button class="btn-gold" onclick="submitVote()" id="g3SubmitBtn">Kirim Vote ✓</button>
+    </div>
+  </div>
+
+  <div id="g3Result" style="display:none">
+    <div class="result-card">
+      <div style="font-size:11px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:8px;">Hasil Voting</div>
+      <div style="font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--brown);margin-bottom:1.5rem;" id="g3ResultQ"></div>
+
+      <div class="mirip-person" style="margin:0 auto 1.5rem">
+        <div class="mp-placeholder" style="width:90px;height:90px;margin:0 auto 8px" id="g3WinnerImg">👑</div>
+        <div class="mp-name" id="g3WinnerName">...</div>
+        <div style="font-size:12px;color:var(--brown-light);margin-top:4px" id="g3WinnerPct"></div>
+      </div>
+
+      <div id="g3Bars" style="max-width:400px;margin:0 auto 1.5rem"></div>
+
+      <div style="font-size:12px;color:var(--brown-light);border-top:1px solid rgba(201,168,76,0.2);padding-top:1rem;" id="g3WhoVoted"></div>
+    </div>
+
+    <div class="center mt1">
+      <button class="btn-gold" onclick="nextG3Question()" id="g3NextBtn">Pertanyaan Berikutnya →</button>
+    </div>
+  </div>
+
+  <div id="g3HallOfFame" style="display:none">
+    <div class="hall-of-fame">
+      <div class="hof-title">🏛️ Hall of Fame</div>
+      <div id="hofList"></div>
+    </div>
+    <div class="center">
+      <button class="btn-gold" onclick="restartGame3()">Main Lagi</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== GAME 4: TIMELINE ===== -->
+<div id="game4" class="game-page page">
+  <div class="game-header">
+    <button class="back-btn" onclick="showLobby()">← Kembali</button>
+    <div>
+      <div class="game-number">Game 04</div>
+      <div class="game-header-title">Timeline Keluarga</div>
+    </div>
+  </div>
+
+  <div id="g4Playing">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+      <div style="font-size:13px;color:var(--brown-light)">Ronde <span id="g4Ronde">1</span>/3 &nbsp;·&nbsp; Skor: <span id="g4Score">0</span></div>
+      <div style="font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--gold)" id="g4Timer">60</div>
+    </div>
+
+    <div class="timeline-instruction">
+      Susun foto berikut dari <strong>termuda</strong> ke <strong>tertua</strong>.<br>
+      Drag ke kotak urutan di bawah!
+    </div>
+
+    <div class="timeline-cards" id="timelineCards"></div>
+
+    <div style="text-align:center;font-size:12px;color:var(--brown-light);margin-bottom:6px">Urutan kamu (kiri = termuda, kanan = tertua):</div>
+    <div class="answer-slots" id="answerSlots"></div>
+
+    <div class="center mt1">
+      <button class="btn-gold" onclick="submitTimeline()">Kunci Jawaban ✓</button>
+      <button class="btn-secondary" style="margin-left:8px" onclick="resetTimeline()">Reset</button>
+    </div>
+  </div>
+
+  <div id="g4Result" style="display:none">
+    <div class="result-card center">
+      <div style="font-family:'Playfair Display',serif;font-size:2rem;color:var(--gold);margin-bottom:0.5rem" id="g4FinalScore">0</div>
+      <div style="font-size:14px;color:var(--brown-light);margin-bottom:1.5rem">Poin Total</div>
+      <div class="podium" id="g4Podium"></div>
+    </div>
+    <div class="center mt1">
+      <button class="btn-gold" onclick="restartGame4()">Main Lagi</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== GAME 5: MIRIP SIAPA ===== -->
+<div id="game5" class="game-page page">
+  <div class="game-header">
+    <button class="back-btn" onclick="showLobby()">← Kembali</button>
+    <div>
+      <div class="game-number">Game 05</div>
+      <div class="game-header-title">Kamu Mirip Siapa?</div>
+    </div>
+  </div>
+
+  <div class="quiz-container">
+    <div id="g5Quiz">
+      <div class="quiz-progress" id="quizProgress"></div>
+      <div class="quiz-step" id="quizStep">
+        <div class="quiz-q" id="quizQuestion">Apa jenis kelaminmu?</div>
+        <div class="quiz-options" id="quizOptions"></div>
+      </div>
+    </div>
+
+    <div class="mirip-result" id="miripResult">
+      <div style="font-size:11px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:1rem;">Hasil Kemiripan</div>
+      <div class="mirip-vs">
+        <div class="mirip-person">
+          <div class="mp-placeholder" id="userPhoto">👤</div>
+          <div class="mp-name" id="userName2">Kamu</div>
+        </div>
+        <div class="vs-badge">VS</div>
+        <div class="mirip-person">
+          <div class="mp-placeholder" id="komedianPhoto">🎭</div>
+          <div class="mp-name" id="komedianName">...</div>
+        </div>
+      </div>
+
+      <div class="persen-badge" id="persenBadge">85%</div>
+      <div style="font-size:12px;color:var(--brown-light);margin-bottom:0.5rem">Tingkat Kemiripan</div>
+
+      <div class="komentar-lucu" id="komentarLucu">...</div>
+
+      <button class="btn-gold" style="width:100%;margin-top:1rem" onclick="restartGame5()">Coba Lagi 🔄</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== GAME 6: TEBAK LAGU ===== -->
+<div id="game6" class="game-page page">
+  <div class="game-header">
+    <button class="back-btn" onclick="showLobby()">← Kembali</button>
+    <div>
+      <div class="game-number">Game 06</div>
+      <div class="game-header-title">🎵 Tebak Lagu Indonesia</div>
+    </div>
+  </div>
+
+  <div id="g6Playing">
+    <div style="text-align:center;margin-bottom:1.5rem;">
+      <div style="font-size:12px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:4px;">Lagu <span id="g6Num">1</span> dari 5</div>
+      <div class="progress-bar"><div class="progress-fill" id="g6Progress" style="width:20%"></div></div>
+    </div>
+
+    <!-- Music Player Visual -->
+    <div style="background:var(--green);border-radius:20px;padding:2rem;text-align:center;max-width:400px;margin:0 auto 1.5rem;box-shadow:0 8px 32px rgba(45,80,22,0.3);">
+      <div id="g6Disc" style="width:120px;height:120px;border-radius:50%;background:var(--brown);margin:0 auto 1rem;display:flex;align-items:center;justify-content:center;border:4px solid var(--gold);position:relative;transition:all 0.3s;">
+        <div style="font-size:2.5rem;" id="g6DiscEmoji">🎵</div>
+      </div>
+      <div id="g6StatusText" style="color:var(--gold-light);font-size:13px;margin-bottom:1rem;font-weight:600;letter-spacing:1px;">TEKAN PLAY UNTUK MULAI</div>
+      <div style="display:flex;gap:12px;justify-content:center;align-items:center;">
+        <button onclick="playG6Intro()" id="g6PlayBtn" style="background:var(--gold);color:var(--brown);border:none;border-radius:50%;width:56px;height:56px;font-size:1.4rem;cursor:pointer;font-weight:700;transition:all 0.2s;" title="Play Intro">▶</button>
+        <button onclick="stopG6Audio()" style="background:rgba(255,255,255,0.15);color:var(--gold-light);border:none;border-radius:50%;width:40px;height:40px;font-size:1rem;cursor:pointer;" title="Stop">⏹</button>
+      </div>
+      <div id="g6AudioBar" style="display:flex;gap:3px;justify-content:center;margin-top:1rem;height:30px;align-items:flex-end;opacity:0.6;">
+        <div class="audio-wave"></div><div class="audio-wave"></div><div class="audio-wave"></div>
+        <div class="audio-wave"></div><div class="audio-wave"></div><div class="audio-wave"></div>
+        <div class="audio-wave"></div><div class="audio-wave"></div>
+      </div>
+    </div>
+
+    <!-- Hint area -->
+    <div id="g6HintBox" style="background:var(--white);border:1px solid rgba(201,168,76,0.3);border-radius:12px;padding:1rem 1.5rem;max-width:400px;margin:0 auto 1rem;text-align:center;display:none;">
+      <div style="font-size:11px;letter-spacing:1px;color:var(--gold);text-transform:uppercase;margin-bottom:4px;">Petunjuk</div>
+      <div id="g6HintText" style="font-size:14px;color:var(--brown);font-style:italic;"></div>
+    </div>
+
+    <!-- Answer buttons (multiple choice) -->
+    <div id="g6Choices" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:400px;margin:0 auto 1rem;"></div>
+
+    <div style="text-align:center;margin-top:0.5rem;">
+      <button class="btn-secondary" onclick="showG6Hint()" id="g6HintBtn">💡 Tampilkan Petunjuk</button>
+    </div>
+  </div>
+
+  <!-- Result per lagu -->
+  <div id="g6RoundResult" style="display:none;max-width:400px;margin:0 auto;text-align:center;">
+    <div style="background:var(--white);border-radius:16px;padding:2rem;margin-bottom:1rem;box-shadow:var(--shadow);border:1px solid rgba(201,168,76,0.3);">
+      <div id="g6RoundIcon" style="font-size:3rem;margin-bottom:0.5rem;">🎉</div>
+      <div id="g6RoundMsg" style="font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--brown);margin-bottom:0.5rem;"></div>
+      <div id="g6RoundScore" style="font-size:2rem;font-weight:700;color:var(--gold);font-family:'Playfair Display',serif;"></div>
+      <div style="font-size:12px;color:var(--brown-light);margin-bottom:1.5rem;">poin kamu ronde ini</div>
+
+      <!-- Sing along section -->
+      <div id="g6SingAlong" style="background:var(--green);border-radius:12px;padding:1.5rem;margin-bottom:1rem;">
+        <div style="color:var(--gold-light);font-size:13px;font-weight:600;letter-spacing:1px;margin-bottom:0.5rem;">🎤 NYANYIKAN BERSAMA!</div>
+        <div id="g6SongTitle" style="font-family:'Playfair Display',serif;font-size:1.2rem;color:white;margin-bottom:0.5rem;"></div>
+        <div id="g6SongArtist" style="font-size:12px;color:var(--gold-light);margin-bottom:1rem;"></div>
+        <div id="g6Lirik" style="background:rgba(255,255,255,0.1);border-radius:8px;padding:1rem;text-align:left;font-size:13px;color:white;line-height:1.8;font-style:italic;"></div>
+        <button onclick="playG6Full()" style="margin-top:1rem;background:var(--gold);color:var(--brown);border:none;border-radius:8px;padding:10px 24px;font-weight:700;cursor:pointer;font-size:13px;" id="g6PlayFullBtn">▶ Play Intro Lagi</button>
+      </div>
+    </div>
+    <button class="btn-gold" onclick="nextG6Song()" id="g6NextBtn" style="width:100%;">Lagu Berikutnya →</button>
+  </div>
+
+  <!-- Final result -->
+  <div id="g6FinalResult" style="display:none;max-width:400px;margin:0 auto;text-align:center;">
+    <div class="result-card">
+      <div style="font-size:3rem;margin-bottom:0.5rem;">🏆</div>
+      <div style="font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--brown);margin-bottom:0.5rem;">Selesai! Kamu tahu semua lagunya?</div>
+      <div style="font-size:3rem;font-weight:700;color:var(--gold);font-family:'Playfair Display',serif;" id="g6TotalScore">0</div>
+      <div style="font-size:13px;color:var(--brown-light);margin-bottom:1.5rem;">Total Poin</div>
+      <div id="g6ScoreSummary" style="text-align:left;margin-bottom:1.5rem;"></div>
+      <div id="g6Podium"></div>
+    </div>
+    <button class="btn-gold" onclick="restartGame6()" style="width:100%;margin-top:1rem;">🔄 Main Lagi</button>
+    <button class="btn-secondary" onclick="showLobby()" style="width:100%;margin-top:0.5rem;">← Kembali ke Lobby</button>
+  </div>
+</div>
+
+<!-- ===== ADMIN PANEL ===== -->
+<div id="admin" class="page">
+  <div class="admin-header">
+    <div>
+      <div class="landing-badge" style="margin-bottom:4px">Admin Panel</div>
+      <h2 id="adminEventTitle">Rasmita's Family Gathering 2026</h2>
+    </div>
+    <button class="btn-secondary" onclick="showLanding()">← Keluar</button>
+  </div>
+
+  <!-- STATUS BAR -->
+  <div class="admin-section" style="padding:1rem 1.5rem;">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+      <div>
+        <div style="font-size:12px;color:var(--brown-light);margin-bottom:4px">Kode Room Aktif</div>
+        <div class="room-code" style="font-size:1.8rem;padding:8px 24px" id="adminRoomCode">FAM2026</div>
+      </div>
+      <div>
+        <div style="font-size:12px;color:var(--brown-light);margin-bottom:4px">Pemain Terdaftar</div>
+        <div style="font-size:2rem;font-weight:700;font-family:'Playfair Display',serif;color:var(--green)" id="adminPlayerCount">0</div>
+      </div>
+      <div>
+        <div style="font-size:12px;color:var(--brown-light);margin-bottom:4px">Game Terbuka</div>
+        <div style="font-size:2rem;font-weight:700;font-family:'Playfair Display',serif;color:var(--gold)" id="adminOpenCount">0</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PENGATURAN EVENT -->
+  <div class="admin-section">
+    <h3>⚙️ Pengaturan Event</h3>
+    <div class="admin-input-row">
+      <label>Nama Event</label>
+      <input type="text" id="inputEventName" placeholder="Rasmita's Family Gathering 2026" maxlength="50">
+    </div>
+    <div class="admin-input-row">
+      <label>Tanggal</label>
+      <input type="text" id="inputEventDate" placeholder="28 Maret 2026" maxlength="30">
+    </div>
+    <div class="admin-input-row">
+      <label>Lokasi</label>
+      <input type="text" id="inputEventVenue" placeholder="Wisma Mandiri, Bandung" maxlength="50">
+    </div>
+    <div class="admin-input-row">
+      <label>Kode Room</label>
+      <input type="text" id="inputRoomCode" placeholder="FAM2026" maxlength="10" style="text-transform:uppercase;letter-spacing:3px;text-align:center;max-width:140px">
+      <button class="btn-save" onclick="saveEventSettings()">💾 Simpan Pengaturan</button>
+    </div>
+  </div>
+
+  <!-- UPLOAD FOTO ANGGOTA KELUARGA -->
+  <div class="admin-section">
+    <h3>📸 Upload Foto Anggota Keluarga</h3>
+    <p style="font-size:13px;color:var(--brown-light);margin-bottom:0.5rem;">Klik kartu untuk upload foto. Foto disimpan otomatis di browser (tidak perlu server).<br>Format: JPG/PNG. Ukuran ideal: 300×300 px. Maksimal ~500KB per foto.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem;">
+      <button class="btn-save" onclick="addMember()" style="font-size:12px;padding:6px 14px;">+ Tambah Anggota</button>
+      <button class="btn-secondary" onclick="clearAllPhotos()" style="font-size:12px;padding:6px 14px;color:var(--red)">🗑️ Hapus Semua Foto</button>
+      <button class="btn-secondary" onclick="exportMemberData()" style="font-size:12px;padding:6px 14px;">📋 Export Data</button>
+    </div>
+    <div class="upload-grid" id="uploadGrid"></div>
+    <!-- Hidden file input -->
+    <input type="file" id="photoFileInput" accept="image/*" style="display:none" onchange="handlePhotoUpload(event)">
+  </div>
+
+  <!-- KONTROL GAME -->
+  <div class="admin-section">
+    <h3>🎮 Kontrol Game</h3>
+    <div style="display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap;">
+      <button class="btn-save" onclick="openAllGames()" style="background:var(--green);color:var(--gold-light);font-size:12px;padding:8px 16px;">▶ Buka Semua Game</button>
+      <button class="btn-secondary" onclick="closeAllGames()" style="font-size:12px;padding:8px 16px;color:var(--red)">⏹ Tutup Semua Game</button>
+    </div>
+    <div class="admin-games" id="adminGames"></div>
+  </div>
+
+  <!-- PEMAIN -->
+  <div class="players-list admin-section">
+    <h3>👥 Daftar Pemain Online</h3>
+    <div id="adminPlayerList"></div>
+  </div>
+</div>
+
+<script>
+// ===== DATA & STATE =====
+const GAMES_INFO = [
+  { id: 1, title: "Memory Match Foto", desc: "4 player bergantian, cocokkan pasangan foto. +10 poin per pasangan cocok!", icon: "🃏" },
+  { id: 2, title: "Tebak Siapa?", desc: "Foto terpotong perlahan terlihat. Tebak lebih awal = poin lebih besar!", icon: "🔍" },
+  { id: 3, title: "Siapa yang Paling...?", desc: "Vote dari foto keluarga. Siapa yang paling sering terpilih jadi Hall of Fame!", icon: "🗳️" },
+  { id: 4, title: "Timeline Keluarga", desc: "Susun foto dari termuda ke tertua. 3 ronde × 5 foto. Bonus kecepatan!", icon: "⏳" },
+  { id: 5, title: "Kamu Mirip Siapa?", desc: "Jawab pertanyaan dan temukan komedian Indonesia yang mirip denganmu!", icon: "🎭" },
+  { id: 6, title: "Tebak Lagu Indonesia", desc: "Dengar intro lagu, tebak judulnya! 5 lagu legendaris lintas generasi. Nyanyikan bersama di akhir!", icon: "🎵" },
+];
+
+const PERTANYAAN_G5 = [
+  { id: 1, pertanyaan: "Apa jenis kelaminmu?", opsi: ["Pria", "Wanita"], field: "gender" },
+  { id: 2, pertanyaan: "Berapa kisaran usiamu?", opsi: ["Muda (< 30 tahun)", "Paruh Baya (30–50 tahun)", "Senior (> 50 tahun)"], field: "usia" },
+  { id: 3, pertanyaan: "Bagaimana postur tubuhmu?", opsi: ["Kurus", "Sedang", "Gemuk"], field: "postur" },
+  { id: 4, pertanyaan: "Bagaimana rambutmu?", opsi: ["Lurus", "Keriting", "Botak"], field: "rambut" },
+  { id: 5, pertanyaan: "Ciri khas wajahmu?", opsi: ["Kumis/Jenggot", "Berkacamata", "Polos saja"], field: "ciri" },
+  { id: 6, pertanyaan: "Karakter lucumu?", opsi: ["Lebay & Dramatis", "Polos & Innocent", "Cerdas & Satir", "Ekspresif & Energik", "Kalem & Misterius", "Jail & Usil"], field: "karakter" },
+];
+
+// FAMILY PHOTOS - Placeholder (will be replaced with actual photos)
+const FAMILY_MEMBERS = [
+  { id: 1, nama: "Anggota 1", foto: "" },
+  { id: 2, nama: "Anggota 2", foto: "" },
+  { id: 3, nama: "Anggota 3", foto: "" },
+  { id: 4, nama: "Anggota 4", foto: "" },
+  { id: 5, nama: "Anggota 5", foto: "" },
+  { id: 6, nama: "Anggota 6", foto: "" },
+  { id: 7, nama: "Anggota 7", foto: "" },
+  { id: 8, nama: "Anggota 8", foto: "" },
+  { id: 9, nama: "Anggota 9", foto: "" },
+  { id: 10, nama: "Anggota 10", foto: "" },
+  { id: 11, nama: "Anggota 11", foto: "" },
+  { id: 12, nama: "Anggota 12", foto: "" },
+  { id: 13, nama: "Anggota 13", foto: "" },
+  { id: 14, nama: "Anggota 14", foto: "" },
+  { id: 15, nama: "Anggota 15", foto: "" },
+  { id: 16, nama: "Anggota 16", foto: "" },
+  { id: 17, nama: "Anggota 17", foto: "" },
+  { id: 18, nama: "Anggota 18", foto: "" },
+  { id: 19, nama: "Anggota 19", foto: "" },
+  { id: 20, nama: "Anggota 20", foto: "" },
+];
+
+const PERTANYAAN_G3 = [
+  "Siapa yang paling suka tidur?",
+  "Siapa yang paling cerewet?",
+  "Siapa yang paling sering telat?",
+  "Siapa yang paling pelit?",
+  "Siapa yang paling lebay kalau sakit?",
+  "Siapa yang paling suka drama?",
+  "Siapa yang paling susah bangun pagi?",
+  "Siapa yang paling boros?",
+  "Siapa yang paling banyak makan?",
+  "Siapa yang paling sering lupa?",
+  "Siapa yang paling gampang nangis?",
+  "Siapa yang paling gampang tertawa?",
+  "Siapa yang paling keras kepala?",
+  "Siapa yang paling suka selfie?",
+  "Siapa yang paling suka gosip?",
+  "Siapa yang paling suka pamer?",
+  "Siapa yang paling gampang marah?",
+  "Siapa yang paling suka ngatur orang?",
+  "Siapa yang paling sulit dibangunkan?",
+  "Siapa yang paling suka jajan?",
+];
+
+const COMEDIANS = {
+  pria: [
+    { id:1, nama:"Sule", usia:44, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"lebay", komentar:"Selamat! Kamu setara Raja Komedi Indonesia. Kalau ngomong, semua orang bisa lupa nama sendiri karena ketawa!" },
+    { id:2, nama:"Andre Taulany", usia:50, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"kalem", komentar:"Wah mirip Andre! Gayamu kalem tapi punchline-mu tajam kayak silet. Orang nggak sadar sudah tertawa sebelum sadar kenapa!" },
+    { id:3, nama:"Komeng", usia:56, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"polos", komentar:"Spontan! Uhuy! Kamu punya wajah datar tapi bikin orang pingsan ketawa. Komeng bangga punya kembaran!" },
+    { id:4, nama:"Cak Lontong", usia:52, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Selamat, otakmu sama njlimet-nya dengan Cak Lontong! Kalimatmu bikin orang mikir dulu 5 menit baru ngakak!" },
+    { id:5, nama:"Raditya Dika", usia:39, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Mirip Raditya Dika! Hidupmu penuh kejadian absurd yang kalau diceritain bisa jadi buku bestseller!" },
+    { id:6, nama:"Dodit Mulyanto", usia:36, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"polos", komentar:"Wajahmu innocent kayak Dodit tapi omonganmu... ya Allah. Selamat, kamu komedian berkedok orang baik-baik!" },
+    { id:7, nama:"Pandji Pragiwaksono", usia:42, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Seperti Pandji, kamu tipe yang bisa bikin kritik sosial jadi bahan ketawa. Berbahaya tapi menghibur!" },
+    { id:8, nama:"Wendi Cagur", usia:42, postur:"gemuk", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Mirip Wendi! Ekspresi mukamu bisa bikin suasana mendung jadi cerah. Aset nasional nih!" },
+    { id:9, nama:"Denny Cagur", usia:40, postur:"gemuk", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Wah duo Cagur versi baru! Energimu selevel Denny, sekali masuk ruangan semua langsung ngakak!" },
+    { id:10, nama:"Indra Jegel", usia:35, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"polos", komentar:"Logat Medanmu sekental Indra Jegel! Belum ngomong apa-apa, orang sudah siap-siap ketawa duluan!" },
+    { id:11, nama:"Bintang Emon", usia:31, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Fresh kayak Bintang Emon! Observasimu tentang kehidupan sehari-hari bisa bikin orang nangis ketawa!" },
+    { id:12, nama:"Ernest Prakasa", usia:43, postur:"sedang", rambut:"lurus", kumis:false, kacamata:true, karakter:"cerdas", komentar:"Mirip Ernest! Kamu tipe komedian intelektual yang bikin penonton merasa pintar padahal baru saja ditertawakan!" },
+    { id:13, nama:"Parto Patrio", usia:57, postur:"gemuk", rambut:"botak", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Wibawa Parto ada di dirimu! Kamu pemimpin yang bisa bikin sidang serius jadi pentas komedi tanpa disadari!" },
+    { id:14, nama:"Tukul Arwana", usia:60, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"lebay", komentar:"Kembali ke laptop! Seperti Tukul, kamu punya catchphrase yang sekali diucapkan langsung ikonik selamanya!" },
+    { id:15, nama:"Coki Pardede", usia:33, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Deep kayak Coki! Humor gelapmu sebenarnya kritik sosial yang dibalut tawa. Philosopher berkedok komedian!" },
+    { id:16, nama:"Boris Bokir", usia:36, postur:"gemuk", rambut:"keriting", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Boris banget! Rambut dan energimu sama-sama sulit dikendalikan. Tapi justru itu yang bikin semua tertawa!" },
+    { id:17, nama:"Abdur Arsyad", usia:36, postur:"kurus", rambut:"keriting", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Seperti Abdur, kamu bisa angkat cerita kampung halaman jadi komedi berkelas. Lokalitas adalah kekuatanmu!" },
+    { id:18, nama:"Arie Kriting", usia:38, postur:"kurus", rambut:"keriting", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Arie Kriting versi baru! Kamu bangga dengan identitas aslimu dan itu justru yang paling menghibur!" },
+    { id:19, nama:"Tretan Muslim", usia:35, postur:"gemuk", rambut:"lurus", kumis:true, kacamata:false, karakter:"polos", komentar:"Seperti Tretan, kamu punya kemampuan ajaib: bicara hal gila dengan muka serius. Itu bakat langka!" },
+    { id:20, nama:"Desta", usia:44, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"kalem", komentar:"Mirip Desta! Gaya santaimu menipu semua orang. Di balik ketenangan itu tersimpan lawakan yang siap meledak!" },
+    { id:21, nama:"Aziz Gagap", usia:47, postur:"gemuk", rambut:"lurus", kumis:false, kacamata:false, karakter:"polos", komentar:"Ga-ga-ga-gak ada yang bisa ngalahin spontanitasmu! Kayak Aziz, keluguan adalah senjata utamamu!" },
+    { id:22, nama:"Eko Patrio", usia:53, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Semangat juang kayak Eko Patrio! Kamu bisa tertawa di tengah badai sekalipun. Itu baru komedian sejati!" },
+    { id:23, nama:"Nugraha Arief", usia:40, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Analitis kayak Nugraha! Kamu bisa membedah situasi absurd dengan logika yang malah makin lucu!" },
+    { id:24, nama:"Ge Pamungkas", usia:35, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Tajam kayak Ge Pamungkas! Observasi hidupmu begitu presisi sampai orang terlambat sadar sudah disindir!" },
+    { id:25, nama:"Arief Muhammad", usia:34, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"kalem", komentar:"Konten-mu selalu relate kayak Arief! Kamu tahu persis apa yang bikin generasi sekarang ngakak!" },
+    { id:26, nama:"Mongol Stres", usia:42, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Stres tapi tetap lucu kayak Mongol! Kamu bisa mengubah frustrasi jadi bahan komedi paling segar!" },
+    { id:27, nama:"Kemal Palevi", usia:36, postur:"sedang", rambut:"lurus", kumis:true, kacamata:false, karakter:"kalem", komentar:"Stylish dan lucu kayak Kemal! Kamu buktikan bahwa gaya dan humor bisa berjalan beriringan dengan sempurna!" },
+    { id:28, nama:"Ryan Adriandhy", usia:37, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Seperti Ryan, kamu storyteller ulung yang bisa bikin cerita sederhana terasa epik dan lucu sekaligus!" },
+    { id:29, nama:"Mamat Alkatiri", usia:48, postur:"sedang", rambut:"lurus", kumis:true, kacamata:false, karakter:"kalem", komentar:"Tenang tapi mematikan kayak Mamat! Lawakan terencana matangmu selalu landing sempurna tanpa tergesa-gesa!" },
+    { id:30, nama:"Soleh Solihun", usia:43, postur:"kurus", rambut:"lurus", kumis:false, kacamata:true, karakter:"cerdas", komentar:"Intelektual kayak Soleh! Kamu bawa humor ke level yang membuat penonton belajar sambil tertawa terpingkal!" },
+    { id:31, nama:"Fico Fachriza", usia:32, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Energi muda kayak Fico! Kamu bawa angin segar ke dunia komedi dengan gaya yang autentik dan relatable!" },
+    { id:32, nama:"Ridwan Remin", usia:33, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"polos", komentar:"Polos tapi nyelekit kayak Ridwan! Wajah innocentmu adalah topeng sempurna untuk lawakan yang tak terduga!" },
+    { id:33, nama:"Dzawin Nur", usia:30, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Seperti Dzawin, kamu punya perspektif unik yang bikin orang melihat dunia dari sudut yang sama sekali berbeda!" },
+    { id:34, nama:"Muhadkly Acho", usia:38, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Tajam seperti Acho! Kritikmu dibalut humor sehingga yang dikritik pun ikut tertawa. Skill level: dewa!" },
+    { id:35, nama:"Babe Cabita", usia:40, postur:"gemuk", rambut:"keriting", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Penuh semangat kayak Babe! Kamu bisa membuat audiens terpingkal hanya dari cara kamu masuk panggung!" },
+    { id:36, nama:"Akbar Kobar", usia:34, postur:"gemuk", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Mengguncang panggung kayak Akbar! Energimu sebesar posturmu dan itu adalah kombinasi mematikan di atas panggung!" },
+    { id:37, nama:"Yudha Keling", usia:36, postur:"kurus", rambut:"keriting", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Mirip Yudha Keling! Kamu punya charisma alami yang bikin semua mata tertuju padamu begitu kamu mulai bicara!" },
+    { id:38, nama:"Ronal Surapradja", usia:45, postur:"gemuk", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Totalitas kayak Ronal! Kamu tidak setengah-setengah dalam apapun, termasuk dalam membuat orang tertawa keras!" },
+    { id:39, nama:"Adi Setiawan", usia:38, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"kalem", komentar:"Konsisten kayak Adi! Kamu bukan tipe yang meledak sekali, tapi yang terus-menerus menghibur tanpa henti!" },
+    { id:40, nama:"Sammy Notaslimboy", usia:39, postur:"gemuk", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Bangga dengan diri sendiri kayak Sammy! Kamu buktikan bahwa percaya diri adalah bahan bakar humor terbaik!" },
+    { id:41, nama:"Wendy Walters", usia:38, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Multitalenta kayak Wendy! Humor musikmu membuktikan kamu bisa menghibur dari dua arah sekaligus!" },
+    { id:42, nama:"Didi Mahardika", usia:41, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"kalem", komentar:"Seperti Didi, kamu simpan kejutan di setiap kalimat. Penonton tidak pernah tahu kapan bom tawa akan meledak!" },
+    { id:43, nama:"Rigen Rakelna", usia:36, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"polos", komentar:"Humble kayak Rigen! Kamu tidak perlu tampil berlebihan karena bakat aslimu sudah cukup bikin semua orang jatuh cinta!" },
+    { id:44, nama:"Insan Nur Akbar", usia:32, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Kritis kayak Insan! Mata tajammu melihat ironi di mana-mana dan kamu ubah jadi materi stand-up yang mengena!" },
+    { id:45, nama:"Alex Cendana", usia:34, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Dinamis kayak Alex! Kamu bisa menyesuaikan diri dengan siapapun dan tetap lucu di semua situasi!" },
+    { id:46, nama:"Nopek Novian", usia:30, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"polos", komentar:"Viral kayak Nopek! Kontenmu selalu punya timing sempurna yang bikin orang replay berkali-kali!" },
+    { id:47, nama:"Kiky Saputra", usia:33, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Energik kayak Kiky! Panggung seperti menyala begitu kamu naik. Ini bukan kebetulan, ini bakat!" },
+    { id:48, nama:"Fajar Nugra", usia:31, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Observatif kayak Fajar! Hal-hal kecil yang orang lewatkan justru jadi material emas di tanganmu!" },
+    { id:49, nama:"Bang Emen", usia:46, postur:"gemuk", rambut:"botak", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Legenda Betawi hidup! Kayak Bang Emen, kamu membawa budaya lokal ke panggung nasional dengan bangga!" },
+    { id:50, nama:"Iwel Sastra", usia:50, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Veteran sejati kayak Iwel! Jam terbangmu membuat setiap penampilan terasa sempurna dan penuh kalkulasi!" },
+    { id:51, nama:"Aming", usia:47, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"lebay", komentar:"Lebay tapi ikonik kayak Aming! Overdramatic-mu bukan kelebihan, itu adalah senjata utama yang tak tertandingi!" },
+    { id:52, nama:"Olga Syahputra", usia:38, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"lebay", komentar:"Legenda tak terlupakan kayak Olga! Energimu mengisi ruangan dan membuat semua orang merasa istimewa!" },
+    { id:53, nama:"Peppy", usia:43, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Host handal kayak Peppy! Kamu bisa mengelola chaos dan tetap menghibur. Bakat yang sangat langka!" },
+    { id:54, nama:"Andhika Pratama", usia:38, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"kalem", komentar:"Good-looking dan lucu kayak Andhika! Kamu kombinasi sempurna yang bikin semua kalangan terpesona!" },
+    { id:55, nama:"Desta", usia:44, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"kalem", komentar:"Karismatik kayak Desta! Kehadiranmu memberikan rasa nyaman sekaligus siap mengundang tawa kapanpun!" },
+    { id:56, nama:"Vincent Ryan Rompies", usia:43, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Duo legend kayak Vincent! Partner terbaikmu adalah lawan bicara yang bisa kamu jadikan bahan lawakan!" },
+    { id:57, nama:"Raffi Ahmad", usia:37, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Entertainer sejati kayak Raffi! Kamu tahu cara membuat semua mata tertuju padamu di manapun kamu berada!" },
+    { id:58, nama:"Baim Wong", usia:41, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Content creator kayak Baim! Hidupmu sendiri adalah reality show terlaris yang membuat jutaan orang terhibur!" },
+    { id:59, nama:"Ruben Onsu", usia:40, postur:"gemuk", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Hangat kayak Ruben! Senyummu adalah pintu masuk yang membuat semua orang merasa diterima dan nyaman!" },
+    { id:60, nama:"Billy Syahputra", usia:38, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"lebay", komentar:"Drama queen kayak Billy! Kemampuanmu mendramatisasi situasi biasa menjadi epik adalah anugerah langka!" },
+    { id:61, nama:"Judika", usia:41, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Serius tapi bisa lucu kayak Judika! Ketika kamu mulai bercanda, orang tidak siap dan langsung terpingkal!" },
+    { id:62, nama:"Denny Sumargo", usia:41, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Penuh kejutan kayak Densu! Di balik wajah seriusmu, tersimpan humor yang siap meledak kapanpun!" },
+    { id:63, nama:"Choki Sitohang", usia:39, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"MC andal kayak Choki! Kamu punya kemampuan membaca suasana yang membuatmu selalu tampil di momen tepat!" },
+    { id:64, nama:"Hengky Kurniawan", usia:42, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"kalem", komentar:"Humble kayak Hengky! Kamu tidak perlu berteriak untuk diperhatikan. Kharismamu berbicara lebih keras dari kata-kata!" },
+    { id:65, nama:"Farhan", usia:52, postur:"kurus", rambut:"lurus", kumis:false, kacamata:true, karakter:"cerdas", komentar:"Intelektual kayak Farhan! Kamu punya referensi yang luas dan bisa mengubah topik berat jadi obrolan santai!" },
+    { id:66, nama:"Irfan Hakim", usia:47, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Profesional kayak Irfan! Kamu bisa menghibur semua usia dari anak kecil sampai kakek nenek sekaligus!" },
+    { id:67, nama:"Rian D'Masiv", usia:37, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"kalem", komentar:"Merakyat kayak Rian! Kesederhanaanmu justru yang membuat semua orang merasa dekat dan nyaman bersamamu!" },
+    { id:68, nama:"Ryan D'Masiv", usia:38, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"polos", komentar:"Genuine kayak Ryan! Kamu tidak perlu pura-pura lucu karena ketulusanmu sendiri adalah humor paling mengena!" },
+    { id:69, nama:"Pandji Pragiwaksono", usia:42, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Berani kayak Pandji! Kamu tidak takut angkat topik berat karena kamu tahu cara membungkusnya dengan humor!" },
+    { id:70, nama:"Asep Sunandar", usia:55, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"polos", komentar:"Maestro tradisi kayak Asep! Kamu menjaga warisan budaya tetap hidup dengan cara yang relevan dan menghibur!" },
+    { id:71, nama:"Tike Priyatnakusuma", usia:50, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Bisa masuk semua genre kayak Tike! Dari drama serius hingga komedi ringan, kamu kuasai semua dengan gemilang!" },
+    { id:72, nama:"Isa Bajaj", usia:41, postur:"gemuk", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Loyal kayak Isa! Kamu tipe teman yang selalu bisa diandalkan untuk menghibur di saat semua orang butuh tawa!" },
+    { id:73, nama:"Kang Sule Junior", usia:25, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"lebay", komentar:"Generasi penerus! Kayak penerus legenda, kamu bawa gaya sendiri yang unik tapi tetap menghibur dari dalam!" },
+    { id:74, nama:"Arap Gotong Royong", usia:34, postur:"gemuk", rambut:"lurus", kumis:false, kacamata:false, karakter:"polos", komentar:"Unexpected kayak Arap! Kamu sering diremehkan di awal, tapi akhir ceritanya semua orang kagum dan tertawa!" },
+    { id:75, nama:"Dedi Suardi", usia:45, postur:"sedang", rambut:"botak", kumis:true, kacamata:false, karakter:"kalem", komentar:"Bijak kayak tetua kampung! Kamu punya kebijaksanaan yang disampaikan dengan cara jenaka yang tidak menggurui!" },
+    { id:76, nama:"Sapri Pantun", usia:48, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"polos", komentar:"Naturalis kayak Sapri! Tidak ada yang dibuat-buat dari dirimu dan itu justru yang membuat semua orang tertawa!" },
+    { id:77, nama:"Ucok Baba", usia:43, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Unik kayak Ucok! Keunikanmu adalah kekuatan terbesar. Berbeda dari keramaian selalu menjadi yang paling diingat!" },
+    { id:78, nama:"Iko Uwais", usia:36, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"kalem", komentar:"Serius tapi punya selera humor tinggi kayak Iko! Ketika kamu tersenyum, dunia terasa lebih aman dan bahagia!" },
+    { id:79, nama:"Joe Taslim", usia:42, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"kalem", komentar:"Cool kayak Joe! Kamu tipe yang tidak banyak bicara, tapi ketika bicara, semua orang langsung mendengarkan!" },
+    { id:80, nama:"Reza Rahadian", usia:37, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Aktor berbakat kayak Reza! Kamu bisa memainkan semua peran termasuk peran jadi orang yang paling lucu di ruangan!" },
+    { id:81, nama:"Vino G Bastian", usia:38, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"kalem", komentar:"Hangat dan autentik kayak Vino! Kepribadian aslimu lebih menarik dari karakter apapun yang pernah kamu perankan!" },
+    { id:82, nama:"Adipati Dolken", usia:32, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Fresh kayak Adipati! Kamu membawa energi baru yang membuat semua orang merasa muda dan bersemangat!" },
+    { id:83, nama:"Lukman Sardi", usia:52, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Berkarakter kuat kayak Lukman! Setiap kata yang kamu ucapkan terasa penuh makna dan kelas tersendiri!" },
+    { id:84, nama:"Hamish Daud", usia:37, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"kalem", komentar:"Internasional kayak Hamish! Perspektifmu yang luas membuat humor dan pandanganmu selalu segar dan unik!" },
+    { id:85, nama:"Deddy Corbuzier", usia:48, postur:"sedang", rambut:"botak", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Provokator positif kayak Deddy! Kamu suka menantang pemikiran orang dan itu justru yang membuat semua tertarik!" },
+    { id:86, nama:"Helmy Yahya", usia:58, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Visioner kayak Helmy! Kamu selalu selangkah lebih maju dan punya cara unik untuk menyampaikan ide-ide besarmu!" },
+    { id:87, nama:"Tomy Soeharto", usia:60, postur:"gemuk", rambut:"lurus", kumis:false, kacamata:false, karakter:"kalem", komentar:"Berpengaruh kayak orang bersejarah! Kehadiranmu selalu meninggalkan kesan yang dalam dan tak terlupakan!" },
+    { id:88, nama:"Sandy Tiar", usia:35, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Storyteller ulung kayak Sandy! Kamu bisa membuat cerita biasa menjadi luar biasa dengan cara penyampaianmu!" },
+    { id:89, nama:"Rizky Febian", usia:26, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Berbakat kayak Rizky! Kamu punya natural talent yang membuat semua yang kamu lakukan terasa mudah dan menghibur!" },
+    { id:90, nama:"Aurel Hermansyah", usia:24, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Muda dan bersemangat! Energimu yang muda dan segar adalah aset yang membuat semua terhibur tanpa upaya!" },
+    { id:91, nama:"Al Ghazali", usia:26, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Next gen kayak Al! Kamu punya semua yang dibutuhkan untuk menjadi ikon generasi berikutnya yang menghibur!" },
+    { id:92, nama:"Atta Halilintar", usia:27, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Viral sejati kayak Atta! Apapun yang kamu lakukan selalu bisa menjadi trending topic yang dibicarakan semua orang!" },
+    { id:93, nama:"Fiki Naki", usia:24, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Multi-language kayak Fiki! Kamu bisa menghubungkan dunia karena humormu melampaui batasan bahasa!" },
+    { id:94, nama:"Kunto Aji", usia:33, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"kalem", komentar:"Introspektif kayak Kunto Aji! Kamu sering berpikir dalam tapi bisa mengungkapkannya dengan cara yang mengena hati!" },
+    { id:95, nama:"Fiersa Besari", usia:34, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Penyair jiwa kayak Fiersa! Kata-katamu bisa membuat orang tertawa sambil merenung. Kombinasi yang sangat langka!" },
+    { id:96, nama:"Ariel Noah", usia:41, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"kalem", komentar:"Fenomenal kayak Ariel! Kehadiranmu selalu membuat suasana berubah drastis menjadi lebih meriah dan berenergi!" },
+    { id:97, nama:"Once Mekel", usia:51, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"kalem", komentar:"Elegan kayak Once! Kamu punya ketenangan yang membuat semua orang percaya bahwa segala sesuatu akan baik-baik saja!" },
+    { id:98, nama:"Tompi", usia:48, postur:"kurus", rambut:"lurus", kumis:true, kacamata:false, karakter:"kalem", komentar:"Smooth kayak Tompi! Apapun situasinya, kamu bisa menavigasinya dengan gaya dan keanggunan yang memikat!" },
+    { id:99, nama:"Glenn Fredly", usia:44, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"kalem", komentar:"Penuh kasih kayak Glenn! Kehangatan yang kamu bawa membuat setiap interaksi terasa bermakna dan berharga!" },
+    { id:100, nama:"Giring Nidji", usia:39, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Semangat tak padam kayak Giring! Kamu selalu optimis dan energimu menginspirasi semua orang di sekitarmu!" },
+  ],
+  wanita: [
+    { id:101, nama:"Nunung", usia:59, postur:"gemuk", rambut:"lurus", karakter:"lebay", komentar:"Selamat! Seperti Nunung legend, energimu mengisi seluruh panggung. Ketawamu menular dan senyummu bikin dunia cerah!" },
+    { id:102, nama:"Soimah", usia:43, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Bawel dan menggemaskan kayak Soimah! Sekali kamu bicara, semua orang berhenti dan mendengarkan sambil senyum-senyum!" },
+    { id:103, nama:"Rina Nose", usia:38, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Eksplosif kayak Rina Nose! Energimu membuktikan kamu bisa bertahan di antara komedian paling lucu!" },
+    { id:104, nama:"Asri Welas", usia:43, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Welas asih kayak Asri! Humormu hangat dan mengundang tapi tiba-tiba bikin orang tersedak ketawa. Berbahaya!" },
+    { id:105, nama:"Kiky Saputri", usia:31, postur:"kurus", rambut:"lurus", karakter:"cerdas", komentar:"Berani kayak Kiky! Stand-up comedy-mu yang kritis tapi lucu membuktikan kamu bukan komedian biasa. Luar biasa!" },
+    { id:106, nama:"Ayu Ting Ting", usia:32, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Bohoso opo iku? Kayak Ayu, kamu punya charm alami yang bikin orang suka padamu bahkan sebelum kamu berkomedi!" },
+    { id:107, nama:"Fitri Tropica", usia:38, postur:"sedang", rambut:"lurus", karakter:"lebay", komentar:"Tropical vibes kayak Fitri! Pembawaan ceriamu seperti sinar matahari yang selalu menghangatkan suasana!" },
+    { id:108, nama:"Tika Panggabean", usia:45, postur:"gemuk", rambut:"lurus", karakter:"ekspresif", komentar:"Totalitas kayak Tika! Kamu all-in dalam berkomedi. Tidak ada setengah-setengah, selalu maksimal dan menghibur!" },
+    { id:109, nama:"Melaney Ricardo", usia:43, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Blak-blakan kayak Melaney! Kejujuranmu dalam berkomedi adalah kekuatan terbesar. Tidak ada filter, semua keluar!" },
+    { id:110, nama:"Arafah Rianti", usia:29, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"TikTok queen kayak Arafah! Kontenmu selalu relate dengan kehidupan sehari-hari dan bikin orang ngerasa less alone!" },
+    { id:111, nama:"Hesti Purwadinata", usia:37, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Presenter lucu kayak Hesti! Kamu bisa membuat topik serius jadi ringan dan menyenangkan. Skill berharga!" },
+    { id:112, nama:"Nycta Gina", usia:39, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Spontan kayak Nycta! Reaksi spontanmu terhadap kejadian sehari-hari selalu lebih lucu dari komedi terencana manapun!" },
+    { id:113, nama:"Sarah Sechan", usia:44, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Talk show queen kayak Sarah! Kemampuanmu menggali cerita lucu dari siapapun adalah superpower yang luar biasa!" },
+    { id:114, nama:"Cinta Laura", usia:30, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Aku tuh orangnya kayak Cinta Laura! Ungkapan ikonikmu sendiri adalah bukti kamu bisa menjadi meme hidup yang dicintai!" },
+    { id:115, nama:"Ria Ricis", usia:28, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Content queen kayak Ria Ricis! Apapun kamu lakukan bisa jadi konten yang menghibur jutaan orang!" },
+    { id:116, nama:"Gisella Anastasia", usia:32, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Gisel banget! Tawa lepasmu yang terkenal adalah senjata paling menggemaskan dalam arsenal humormu!" },
+    { id:117, nama:"Ayu Dewi", usia:40, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Host handal kayak Ayu Dewi! Kamu bisa mengendalikan suasana dan bikin semua tamu merasa nyaman dan lucu!" },
+    { id:118, nama:"Mpok Nori", usia:70, postur:"gemuk", rambut:"lurus", karakter:"polos", komentar:"Legenda Betawi ada di jiwamu! Seperti Mpok Nori, kamu simpan kelucuan dalam kesederhanaan. Rare talent!" },
+    { id:119, nama:"Olla Ramlan", usia:41, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Spontan kayak Olla! Kamu tidak perlu persiapan untuk jadi lucu. Natural comedian yang selalu ada di momen tepat!" },
+    { id:120, nama:"Rizky Inggar", usia:28, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Pemenang Anugerah Komedi! Seperti Rizky Inggar, kamu diakui semua kalangan sebagai komedian terbaik masa kini!" },
+    { id:121, nama:"Nabilah Ayu", usia:26, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Idol yang menghibur kayak Nabilah! Kamu punya kemampuan membuat semua orang bahagia hanya dengan senyumanmu!" },
+    { id:122, nama:"Awkarin", usia:26, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Berani dan autentik kayak Awkarin! Kamu tidak peduli penilaian orang dan itu justru yang membuat semua orang terpesona!" },
+    { id:123, nama:"Rachel Vennya", usia:27, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Relatable kayak Rachel! Cerita hidupmu yang jujur membuat semua orang merasa tidak sendirian dalam perjuangan!" },
+    { id:124, nama:"Awkarin", usia:26, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Pemberani kayak Awkarin! Kamu selalu jujur pada diri sendiri dan itulah kekuatan terbesar yang kamu miliki!" },
+    { id:125, nama:"Nagita Slavina", usia:35, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Anggun dan menghibur kayak Nagita! Senyummu adalah senjata rahasia yang membuat semua orang luluh!" },
+    { id:126, nama:"Nikita Willy", usia:30, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Elegan kayak Nikita! Kamu membuktikan bahwa cantik dan lucu adalah kombinasi yang bisa berjalan beriringan!" },
+    { id:127, nama:"Prilly Latuconsina", usia:27, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Multitalenta kayak Prilly! Kamu bisa akting serius sekaligus menghibur dengan natural. Bakat yang sangat langka!" },
+    { id:128, nama:"Raisa", usia:33, postur:"kurus", rambut:"lurus", karakter:"kalem", komentar:"Lembut kayak Raisa! Kehadiranmu selalu membawa ketenangan dan kehangatan yang membuat semua orang nyaman!" },
+    { id:129, nama:"Isyana Sarasvati", usia:30, postur:"kurus", rambut:"lurus", karakter:"cerdas", komentar:"Klasik dan modern kayak Isyana! Kamu punya kedalaman yang membuat setiap interaksi denganmu sangat berharga!" },
+    { id:130, nama:"Agnez Mo", usia:37, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"World class kayak Agnez! Standar tinggimu membuktikan bahwa kamu tidak pernah puas dengan yang biasa-biasa saja!" },
+    { id:131, nama:"Bunga Citra Lestari", usia:40, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Timeless kayak BCL! Kamu punya kualitas yang tidak lekang oleh waktu dan selalu relevan di setiap generasi!" },
+    { id:132, nama:"Rossa", usia:45, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Diva legendaris kayak Rossa! Totalitasmu dalam setiap penampilan adalah inspirasi bagi semua orang di sekitarmu!" },
+    { id:133, nama:"Krisdayanti", usia:49, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Diva tak tertandingi kayak KD! Kamu punya aura yang membuat semua orang berhenti dan memperhatikanmu!" },
+    { id:134, nama:"Titiek Puspa", usia:85, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Legenda abadi kayak Titiek Puspa! Kebijaksanaanmu adalah harta tak ternilai yang terus menginspirasi generasi!" },
+    { id:135, nama:"Evi Tamala", usia:52, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Dangdut queen kayak Evi! Energimu membuat semua kaki ingin bergoyang dan semua hati ikut bahagia!" },
+    { id:136, nama:"Inul Daratista", usia:43, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Energetik kayak Inul! Semangatmu yang tak pernah padam adalah bukti bahwa passion adalah bahan bakar terbaik!" },
+    { id:137, nama:"Via Vallen", usia:29, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Hits factory kayak Via! Apapun yang kamu sentuh langsung menjadi viral dan digemari semua kalangan!" },
+    { id:138, nama:"Nella Kharisma", usia:27, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Konsisten kayak Nella! Kamu terus berkarya tanpa henti dan itu adalah bukti dedikasi yang luar biasa!" },
+    { id:139, nama:"Happy Asmara", usia:24, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Gembira kayak namamu! Kamu punya kemampuan alami untuk membuat suasana menjadi lebih ceria dan bersemangat!" },
+    { id:140, nama:"Yura Yunita", usia:33, postur:"sedang", rambut:"lurus", karakter:"cerdas", komentar:"Artistik kayak Yura! Cara pandangmu yang unik membuat apapun yang kamu hasilkan selalu memiliki nilai seni tinggi!" },
+    { id:141, nama:"Lyodra Ginting", usia:21, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Prodigy kayak Lyodra! Di usiamu yang muda kamu sudah memiliki kemampuan yang membuat semua orang kagum!" },
+    { id:142, nama:"Tiara Andini", usia:20, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Rising star kayak Tiara! Kamu baru mulai tapi sudah membuat semua orang yakin masa depanmu sangat cerah!" },
+    { id:143, nama:"Ziva Magnolya", usia:21, postur:"kurus", rambut:"lurus", karakter:"kalem", komentar:"Pure talent kayak Ziva! Bakatmu yang murni dan tulus adalah nilai yang paling berharga di industri hiburan!" },
+    { id:144, nama:"Marion Jola", usia:23, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Berani tampil beda kayak Marion! Kamu tidak takut menjadi diri sendiri dan itu yang membuat semua orang mencintaimu!" },
+    { id:145, nama:"Ghea Indrawari", usia:24, postur:"sedang", rambut:"lurus", karakter:"cerdas", komentar:"Musisi berbakat kayak Ghea! Selera musikmu yang tinggi mencerminkan kedewasaan berpikir yang jauh melampaui usiamu!" },
+    { id:146, nama:"Ardhito Pramono", usia:27, postur:"sedang", rambut:"lurus", karakter:"kalem", komentar:"Cool dan stylish kayak Ardhito! Kamu punya vibe yang unik yang membuat semua orang ingin tahu lebih banyak tentangmu!" },
+    { id:147, nama:"Pamela Bowie", usia:34, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Penuh warna kayak Pamela! Kamu membawa kegembiraan dan keceriaan ke manapun kamu pergi. Sunshine of the party!" },
+    { id:148, nama:"Wulan Guritno", usia:43, postur:"kurus", rambut:"lurus", karakter:"kalem", komentar:"Ageless kayak Wulan! Kamu membuktikan bahwa kecantikan dan pesona sejati tidak mengenal batas usia!" },
+    { id:149, nama:"Dian Sastrowardoyo", usia:42, postur:"kurus", rambut:"lurus", karakter:"cerdas", komentar:"Cerdas dan cantik kayak Dian! Kamu buktikan bahwa otak dan penampilan bisa bersinergi menjadi paket sempurna!" },
+    { id:150, nama:"Marsha Timothy", usia:40, postur:"sedang", rambut:"lurus", karakter:"cerdas", komentar:"Aktris berbakat kayak Marsha! Kemampuanmu membaca situasi dan beradaptasi membuat kamu selalu tampil memukau!" },
+    { id:151, nama:"Adinia Wirasti", usia:38, postur:"kurus", rambut:"lurus", karakter:"cerdas", komentar:"Berkarakter kuat kayak Adinia! Setiap peran yang kamu mainkan meninggalkan kesan mendalam yang tak terlupakan!" },
+    { id:152, nama:"Tara Basro", usia:34, postur:"kurus", rambut:"lurus", karakter:"cerdas", komentar:"Visioner kayak Tara! Kamu selalu melihat peluang di mana orang lain hanya melihat rintangan. Luar biasa!" },
+    { id:153, nama:"Chicco Jerikho", usia:38, postur:"sedang", rambut:"lurus", karakter:"kalem", komentar:"Dedikasi tinggi kayak Chicco! Kamu tidak pernah setengah-setengah dalam apapun yang kamu lakukan!" },
+    { id:154, nama:"Tatjana Saphira", usia:27, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Bersinar kayak Tatjana! Kamu punya bakat alami yang membuat semua orang langsung jatuh cinta saat melihatmu!" },
+    { id:155, nama:"Pevita Pearce", usia:30, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Action queen kayak Pevita! Kamu buktikan bahwa perempuan bisa jadi kuat, berani, dan menghibur sekaligus!" },
+    { id:156, nama:"Andien", usia:39, postur:"kurus", rambut:"lurus", karakter:"kalem", komentar:"Filosofis kayak Andien! Cara berpikirmu yang mendalam membuat setiap percakapan denganmu selalu berkesan!" },
+    { id:157, nama:"Dira Sugandi", usia:41, postur:"sedang", rambut:"lurus", karakter:"cerdas", komentar:"Jazz queen kayak Dira! Kamu punya jiwa seni yang dalam dan cara berekspresi yang sangat autentik dan khas!" },
+    { id:158, nama:"Ruth Sahanaya", usia:57, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Legenda tak lekang waktu kayak Ruth! Standar profesionalisme yang kamu tunjukkan menjadi acuan bagi generasi muda!" },
+    { id:159, nama:"Titi DJ", usia:55, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Ikon era 90an kayak Titi DJ! Kamu adalah simbol kejayaan musik Indonesia yang selalu dirindukan semua generasi!" },
+    { id:160, nama:"Melly Goeslaw", usia:50, postur:"sedang", rambut:"lurus", karakter:"cerdas", komentar:"Pencipta lagu jenius kayak Melly! Kata-katamu selalu menembus hati karena berasal dari tempat yang paling dalam!" },
+    { id:161, nama:"Dewi Sandra", usia:43, postur:"sedang", rambut:"lurus", karakter:"kalem", komentar:"Transformasi inspiratif kayak Dewi! Perjalanan hidupmu mengajarkan bahwa perubahan terbaik dimulai dari dalam!" },
+    { id:162, nama:"Mulan Jameela", usia:43, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Rock diva kayak Mulan! Kamu punya keberanian untuk tampil beda dan itu yang membuat kamu selalu diingat!" },
+    { id:163, nama:"Nidji Vocalist", usia:38, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Idealis kayak Nidji! Kamu punya prinsip kuat yang tidak mudah goyah. Integritas adalah mahkota terindahmu!" },
+    { id:164, nama:"Sherina Munaf", usia:33, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Child prodigy yang berkembang kayak Sherina! Kamu terus tumbuh dan berkembang tanpa kehilangan esensi aslimu!" },
+    { id:165, nama:"Maudy Ayunda", usia:30, postur:"kurus", rambut:"lurus", karakter:"cerdas", komentar:"Brilian kayak Maudy! Kamu membuktikan bahwa berprestasi di akademik dan hiburan bisa dilakukan sekaligus!" },
+    { id:166, nama:"Raissa Anggiani", usia:18, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Generasi baru yang cerah kayak Raissa! Masa depan ada di tanganmu dan semua orang tidak sabar melihat perkembanganmu!" },
+    { id:167, nama:"Putri Ariani", usia:18, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Inspirasi dunia kayak Putri Ariani! Kamu membuktikan bahwa keterbatasan hanyalah perspektif yang bisa diubah!" },
+    { id:168, nama:"Hanin Dhiya", usia:24, postur:"kurus", rambut:"lurus", karakter:"kalem", komentar:"Melodi hati kayak Hanin! Suaramu bisa menyentuh hati orang bahkan sebelum mereka mengerti kata-katanya!" },
+    { id:169, nama:"Yovie Widianto", usia:52, postur:"sedang", rambut:"lurus", karakter:"cerdas", komentar:"Maestro kayak Yovie! Kamu punya pemahaman mendalam tentang apa yang membuat hati orang tergerak dan bahagia!" },
+    { id:170, nama:"Anggun C Sasmi", usia:51, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Global artist kayak Anggun! Kamu punya kualitas yang diakui dunia karena bakat dan kerja kerasmu yang luar biasa!" },
+    { id:171, nama:"Lesti Kejora", usia:24, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Juara sejati kayak Lesti! Perjalananmu dari bawah ke puncak adalah inspirasi nyata bagi semua yang bermimpi besar!" },
+    { id:172, nama:"Ayu Lestari", usia:40, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Konsisten kayak Ayu! Kamu terus hadir dan berkarya tanpa terpengaruh tren sesaat. Itu adalah ketangguhan sejati!" },
+    { id:173, nama:"Dewi Yull", usia:62, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Veteran panggung kayak Dewi Yull! Pengalamanmu adalah kitab hidup yang penuh pelajaran berharga!" },
+    { id:174, nama:"Hetty Koes Endang", usia:68, postur:"sedang", rambut:"lurus", karakter:"kalem", komentar:"Klasik tak lekang kayak Hetty! Kamu adalah bukti nyata bahwa kualitas sejati tidak pernah ketinggalan zaman!" },
+    { id:175, nama:"Ike Nurjanah", usia:50, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Penuh semangat kayak Ike! Kamu selalu memberikan 100% dalam setiap momen dan itu yang membuat semua kagum!" },
+    { id:176, nama:"Nafa Urbach", usia:43, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Abadi kayak Nafa! Kamu membuktikan bahwa pesona sejati tidak pernah pudar meski waktu terus berjalan!" },
+    { id:177, nama:"Paramitha Rusady", usia:55, postur:"sedang", rambut:"lurus", karakter:"kalem", komentar:"Elegan tanpa batas kayak Paramitha! Keanggunanmu adalah inspirasi bagi semua wanita dari segala generasi!" },
+    { id:178, nama:"Chrisye", usia:60, postur:"kurus", rambut:"lurus", karakter:"kalem", komentar:"Legenda musik kayak Chrisye! Kelembutanmu dalam menyampaikan pesan membuat semua kata terasa seperti puisi!" },
+    { id:179, nama:"Ikke Nurjanah", usia:50, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Queen of dangdut kayak Ikke! Energimu di atas panggung selalu berhasil membuat semua kaki tak bisa diam!" },
+    { id:180, nama:"Elvy Sukaesih", usia:73, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Ratu dangdut abadi kayak Elvy! Kontribusimu dalam musik Indonesia adalah warisan yang akan terus hidup selamanya!" },
+    { id:181, nama:"Camelia Malik", usia:59, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Berpengaruh kayak Camelia! Jejak langkahmu dalam industri hiburan membuka jalan bagi banyak generasi setelahmu!" },
+    { id:182, nama:"Dewi Persik", usia:38, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Bold dan percaya diri kayak Dewi Persik! Kamu tidak pernah takut menjadi diri sendiri dan itu kekuatan terbesarmu!" },
+    { id:183, nama:"Zaskia Gotik", usia:31, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Fun dan menggemaskan kayak Zaskia! Keceriaanmu yang tulus membuat semua orang merasa bahagia berada di dekatmu!" },
+    { id:184, nama:"Ayu Azhari", usia:51, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Legenda tak terlupakan kayak Ayu Azhari! Pesonamu telah memikat hati jutaan orang selama puluhan tahun!" },
+    { id:185, nama:"Tamara Bleszynski", usia:51, postur:"kurus", rambut:"lurus", karakter:"kalem", komentar:"Ikonik kayak Tamara! Kehadiranmu selalu memberikan kesan mendalam yang bertahan lama di benak semua orang!" },
+    { id:186, nama:"Luna Maya", usia:40, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Selalu fresh kayak Luna! Kamu terus berinovasi dan reinventing yourself sehingga selalu relevan di setiap era!" },
+    { id:187, nama:"Gracia Indri", usia:30, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Penuh pesona kayak Gracia! Kombinasi bakat dan kepribadianmu yang hangat membuat semua orang jatuh hati!" },
+    { id:188, nama:"Putri Marino", usia:30, postur:"kurus", rambut:"lurus", karakter:"cerdas", komentar:"Depth kayak Putri! Di balik penampilanmu yang anggun tersimpan kecerdasan dan kedalaman yang membuat semua kagum!" },
+    { id:189, nama:"Sheila Marcia", usia:35, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Survivor sejati kayak Sheila! Perjalanan hidupmu mengajarkan bahwa kekuatan sejati lahir dari tantangan terberat!" },
+    { id:190, nama:"Angel Karamoy", usia:31, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Energetik kayak Angel! Kamu selalu membawa suasana positif yang menular ke semua orang di sekitarmu!" },
+    { id:191, nama:"Dara JKT48", usia:22, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Idol spirit kayak Dara! Semangatmu dalam berkarya dan menghibur fans adalah inspirasi bagi semua penggemar setiamu!" },
+    { id:192, nama:"Shinta Bachir", usia:36, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Penuh warna kayak Shinta! Hidupmu yang berwarna adalah bukti bahwa keberanian menghadapi hidup menghasilkan keindahan!" },
+    { id:193, nama:"Aurel Hermansyah", usia:24, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Next gen star kayak Aurel! Kamu membawa semangat dan energi yang membuat orang-orang yang lebih tua pun ikut bersemangat!" },
+    { id:194, nama:"Acha Septriasa", usia:33, postur:"kurus", rambut:"lurus", karakter:"cerdas", komentar:"Bertumbuh kayak Acha! Kamu terus berkembang dengan integritas yang membuat semua orang bangga melihatmu!" },
+    { id:195, nama:"Ratu Felisha", usia:35, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Charming kayak Ratu! Kamu punya daya tarik natural yang membuat semua orang ingin berada di dekatmu!" },
+    { id:196, nama:"Sarwendah", usia:31, postur:"sedang", rambut:"lurus", karakter:"kalem", komentar:"Sabar dan bijaksana kayak Sarwendah! Ketenanganmu dalam menghadapi situasi apapun adalah kekuatan yang luar biasa!" },
+    { id:197, nama:"Reni Anggraeni", usia:40, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Profesional sejati kayak Reni! Kamu selalu memberikan yang terbaik dalam setiap pekerjaan tanpa terkecuali!" },
+    { id:198, nama:"Tya Ariestya", usia:38, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Hangat kayak Tya! Keramahanmu yang tulus membuat semua orang merasa diterima dan dihargai di dekatmu!" },
+    { id:199, nama:"Widi Mulia", usia:43, postur:"sedang", rambut:"lurus", karakter:"kalem", komentar:"Keluarga adalah segalanya kayak Widi! Prioritasmu yang jelas membuat semua keputusanmu terasa bijak dan bermakna!" },
+    { id:200, nama:"Annisa Pohan", usia:42, postur:"kurus", rambut:"lurus", karakter:"kalem", komentar:"Anggun dan berkarakter kayak Annisa! Kamu membuktikan bahwa kombinasi kecantikan dan integritas adalah yang terkuat!" },
+  ]
+};
+
+// ===== APP STATE =====
+let state = {
+  currentPage: 'landing',
+  playerName: '',
+  playerPhoto: '',
+  roomCode: '',
+  openGames: [],
+  players: ['Budi', 'Sari', 'Rudi', 'Rina'], // demo players
+  playerPhotos: {}, // name -> base64 photo
+
+  // Game 1
+  g1Cards: [], g1Flipped: [], g1Matched: [], g1CurrentPlayer: 0,
+  g1Scores: [0,0,0,0], g1CanFlip: true,
+
+  // Game 2
+  g2Members: [], g2CurrentIdx: 0, g2Score: 0, g2PoinLeft: 500,
+  g2Timer: null, g2Stage: 0, g2Scores: {},
+
+  // Game 3
+  g3Questions: [], g3CurrentQ: 0, g3Votes: {}, g3HofData: {},
+  g3Timer: null, g3TimerVal: 30,
+
+  // Game 4
+  g4Ronde: 1, g4Score: 0, g4Timer: null, g4TimerVal: 60,
+  g4Current: [], g4Answer: [],
+
+  // Game 5
+  g5Step: 0, g5Answers: {},
+
+  // Game 6
+  g6Idx: 0, g6Score: 0, g6Answers: [], g6HintUsed: false,
+};
+
+// ===== NAVIGATION =====
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+  const el = document.getElementById(id);
+  if (el) { el.style.display = id === 'landing' ? 'flex' : 'block'; }
+  state.currentPage = id;
+}
+
+function showLanding() { showPage('landing'); }
+function showLobby() {
+  showPage('lobby');
+  renderLobby();
+}
+
+function showAdmin() {
+  showPage('admin');
+  renderAdmin();
+}
+
+// ===== LANDING =====
+// ===== PHOTO UPLOAD (REGISTRASI) =====
+function handleRegPhoto(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = new Image();
+    img.onload = function() {
+      const canvas = document.createElement('canvas');
+      const MAX = 200;
+      let w = img.width, h = img.height;
+      if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+      else { w = Math.round(w * MAX / h); h = MAX; }
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+      state.playerPhoto = dataUrl;
+
+      // Show preview
+      const preview = document.getElementById('regPhotoPreview');
+      preview.innerHTML = '<img src="' + dataUrl + '" style="width:100%;height:100%;object-fit:cover;">';
+      showNotif('✅ Foto profil siap!');
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+  event.target.value = '';
+}
+
+function joinRoom() {
+  const name = document.getElementById('playerName').value.trim();
+  const code = document.getElementById('roomCode').value.trim().toUpperCase();
+  if (!name) { showNotif('Masukkan namamu dulu ya! 😊'); return; }
+  if (!code) { showNotif('Masukkan kode room dulu!'); return; }
+
+  // Validate room code against saved setting
+  const validCode = state.savedRoomCode || 'FAM2026';
+  if (code !== validCode) { showNotif('Kode room salah! Tanya host. 🔐'); return; }
+
+  state.playerName = name;
+  state.roomCode = code;
+  if (state.playerPhoto) state.playerPhotos[name] = state.playerPhoto;
+  document.getElementById('welcomeName').textContent = name;
+  document.getElementById('displayRoomCode').textContent = code;
+  if (!state.players.includes(name)) state.players.push(name);
+  showNotif('Berhasil masuk! Selamat datang, ' + name + ' 🎉');
+  showLobby();
+}
+
+// ===== LOBBY =====
+function renderLobby() {
+  const grid = document.getElementById('gamesGrid');
+  grid.innerHTML = GAMES_INFO.map(g => {
+    const isOpen = state.openGames.includes(g.id);
+    return `
+    <div class="game-card ${isOpen ? 'active' : 'locked'}" onclick="${isOpen ? 'openGame(' + g.id + ')' : 'showNotif(\'Game ini belum dibuka host!\')'}">
+      <div>
+        <div style="font-size:3.5rem;margin-bottom:12px;line-height:1">${g.icon}</div>
+        <div class="game-number">Game ${String(g.id).padStart(2,'0')}</div>
+        <div class="game-title">${g.title}</div>
+        <div class="game-desc">${g.desc}</div>
+      </div>
+      <div class="game-status ${isOpen ? 'status-open' : 'status-locked'}">${isOpen ? '✓ DIBUKA — TAP UNTUK MAIN' : '⌛ MENUNGGU HOST'}</div>
+    </div>`;
+  }).join('');
+}
+
+function openGame(id) {
+  if (id === 1) initGame1();
+  else if (id === 2) initGame2();
+  else if (id === 3) initGame3();
+  else if (id === 4) initGame4();
+  else if (id === 5) initGame5();
+  else if (id === 6) initGame6();
+}
+
+// ===== GAME 1: MEMORY MATCH =====
+function initGame1() {
+  showPage('game1');
+  const members = FAMILY_MEMBERS.slice(0, 15);
+  // Create pairs
+  let cards = [...members, ...members].map((m, i) => ({...m, cardId: i, flipped: false, matched: false}));
+  // Shuffle
+  for (let i = cards.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [cards[i], cards[j]] = [cards[j], cards[i]];
+  }
+  state.g1Cards = cards;
+  state.g1Flipped = [];
+  state.g1Matched = [];
+  state.g1CurrentPlayer = 0;
+  state.g1Scores = [0, 0, 0, 0];
+  state.g1CanFlip = true;
+  document.getElementById('game1Result').style.display = 'none';
+  renderG1();
+}
+
+function renderG1() {
+  // Player tabs
+  const tabs = state.players.slice(0,4);
+  document.getElementById('playerTabs').innerHTML = tabs.map((p,i) =>
+    `<div class="player-tab ${i === state.g1CurrentPlayer ? 'active' : ''}">${p}</div>`
+  ).join('');
+
+  // Scores
+  document.getElementById('scoreDisplay').innerHTML = tabs.map((p,i) =>
+    `<div class="score-box ${i === state.g1CurrentPlayer ? 'current' : ''}">
+      <div class="score-name">${p}</div>
+      <div class="score-val">${state.g1Scores[i]}</div>
+    </div>`
+  ).join('');
+
+  document.getElementById('turnAnnounce').textContent =
+    `Giliran: ${tabs[state.g1CurrentPlayer]} 🎯`;
+
+  // Grid
+  const grid = document.getElementById('memoryGrid');
+  grid.innerHTML = state.g1Cards.map((c, idx) => {
+    const isFlipped = state.g1Flipped.includes(idx) || state.g1Matched.includes(c.id);
+    const isMatched = state.g1Matched.includes(c.id);
+    return `
+    <div class="mem-card ${isFlipped ? 'flipped' : ''} ${isMatched ? 'matched' : ''}" onclick="flipCard(${idx})">
+      <div class="mem-inner">
+        <div class="mem-front"><div class="mem-front-pattern">❋</div></div>
+        <div class="mem-back">
+          ${c.foto ? `<img src="${c.foto}" alt="${c.nama}">` :
+            `<div style="width:100%;height:65%;background:var(--cream-dark);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;">👤</div>`}
+          <div class="mem-name">${c.nama}</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function flipCard(idx) {
+  if (!state.g1CanFlip) return;
+  if (state.g1Flipped.includes(idx)) return;
+  const card = state.g1Cards[idx];
+  if (state.g1Matched.includes(card.id)) return;
+
+  state.g1Flipped.push(idx);
+  renderG1();
+
+  if (state.g1Flipped.length === 2) {
+    state.g1CanFlip = false;
+    const [i1, i2] = state.g1Flipped;
+    const c1 = state.g1Cards[i1], c2 = state.g1Cards[i2];
+
+    setTimeout(() => {
+      if (c1.id === c2.id) {
+        // Match!
+        state.g1Matched.push(c1.id);
+        state.g1Scores[state.g1CurrentPlayer] += 10;
+        state.g1Flipped = [];
+        state.g1CanFlip = true;
+        showNotif('Cocok! +10 poin 🎉');
+        renderG1();
+        // Check win
+        if (state.g1Matched.length === FAMILY_MEMBERS.slice(0,15).length) {
+          showG1Result();
+        }
+      } else {
+        // No match - move to next player
+        state.g1Flipped = [];
+        state.g1CurrentPlayer = (state.g1CurrentPlayer + 1) % 4;
+        state.g1CanFlip = true;
+        renderG1();
+      }
+    }, 3000);
+  }
+}
+
+function showG1Result() {
+  document.getElementById('game1Result').style.display = 'block';
+  const scores = state.g1Scores.map((s, i) => ({ name: state.players[i] || 'P' + (i+1), score: s }));
+  scores.sort((a, b) => b.score - a.score);
+  document.getElementById('g1Podium').innerHTML = buildPodium(scores);
+}
+
+function restartGame1() { initGame1(); }
+
+// ===== GAME 2: TEBAK SIAPA =====
+function initGame2() {
+  showPage('game2');
+  state.g2Members = [...FAMILY_MEMBERS].sort(() => Math.random() - 0.5);
+  state.g2CurrentIdx = 0;
+  state.g2Score = 0;
+  state.g2Scores = {};
+  document.getElementById('g2Soal').style.display = 'block';
+  document.getElementById('g2Leaderboard').style.display = 'none';
+  loadG2Soal();
+}
+
+function loadG2Soal() {
+  if (state.g2CurrentIdx >= state.g2Members.length) {
+    showG2Leaderboard(); return;
+  }
+  const m = state.g2Members[state.g2CurrentIdx];
+  state.g2PoinLeft = 500;
+  state.g2Stage = 0;
+  document.getElementById('g2Num').textContent = state.g2CurrentIdx + 1;
+  document.getElementById('g2Total').textContent = state.g2Members.length;
+  document.getElementById('g2Progress').style.width = ((state.g2CurrentIdx / state.g2Members.length) * 100) + '%';
+  document.getElementById('g2Poin').textContent = state.g2PoinLeft;
+  document.getElementById('g2Answer').value = '';
+  document.getElementById('g2Feedback').innerHTML = '';
+
+  if (m.foto) {
+    document.getElementById('g2Img').src = m.foto;
+  }
+
+  // Start mask reveal
+  clearInterval(state.g2Timer);
+  updateG2Mask(0);
+  state.g2Timer = setInterval(() => {
+    state.g2Stage++;
+    state.g2PoinLeft = Math.max(100, 500 - state.g2Stage * 80);
+    document.getElementById('g2Poin').textContent = state.g2PoinLeft;
+    updateG2Mask(state.g2Stage);
+    if (state.g2Stage >= 5) clearInterval(state.g2Timer);
+  }, 2000);
+}
+
+function updateG2Mask(stage) {
+  const pct = stage * 20;
+  const mask = document.getElementById('g2Mask');
+  if (mask) mask.style.clipPath = `inset(${pct}% 0 0 0)`;
+}
+
+function submitG2() {
+  clearInterval(state.g2Timer);
+  const ans = document.getElementById('g2Answer').value.trim().toLowerCase();
+  const m = state.g2Members[state.g2CurrentIdx];
+  const correct = m.nama.toLowerCase();
+  const isCorrect = ans.includes(correct.split(' ')[0].toLowerCase()) || correct.includes(ans);
+  const fb = document.getElementById('g2Feedback');
+
+  if (isCorrect) {
+    const poin = state.g2PoinLeft;
+    state.g2Score += poin;
+    state.g2Scores[state.playerName || 'Kamu'] = (state.g2Scores[state.playerName || 'Kamu'] || 0) + poin;
+    fb.innerHTML = `<span style="color:var(--green);font-weight:600">✓ Benar! +${poin} poin</span>`;
+  } else {
+    fb.innerHTML = `<span style="color:var(--red)">✗ Salah. Jawabannya: <strong>${m.nama}</strong></span>`;
+  }
+
+  // Fully reveal
+  updateG2Mask(5);
+
+  setTimeout(() => {
+    state.g2CurrentIdx++;
+    loadG2Soal();
+  }, 2000);
+}
+
+function showG2Leaderboard() {
+  document.getElementById('g2Soal').style.display = 'none';
+  document.getElementById('g2Leaderboard').style.display = 'block';
+  const list = document.getElementById('g2LBList');
+  const sorted = Object.entries(state.g2Scores).sort((a,b) => b[1]-a[1]);
+  list.innerHTML = sorted.map(([name, score], i) => `
+    <div style="display:flex;align-items:center;gap:1rem;padding:12px;background:var(--${i===0?'cream-dark':'white'});border-radius:10px;margin-bottom:8px;border:1px solid rgba(201,168,76,0.2)">
+      <div style="font-size:1.5rem">${i===0?'🥇':i===1?'🥈':'🥉'}</div>
+      <div style="flex:1;font-weight:600;color:var(--brown)">${name}</div>
+      <div style="font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--gold)">${score}</div>
+    </div>`).join('');
+}
+
+function restartGame2() { initGame2(); }
+
+// ===== GAME 3: SIAPA PALING =====
+function initGame3() {
+  showPage('game3');
+  state.g3Questions = [...PERTANYAAN_G3].sort(() => Math.random() - 0.5).slice(0, 5);
+  state.g3CurrentQ = 0;
+  state.g3Votes = {};
+  state.g3HofData = {};
+  document.getElementById('g3Voting').style.display = 'block';
+  document.getElementById('g3Result').style.display = 'none';
+  document.getElementById('g3HallOfFame').style.display = 'none';
+  loadG3Question();
+}
+
+function loadG3Question() {
+  const q = state.g3Questions[state.g3CurrentQ];
+  state.g3Votes = {};
+  document.getElementById('g3Num').textContent = state.g3CurrentQ + 1;
+  document.getElementById('g3Question').textContent = q;
+  document.getElementById('g3TimerNum').textContent = 30;
+  document.getElementById('g3Timer').style.width = '100%';
+  document.getElementById('g3SubmitBtn').disabled = false;
+
+  // Render vote grid
+  const members = FAMILY_MEMBERS.slice(0, 20);
+  document.getElementById('voteGrid').innerHTML = members.map(m => `
+    <div class="vote-card" id="vc_${m.id}" onclick="selectVote(${m.id})">
+      ${m.foto ? `<img src="${m.foto}" alt="${m.nama}">` :
+        `<div style="width:64px;height:64px;border-radius:50%;background:var(--cream-dark);margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;border:2px solid rgba(201,168,76,0.3)">👤</div>`}
+      <div class="vote-name">${m.nama}</div>
+    </div>`).join('');
+
+  // Timer
+  clearInterval(state.g3Timer);
+  let t = 30;
+  state.g3Timer = setInterval(() => {
+    t--;
+    document.getElementById('g3TimerNum').textContent = t;
+    document.getElementById('g3Timer').style.width = (t / 30 * 100) + '%';
+    if (t <= 0) { clearInterval(state.g3Timer); showG3Result(); }
+  }, 1000);
+}
+
+function selectVote(id) {
+  document.querySelectorAll('.vote-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('vc_' + id).classList.add('selected');
+  state.selectedVote = id;
+}
+
+function submitVote() {
+  clearInterval(state.g3Timer);
+  if (state.selectedVote) {
+    state.g3Votes[state.selectedVote] = (state.g3Votes[state.selectedVote] || 0) + 1;
+    // Simulate other votes
+    FAMILY_MEMBERS.slice(0, 10).forEach(m => {
+      if (Math.random() > 0.6) {
+        state.g3Votes[m.id] = (state.g3Votes[m.id] || 0) + 1;
+      }
+    });
+  }
+  showG3Result();
+}
+
+function showG3Result() {
+  document.getElementById('g3Voting').style.display = 'none';
+  document.getElementById('g3Result').style.display = 'block';
+
+  const q = state.g3Questions[state.g3CurrentQ];
+  document.getElementById('g3ResultQ').textContent = q;
+
+  // Find winner
+  const sorted = Object.entries(state.g3Votes).sort((a,b) => b[1]-a[1]);
+  const total = Object.values(state.g3Votes).reduce((a,b) => a+b, 0) || 1;
+
+  if (sorted.length > 0) {
+    const winnerId = parseInt(sorted[0][0]);
+    const winner = FAMILY_MEMBERS.find(m => m.id === winnerId);
+    if (winner) {
+      document.getElementById('g3WinnerName').textContent = winner.nama;
+      document.getElementById('g3WinnerPct').textContent = Math.round(sorted[0][1] / total * 100) + '% suara';
+      document.getElementById('g3WinnerImg').textContent = '👑';
+      // Update HOF
+      state.g3HofData[winner.nama] = (state.g3HofData[winner.nama] || 0) + 1;
+    }
+  }
+
+  // Vote bars
+  const topFive = sorted.slice(0, 5);
+  document.getElementById('g3Bars').innerHTML = topFive.map(([id, cnt]) => {
+    const m = FAMILY_MEMBERS.find(x => x.id == id);
+    const pct = Math.round(cnt / total * 100);
+    return `<div class="vote-bar-row">
+      <div class="vote-bar-name">${m ? m.nama : '?'}</div>
+      <div class="vote-bar-wrap"><div class="vote-bar-fill" style="width:${pct}%"></div></div>
+      <div class="vote-bar-pct">${pct}%</div>
+    </div>`;
+  }).join('');
+
+  const isLast = state.g3CurrentQ >= state.g3Questions.length - 1;
+  document.getElementById('g3NextBtn').textContent = isLast ? '🏛️ Lihat Hall of Fame' : 'Pertanyaan Berikutnya →';
+}
+
+function nextG3Question() {
+  state.g3CurrentQ++;
+  if (state.g3CurrentQ >= state.g3Questions.length) {
+    showG3HallOfFame();
+  } else {
+    document.getElementById('g3Voting').style.display = 'block';
+    document.getElementById('g3Result').style.display = 'none';
+    state.selectedVote = null;
+    loadG3Question();
+  }
+}
+
+function showG3HallOfFame() {
+  document.getElementById('g3Result').style.display = 'none';
+  document.getElementById('g3HallOfFame').style.display = 'block';
+  const sorted = Object.entries(state.g3HofData).sort((a,b) => b[1]-a[1]);
+  const trophies = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'];
+  document.getElementById('hofList').innerHTML = sorted.map(([name, count], i) => `
+    <div class="hof-item">
+      <div class="hof-placeholder">👤</div>
+      <div class="hof-info">
+        <strong>${name}</strong>
+        <span>Terpilih di ${count} kategori</span>
+      </div>
+      <div class="hof-trophy">${trophies[i] || '⭐'}</div>
+    </div>`).join('');
+}
+
+function restartGame3() { initGame3(); }
+
+// ===== GAME 4: TIMELINE =====
+function initGame4() {
+  showPage('game4');
+  state.g4Ronde = 1;
+  state.g4Score = 0;
+  state.g4Answer = [];
+  document.getElementById('g4Playing').style.display = 'block';
+  document.getElementById('g4Result').style.display = 'none';
+  loadG4Ronde();
+}
+
+function loadG4Ronde() {
+  document.getElementById('g4Ronde').textContent = state.g4Ronde;
+  document.getElementById('g4Score').textContent = state.g4Score;
+  document.getElementById('g4Timer').textContent = 60;
+
+  // Pick 5 members with "usia" field for this ronde
+  const pool = FAMILY_MEMBERS.slice((state.g4Ronde - 1) * 5, state.g4Ronde * 5)
+    .map((m, i) => ({ ...m, usia: 20 + i * 8 }));
+  state.g4Current = [...pool].sort(() => Math.random() - 0.5);
+  state.g4Answer = [];
+
+  // Timer
+  clearInterval(state.g4Timer);
+  let t = 60;
+  const timerEl = document.getElementById('g4Timer');
+  state.g4TimerInterval = setInterval(() => {
+    t--;
+    if (timerEl) timerEl.textContent = t;
+    if (t <= 0) { clearInterval(state.g4TimerInterval); submitTimeline(); }
+  }, 1000);
+
+  renderG4();
+}
+
+function renderG4() {
+  document.getElementById('timelineCards').innerHTML = state.g4Current.map(m => `
+    <div class="timeline-card" draggable="true" id="tc_${m.id}" ondragstart="dragStart(${m.id})" onclick="addToAnswer(${m.id})">
+      ${m.foto ? `<img src="${m.foto}" alt="${m.nama}">` :
+        `<div style="width:70px;height:70px;border-radius:50%;background:var(--cream-dark);display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin:0 auto 6px;border:2px solid rgba(201,168,76,0.3)">👤</div>`}
+      <div class="tl-name">${m.nama}</div>
+    </div>`).join('');
+
+  document.getElementById('answerSlots').innerHTML = Array(5).fill(0).map((_, i) => {
+    const filled = state.g4Answer[i];
+    return filled ?
+      `<div class="answer-slot filled" onclick="removeFromAnswer(${i})" style="width:80px;height:90px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--white);padding:4px">
+        <div style="font-size:1.5rem">👤</div>
+        <div style="font-size:9px;font-weight:600;color:var(--brown);text-align:center;margin-top:4px">${filled.nama}</div>
+      </div>` :
+      `<div class="answer-slot" ondragover="event.preventDefault()" ondrop="dropHere(${i})">${i + 1}</div>`;
+  }).join('');
+}
+
+let dragId = null;
+function dragStart(id) { dragId = id; }
+function dropHere(slotIdx) {
+  if (dragId !== null) addToAnswerAt(dragId, slotIdx);
+}
+
+function addToAnswer(id) {
+  const m = state.g4Current.find(x => x.id === id);
+  if (!m) return;
+  const nextEmpty = state.g4Answer.length;
+  if (nextEmpty < 5 && !state.g4Answer.find(x => x.id === id)) {
+    state.g4Answer.push(m);
+    renderG4();
+  }
+}
+
+function addToAnswerAt(id, slotIdx) {
+  const m = state.g4Current.find(x => x.id === id);
+  if (!m || state.g4Answer.find(x => x.id === id)) return;
+  state.g4Answer[slotIdx] = m;
+  renderG4();
+}
+
+function removeFromAnswer(i) {
+  state.g4Answer.splice(i, 1);
+  renderG4();
+}
+
+function resetTimeline() {
+  state.g4Answer = [];
+  renderG4();
+}
+
+function submitTimeline() {
+  clearInterval(state.g4TimerInterval);
+  const correct = [...state.g4Current].sort((a, b) => a.usia - b.usia);
+  let roundScore = 0;
+
+  state.g4Answer.forEach((m, i) => {
+    if (m && correct[i] && m.id === correct[i].id) roundScore += 10;
+  });
+
+  if (state.g4Answer.length === 5 && state.g4Answer.every((m, i) => m && correct[i] && m.id === correct[i].id)) {
+    roundScore += 20; // Bonus semua benar
+  }
+
+  state.g4Score += roundScore;
+  showNotif(`Ronde ${state.g4Ronde}: +${roundScore} poin`);
+
+  if (state.g4Ronde < 3) {
+    state.g4Ronde++;
+    setTimeout(loadG4Ronde, 1500);
+  } else {
+    setTimeout(showG4Result, 1500);
+  }
+}
+
+function showG4Result() {
+  document.getElementById('g4Playing').style.display = 'none';
+  document.getElementById('g4Result').style.display = 'block';
+  document.getElementById('g4FinalScore').textContent = state.g4Score + ' Poin';
+  const scores = [{ name: state.playerName || 'Kamu', score: state.g4Score }];
+  document.getElementById('g4Podium').innerHTML = buildPodium(scores);
+}
+
+function restartGame4() { initGame4(); }
+
+// ===== GAME 5: MIRIP SIAPA =====
+function initGame5() {
+  showPage('game5');
+  state.g5Step = 0;
+  state.g5Answers = {};
+  document.getElementById('g5Quiz').style.display = 'block';
+  document.getElementById('miripResult').style.display = 'none';
+  renderG5Step();
+}
+
+function renderG5Step() {
+  const q = PERTANYAAN_G5[state.g5Step];
+
+  // Progress dots
+  document.getElementById('quizProgress').innerHTML = PERTANYAAN_G5.map((_, i) =>
+    `<div class="quiz-dot ${i < state.g5Step ? 'done' : i === state.g5Step ? 'active' : ''}"></div>`
+  ).join('');
+
+  document.getElementById('quizQuestion').textContent = q.pertanyaan;
+  document.getElementById('quizOptions').innerHTML = q.opsi.map(opt => `
+    <button class="quiz-opt ${state.g5Answers[q.field] === opt ? 'selected' : ''}"
+      onclick="selectG5('${q.field}', '${opt}')">${opt}</button>`).join('');
+}
+
+function selectG5(field, val) {
+  state.g5Answers[field] = val;
+  document.querySelectorAll('.quiz-opt').forEach(b => b.classList.remove('selected'));
+  event.target.classList.add('selected');
+
+  setTimeout(() => {
+    state.g5Step++;
+    if (state.g5Step >= PERTANYAAN_G5.length) {
+      showG5Result();
+    } else {
+      renderG5Step();
+    }
+  }, 400);
+}
+
+function showG5Result() {
+  document.getElementById('g5Quiz').style.display = 'none';
+  const result = document.getElementById('miripResult');
+  result.style.display = 'block';
+
+  const { gender, usia, postur, rambut, ciri, karakter } = state.g5Answers;
+  const pool = gender === 'Pria' ? COMEDIANS.pria : COMEDIANS.wanita;
+
+  const usiaMap = { "Muda (< 30 tahun)": [0,29], "Paruh Baya (30–50 tahun)": [30,50], "Senior (> 50 tahun)": [51,999] };
+  const posturMap = { "Kurus": "kurus", "Sedang": "sedang", "Gemuk": "gemuk" };
+  const rambutMap = { "Lurus": "lurus", "Keriting": "keriting", "Botak": "botak" };
+  const karakterMap = { "Lebay & Dramatis": "lebay", "Polos & Innocent": "polos", "Cerdas & Satir": "cerdas", "Ekspresif & Energik": "ekspresif", "Kalem & Misterius": "kalem", "Jail & Usil": "jail" };
+
+  const [minU, maxU] = usiaMap[usia] || [0, 999];
+
+  let scores = pool.map(k => {
+    let s = 0;
+    if ((k.usia || 35) >= minU && (k.usia || 35) <= maxU) s += 3;
+    if (k.postur === posturMap[postur]) s += 2;
+    if (k.rambut === rambutMap[rambut]) s += 2;
+    if (k.karakter === karakterMap[karakter]) s += 3;
+    if (ciri === "Kumis/Jenggot" && k.kumis) s += 2;
+    if (ciri === "Berkacamata" && k.kacamata) s += 2;
+    s += Math.random() * 1.5;
+    return { ...k, score: s };
+  });
+
+  scores.sort((a, b) => b.score - a.score);
+  const winner = scores[0];
+  const persen = Math.floor(70 + Math.random() * 25);
+
+  document.getElementById('userName2').textContent = state.playerName || 'Kamu';
+  document.getElementById('komedianName').textContent = winner.nama;
+  document.getElementById('persenBadge').textContent = persen + '% Mirip';
+  document.getElementById('komentarLucu').textContent = winner.komentar;
+}
+
+function restartGame5() { initGame5(); }
+
+// ===== ADMIN =====
+
+// Load saved data from localStorage on startup
+function loadSavedData() {
+  try {
+    // Event settings
+    const evSettings = localStorage.getItem('ras_event');
+    if (evSettings) {
+      const ev = JSON.parse(evSettings);
+      if (ev.name) {
+        document.title = ev.name;
+        const wm = document.querySelector('.event-watermark');
+        if (wm) wm.textContent = (ev.name.toUpperCase()) + ' · ' + (ev.date || '') + ' · ' + (ev.venue || '');
+        const lt = document.querySelector('.landing-title');
+        if (lt) lt.innerHTML = ev.name.replace("'s", "'s<br>").replace('Family', '<span>Family</span>');
+        const ei = document.querySelector('.event-info p');
+        if (ei && ev.date && ev.venue) ei.innerHTML = '📅 ' + ev.date + ' &nbsp;·&nbsp; 🏛️ ' + ev.venue;
+      }
+      if (ev.roomCode) state.savedRoomCode = ev.roomCode;
+    }
+
+    // Family members & photos
+    const savedMembers = localStorage.getItem('ras_members');
+    if (savedMembers) {
+      const parsed = JSON.parse(savedMembers);
+      if (parsed && parsed.length > 0) {
+        // Merge saved data into FAMILY_MEMBERS
+        parsed.forEach((saved, i) => {
+          if (i < FAMILY_MEMBERS.length) {
+            if (saved.nama) FAMILY_MEMBERS[i].nama = saved.nama;
+            if (saved.foto) FAMILY_MEMBERS[i].foto = saved.foto;
+          }
+        });
+      }
+    }
+  } catch(e) {
+    console.log('No saved data or parse error', e);
+  }
+}
+
+function saveEventSettings() {
+  const name = document.getElementById('inputEventName').value.trim() || 'Rasmita\'s Family Gathering 2026';
+  const date = document.getElementById('inputEventDate').value.trim() || '28 Maret 2026';
+  const venue = document.getElementById('inputEventVenue').value.trim() || 'Wisma Mandiri, Bandung';
+  const roomCode = (document.getElementById('inputRoomCode').value.trim() || 'FAM2026').toUpperCase();
+
+  localStorage.setItem('ras_event', JSON.stringify({ name, date, venue, roomCode }));
+  state.savedRoomCode = roomCode;
+
+  // Update UI
+  document.getElementById('adminRoomCode').textContent = roomCode;
+  document.getElementById('displayRoomCode').textContent = roomCode;
+  document.getElementById('adminEventTitle').textContent = name;
+  document.querySelector('.event-watermark').textContent = name.toUpperCase() + ' · ' + date + ' · ' + venue;
+  document.querySelector('.event-info p').innerHTML = '📅 ' + date + ' &nbsp;·&nbsp; 🏛️ ' + venue;
+
+  showNotif('✅ Pengaturan disimpan!');
+}
+
+let currentUploadId = null;
+
+function addMember() {
+  const newId = FAMILY_MEMBERS.length + 1;
+  FAMILY_MEMBERS.push({ id: newId, nama: 'Anggota ' + newId, foto: '' });
+  saveMembersToStorage();
+  renderUploadGrid();
+  showNotif('Anggota baru ditambahkan');
+}
+
+function clearAllPhotos() {
+  if (!confirm('Hapus semua foto yang sudah diupload?')) return;
+  FAMILY_MEMBERS.forEach(m => m.foto = '');
+  saveMembersToStorage();
+  renderUploadGrid();
+  showNotif('Semua foto dihapus');
+}
+
+function exportMemberData() {
+  const data = FAMILY_MEMBERS.map(m => ({ id: m.id, nama: m.nama, hasFoto: !!m.foto }));
+  const text = JSON.stringify(data, null, 2);
+  const blob = new Blob([text], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'anggota-keluarga.json';
+  a.click();
+}
+
+function saveMembersToStorage() {
+  try {
+    const toSave = FAMILY_MEMBERS.map(m => ({ id: m.id, nama: m.nama, foto: m.foto }));
+    localStorage.setItem('ras_members', JSON.stringify(toSave));
+  } catch(e) {
+    showNotif('⚠️ Storage penuh! Kurangi ukuran foto.');
+  }
+}
+
+function renderUploadGrid() {
+  const grid = document.getElementById('uploadGrid');
+  if (!grid) return;
+  grid.innerHTML = FAMILY_MEMBERS.map(m => `
+    <div class="upload-item ${m.foto ? 'has-photo' : ''}" onclick="triggerPhotoUpload(${m.id})">
+      ${m.foto
+        ? `<img src="${m.foto}" alt="${m.nama}">`
+        : `<div class="upload-placeholder">📷</div>`}
+      <div class="upload-member-name" id="mname_${m.id}" contenteditable="true"
+        onblur="renameMember(${m.id}, this.textContent)"
+        onclick="event.stopPropagation()">${m.nama}</div>
+      <div class="upload-hint">${m.foto ? '✓ Ada foto' : 'Tap upload'}</div>
+    </div>`).join('');
+}
+
+function triggerPhotoUpload(memberId) {
+  currentUploadId = memberId;
+  document.getElementById('photoFileInput').click();
+}
+
+function handlePhotoUpload(event) {
+  const file = event.target.files[0];
+  if (!file || !currentUploadId) return;
+
+  // Resize & compress to base64
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = new Image();
+    img.onload = function() {
+      const canvas = document.createElement('canvas');
+      const MAX = 300;
+      let w = img.width, h = img.height;
+      if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+      else { w = Math.round(w * MAX / h); h = MAX; }
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.75);
+
+      const member = FAMILY_MEMBERS.find(m => m.id === currentUploadId);
+      if (member) {
+        member.foto = dataUrl;
+        saveMembersToStorage();
+        renderUploadGrid();
+        showNotif('✅ Foto ' + member.nama + ' tersimpan!');
+      }
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+  event.target.value = ''; // reset input
+}
+
+function renameMember(id, newName) {
+  const member = FAMILY_MEMBERS.find(m => m.id === id);
+  if (member && newName.trim()) {
+    member.nama = newName.trim();
+    saveMembersToStorage();
+  }
+}
+
+function openAllGames() {
+  state.openGames = GAMES_INFO.map(g => g.id);
+  renderAdmin();
+  showNotif('🎮 Semua game dibuka!');
+}
+
+function closeAllGames() {
+  state.openGames = [];
+  renderAdmin();
+  showNotif('Semua game ditutup.');
+}
+
+function renderAdmin() {
+  // Fill settings inputs with saved values
+  try {
+    const ev = JSON.parse(localStorage.getItem('ras_event') || '{}');
+    document.getElementById('inputEventName').value = ev.name || '';
+    document.getElementById('inputEventDate').value = ev.date || '';
+    document.getElementById('inputEventVenue').value = ev.venue || '';
+    document.getElementById('inputRoomCode').value = ev.roomCode || 'FAM2026';
+    document.getElementById('adminRoomCode').textContent = ev.roomCode || 'FAM2026';
+    document.getElementById('adminEventTitle').textContent = ev.name || "Rasmita's Family Gathering 2026";
+  } catch(e) {}
+
+  document.getElementById('adminPlayerCount').textContent = state.players.length;
+  document.getElementById('adminOpenCount').textContent = state.openGames.length;
+
+  document.getElementById('adminGames').innerHTML = GAMES_INFO.map(g => {
+    const isOpen = state.openGames.includes(g.id);
+    return `
+    <div class="admin-game-card">
+      <div style="font-size:1.5rem;margin-bottom:6px">${g.icon}</div>
+      <h4>${g.title}</h4>
+      <p>${g.desc}</p>
+      <button class="toggle-btn ${isOpen ? 'close' : 'open'}" onclick="toggleGame(${g.id})">
+        ${isOpen ? '⏹ Tutup Game' : '▶ Buka Game'}
+      </button>
+    </div>`;
+  }).join('');
+
+  document.getElementById('adminPlayerList').innerHTML = state.players.map(p => `
+    <div class="player-item">
+      <div class="player-avatar">${p[0].toUpperCase()}</div>
+      <div class="player-name">${p}</div>
+      <div class="player-status">● Online</div>
+    </div>`).join('') || '<p style="color:var(--brown-light);font-size:13px">Belum ada pemain</p>';
+
+  renderUploadGrid();
+}
+
+function toggleGame(id) {
+  if (state.openGames.includes(id)) {
+    state.openGames = state.openGames.filter(g => g !== id);
+    showNotif('Game ' + id + ' ditutup');
+  } else {
+    state.openGames.push(id);
+    showNotif('Game ' + id + ' dibuka! Pemain bisa bergabung 🎉');
+  }
+  renderAdmin();
+}
+
+// ===== HELPERS =====
+function buildPodium(scores) {
+  const ordered = [scores[1], scores[0], scores[2]].filter(Boolean);
+  const classes = ['second', 'first', 'third'];
+  const labels = ['🥈', '🥇', '🥉'];
+  return `<div class="podium">` + ordered.map((s, i) => `
+    <div class="podium-slot">
+      <div class="podium-bar ${classes[i]}">${labels[i]}</div>
+      <div class="podium-name">${s.name}</div>
+      <div class="podium-score">${s.score} poin</div>
+    </div>`).join('') + `</div>`;
+}
+
+function showNotif(msg) {
+  const n = document.getElementById('notif');
+  n.textContent = msg;
+  n.classList.add('show');
+  setTimeout(() => n.classList.remove('show'), 3000);
+}
+
+// ===== GAME 6: TEBAK LAGU =====
+const LAGU_INDONESIA = [
+  {
+    id: 1,
+    judul: "Keluarga Cemara",
+    artis: "Hedi Yunus",
+    tahun: 1996,
+    emoji: "🏡",
+    petunjuk: "Lagu tema dari sinetron legendaris keluarga Indonesia tahun 90-an",
+    lirik: "Harta yang paling berharga adalah keluarga
+Istana yang paling indah adalah keluarga
+Puisi yang paling bermakna adalah keluarga
+Mutiara tiada tara adalah keluarga
+
+Selamat pagi Emak, selamat pagi Abah
+Mentari hari ini berseri indah...",
+    pilihan: ["Keluarga Cemara", "Harta Berharga", "Bintang di Surga", "Kau Adalah"],
+    jawaban: "Keluarga Cemara",
+    intro_nada: "Sol Mi Fa Sol Do Re Mi Fa Sol...",
+    // ─── AUDIO FILE (opsional) ───────────────────────────────
+    // audio_file: "lagu1.mp3",
+    // ✂️ POTONG: menit 0:00 – 0:14 (14 detik pertama — melodi intro sebelum vokal masuk)
+    // intro_start: 0,
+    // intro_end: 14
+    // ─────────────────────────────────────────────────────────
+  },
+  {
+    id: 2,
+    judul: "Tabo Balik",
+    artis: "Pop Minang / Tradisional",
+    tahun: 1990,
+    emoji: "🎶",
+    petunjuk: "Lagu daerah Minang yang familiar — tentang kerinduan kampung halaman",
+    lirik: "Tabo balik ka nagari
+Tampek lahia den barinduang
+Tagak di lereng Singgalang
+Mandanga bunyi talempong...
+
+Di siko den marantau jauah
+Hati rindu ka kampuang...",
+    pilihan: ["Tabo Balik", "Ayam Den Lapeh", "Kampuang Nan Jauh Di Mato", "Tak Tong Tong"],
+    jawaban: "Tabo Balik",
+    intro_nada: "Do Re Mi Sol Mi Re Do La Sol...",
+    // ─── AUDIO FILE (opsional) ───────────────────────────────
+    // audio_file: "lagu2.mp3",
+    // ✂️ POTONG: menit 0:00 – 0:12 (12 detik pertama — bagian melodi pembuka)
+    // intro_start: 0,
+    // intro_end: 12
+    // ─────────────────────────────────────────────────────────
+  },
+  {
+    id: 3,
+    judul: "Kangen",
+    artis: "Dewa 19",
+    tahun: 1992,
+    emoji: "💕",
+    petunjuk: "Lagu band rock legendaris Indonesia era 90-an tentang kerinduan",
+    lirik: "Kau begitu sempurna di mataku
+Kau bagaikan tiada yang lain
+Resahku yang selalu membuatku
+Tak dapat melupakan dirimu
+Kuingin kau tahu
+Kuingin kau mengerti
+Betapa aku sangat merindukanmu
+Walau kutahu kau telah pergi...",
+    pilihan: ["Kangen", "Laskar Pelangi", "Separuh Aku", "Sempurna"],
+    jawaban: "Kangen",
+    intro_nada: "Mi Re Do La Sol La Mi Re...",
+    // ─── AUDIO FILE (opsional) ───────────────────────────────
+    // audio_file: "lagu3.mp3",
+    // ✂️ POTONG: menit 0:05 – 0:18 (lewati 5 detik intro gitar, ambil masuk vokal pertama)
+    // intro_start: 5,
+    // intro_end: 18
+    // ─────────────────────────────────────────────────────────
+  },
+  {
+    id: 4,
+    judul: "Laskar Pelangi",
+    artis: "Nidji",
+    tahun: 2008,
+    emoji: "🌈",
+    petunjuk: "Lagu soundtrack film fenomenal tentang anak-anak sekolah di Belitung",
+    lirik: "Mimpi adalah kunci
+Untuk kita menaklukkan dunia
+Berlarilah tanpa lelah
+Sampai engkau meraihnya
+Laskar pelangi, takkan terikat waktu
+Bebaskan mimpimu di angkasa
+Raih bintang di jiwa
+Mimpilah yang besar
+Hingga hidupmu bermakna...",
+    pilihan: ["Garuda di Dadaku", "Laskar Pelangi", "Sang Pemimpi", "Dealova"],
+    jawaban: "Laskar Pelangi",
+    intro_nada: "Sol Sol Mi Sol La Sol Mi Re...",
+    // ─── AUDIO FILE (opsional) ───────────────────────────────
+    // audio_file: "lagu4.mp3",
+    // ✂️ POTONG: menit 0:00 – 0:13 (langsung dari awal, vokal masuk di detik ke-13)
+    // intro_start: 0,
+    // intro_end: 13
+    // ─────────────────────────────────────────────────────────
+  },
+  {
+    id: 5,
+    judul: "Pergi Pagi Pulang Pagi",
+    artis: "Armada",
+    tahun: 2016,
+    emoji: "🌙",
+    petunjuk: "Lagu hits yang sering diputar di radio tentang pasangan yang pulang subuh",
+    lirik: "Kamu pergi pagi, pulang juga pagi
+Kamu pergi malam, pulang juga pagi
+Kamu jalan-jalan, bersama siapa?
+Kamu jalan-jalan, sama siapa?
+Kenapa kamu, tak bilang padaku
+Kenapa kamu, tak cerita padaku
+Aku gelisah, menunggumu
+Aku resah, menunggumu...",
+    pilihan: ["Asal Kau Bahagia", "Pergi Pagi Pulang Pagi", "Mau Dibawa Kemana", "Awas"],
+    jawaban: "Pergi Pagi Pulang Pagi",
+    intro_nada: "Sol Mi Fa Sol La Sol Mi Fa Re...",
+    // ─── AUDIO FILE (opsional) ───────────────────────────────
+    // audio_file: "lagu5.mp3",
+    // ✂️ POTONG: menit 0:00 – 0:11 (11 detik pertama sebelum vokal masuk)
+    // intro_start: 0,
+    // intro_end: 11
+    // ─────────────────────────────────────────────────────────
+  }
+];
+
+let g6AudioCtx = null;
+let g6OscNodes = [];
+let g6IsPlaying = false;
+
+function getAudioCtx() {
+  if (!g6AudioCtx) {
+    g6AudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  return g6AudioCtx;
+}
+
+function playTone(freq, startTime, duration, ctx, gainNode) {
+  const osc = ctx.createOscillator();
+  osc.connect(gainNode);
+  osc.frequency.setValueAtTime(freq, startTime);
+  osc.type = 'sine';
+  osc.start(startTime);
+  osc.stop(startTime + duration);
+  g6OscNodes.push(osc);
+}
+
+let g6AudioElement = null;
+
+function playAudioFile(src, startSec, endSec, onEnd) {
+  if (g6AudioElement) {
+    g6AudioElement.pause();
+    g6AudioElement = null;
+  }
+  const audio = new Audio(src);
+  g6AudioElement = audio;
+  audio.currentTime = startSec || 0;
+  audio.play().catch(() => {
+    // Fallback to synthetic if file fails
+    const lagu = LAGU_INDONESIA[state.g6Idx];
+    playMelodi(lagu.intro_nada, onEnd);
+  });
+  const duration = ((endSec || 10) - (startSec || 0)) * 1000;
+  setTimeout(() => {
+    audio.pause();
+    if (onEnd) onEnd();
+  }, duration);
+}
+
+function stopG6Audio() {
+  if (g6AudioElement) {
+    g6AudioElement.pause();
+    g6AudioElement = null;
+  }
+  g6OscNodes.forEach(o => { try { o.stop(); } catch(e) {} });
+  g6OscNodes = [];
+  g6IsPlaying = false;
+  setDiscSpin(false);
+  setWavePlay(false);
+  document.getElementById('g6StatusText').textContent = 'TEKAN PLAY UNTUK MULAI';
+  document.getElementById('g6PlayBtn').textContent = '▶';
+}
+
+function setDiscSpin(spin) {
+  const disc = document.getElementById('g6Disc');
+  if (disc) disc.style.animation = spin ? 'spin-disc 2s linear infinite' : 'none';
+}
+
+function setWavePlay(play) {
+  document.querySelectorAll('.audio-wave').forEach(w => {
+    w.classList.toggle('paused', !play);
+  });
+}
+
+function playMelodi(nada_str, onEnd) {
+  const ctx = getAudioCtx();
+  const noteMap = { 'Do':261.63,'Re':293.66,'Mi':329.63,'Fa':349.23,'Sol':392,'La':440,'Si':493.88 };
+  // Parse simple nada string
+  const notes = [];
+  const parts = nada_str.replace(/\.\.\./g,'').trim().split(/\s+/);
+  parts.forEach(p => {
+    const clean = p.replace(/,/g,'');
+    if (noteMap[clean]) notes.push(noteMap[clean]);
+    else if (clean === 'Sol') notes.push(392);
+  });
+
+  if (notes.length === 0) { if(onEnd) onEnd(); return; }
+
+  const gainNode = ctx.createGain();
+  gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
+  gainNode.connect(ctx.destination);
+
+  const noteDur = 0.4;
+  const gap = 0.05;
+  notes.forEach((freq, i) => {
+    playTone(freq, ctx.currentTime + i * (noteDur + gap), noteDur, ctx, gainNode);
+  });
+
+  const totalTime = notes.length * (noteDur + gap) * 1000;
+  setTimeout(() => {
+    g6IsPlaying = false;
+    setDiscSpin(false);
+    setWavePlay(false);
+    document.getElementById('g6StatusText').textContent = 'SELESAI — JAWAB SEKARANG!';
+    document.getElementById('g6PlayBtn').textContent = '▶';
+    if (onEnd) onEnd();
+  }, totalTime + 200);
+}
+
+function initGame6() {
+  showPage('game6');
+  state.g6Idx = 0;
+  state.g6Score = 0;
+  state.g6Answers = [];
+  state.g6HintUsed = false;
+  document.getElementById('g6Playing').style.display = 'block';
+  document.getElementById('g6RoundResult').style.display = 'none';
+  document.getElementById('g6FinalResult').style.display = 'none';
+  stopG6Audio();
+  loadG6Song();
+}
+
+function loadG6Song() {
+  const lagu = LAGU_INDONESIA[state.g6Idx];
+  state.g6HintUsed = false;
+  document.getElementById('g6Num').textContent = state.g6Idx + 1;
+  document.getElementById('g6Progress').style.width = ((state.g6Idx + 1) / LAGU_INDONESIA.length * 100) + '%';
+  document.getElementById('g6DiscEmoji').textContent = lagu.emoji;
+  document.getElementById('g6StatusText').textContent = 'TEKAN PLAY UNTUK MULAI';
+  document.getElementById('g6PlayBtn').textContent = '▶';
+  document.getElementById('g6HintBox').style.display = 'none';
+  document.getElementById('g6HintBtn').style.display = 'inline-block';
+
+  // Build choices
+  const shuffled = [...lagu.pilihan].sort(() => Math.random() - 0.5);
+  document.getElementById('g6Choices').innerHTML = shuffled.map(p => `
+    <button class="g6-choice" onclick="answerG6('${p}')">${p}</button>
+  `).join('');
+
+  stopG6Audio();
+}
+
+function playG6Intro() {
+  if (g6IsPlaying) return;
+  const lagu = LAGU_INDONESIA[state.g6Idx];
+  g6IsPlaying = true;
+  setDiscSpin(true);
+  setWavePlay(true);
+  document.getElementById('g6StatusText').textContent = '♪ MEMAINKAN INTRO...';
+  document.getElementById('g6PlayBtn').textContent = '⏸';
+
+  // Try audio file first, fallback to synthetic melody
+  if (lagu.audio_file) {
+    playAudioFile(lagu.audio_file, lagu.intro_start || 0, lagu.intro_end || 10, () => {
+      g6IsPlaying = false;
+      setDiscSpin(false);
+      setWavePlay(false);
+      document.getElementById('g6StatusText').textContent = 'SELESAI — JAWAB SEKARANG!';
+      document.getElementById('g6PlayBtn').textContent = '▶';
+    });
+  } else {
+    playMelodi(lagu.intro_nada, null);
+  }
+}
+
+function playG6Full() {
+  const lagu = LAGU_INDONESIA[state.g6Idx];
+  stopG6Audio();
+  setTimeout(() => {
+    g6IsPlaying = true;
+    setDiscSpin(true);
+    setWavePlay(true);
+    const btn = document.getElementById('g6PlayFullBtn');
+    if (btn) btn.textContent = '⏸ Sedang Diputar...';
+    playMelodi(lagu.intro_nada, () => {
+      if (btn) btn.textContent = '▶ Play Intro Lagi';
+    });
+  }, 100);
+}
+
+function showG6Hint() {
+  const lagu = LAGU_INDONESIA[state.g6Idx];
+  state.g6HintUsed = true;
+  document.getElementById('g6HintText').textContent = lagu.petunjuk;
+  document.getElementById('g6HintBox').style.display = 'block';
+  document.getElementById('g6HintBtn').style.display = 'none';
+}
+
+function answerG6(jawaban) {
+  stopG6Audio();
+  const lagu = LAGU_INDONESIA[state.g6Idx];
+  const benar = jawaban === lagu.jawaban;
+  const poin = benar ? (state.g6HintUsed ? 50 : 100) : 0;
+  state.g6Score += poin;
+  state.g6Answers.push({ lagu: lagu.judul, benar, poin });
+
+  // Highlight choices
+  document.querySelectorAll('.g6-choice').forEach(btn => {
+    btn.disabled = true;
+    if (btn.textContent === lagu.jawaban) btn.classList.add('correct');
+    else if (btn.textContent === jawaban && !benar) btn.classList.add('wrong');
+  });
+
+  setTimeout(() => showG6RoundResult(benar, poin, lagu), 800);
+}
+
+function showG6RoundResult(benar, poin, lagu) {
+  document.getElementById('g6Playing').style.display = 'none';
+  document.getElementById('g6RoundResult').style.display = 'block';
+  document.getElementById('g6RoundIcon').textContent = benar ? '🎉' : '😅';
+  document.getElementById('g6RoundMsg').textContent = benar ? 'Benar! Kamu tahu lagunya!' : 'Jawabannya: ' + lagu.jawaban;
+  document.getElementById('g6RoundScore').textContent = '+' + poin;
+  document.getElementById('g6SongTitle').textContent = lagu.judul;
+  document.getElementById('g6SongArtist').textContent = lagu.artis + ' · ' + lagu.tahun;
+  document.getElementById('g6Lirik').textContent = lagu.lirik;
+  document.getElementById('g6PlayFullBtn').textContent = '▶ Play Intro Lagi';
+
+  const isLast = state.g6Idx >= LAGU_INDONESIA.length - 1;
+  const nextBtn = document.getElementById('g6NextBtn');
+  nextBtn.textContent = isLast ? '🏆 Lihat Hasil Akhir' : 'Lagu Berikutnya →';
+  nextBtn.onclick = isLast ? showG6FinalResult : nextG6Song;
+
+  // Auto play intro for sing along
+  setTimeout(() => playG6Full(), 500);
+}
+
+function nextG6Song() {
+  stopG6Audio();
+  state.g6Idx++;
+  document.getElementById('g6Playing').style.display = 'block';
+  document.getElementById('g6RoundResult').style.display = 'none';
+  loadG6Song();
+}
+
+function showG6FinalResult() {
+  stopG6Audio();
+  document.getElementById('g6RoundResult').style.display = 'none';
+  document.getElementById('g6FinalResult').style.display = 'block';
+  document.getElementById('g6TotalScore').textContent = state.g6Score + ' Poin';
+
+  const summary = state.g6Answers.map((a, i) =>
+    `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:${a.benar?'#E8F5E9':'#FFEBEE'};border-radius:8px;margin-bottom:6px;">
+      <div style="font-size:13px;color:var(--brown);font-weight:600;">${i+1}. ${a.lagu}</div>
+      <div style="font-size:13px;font-weight:700;color:${a.benar?'var(--green)':'#C62828'}">${a.benar?'✓ +'+a.poin:'✗ 0'}</div>
+    </div>`
+  ).join('');
+  document.getElementById('g6ScoreSummary').innerHTML = summary;
+
+  const scores = [{ name: state.playerName || 'Kamu', score: state.g6Score }];
+  document.getElementById('g6Podium').innerHTML = buildPodium(scores);
+}
+
+function restartGame6() { initGame6(); }
+
+// ===== INIT =====
+loadSavedData();
+showPage('landing');
+</script>
+</body>
+</html>
