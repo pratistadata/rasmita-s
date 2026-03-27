@@ -636,7 +636,7 @@
 // SUPABASE CONFIG — ganti dengan credentials project Anda
 // ============================================================
 const SUPABASE_URL = 'https://ykibpxiovrslknagmnpq.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_mC5dlpZLyCUFWgGetANo4w_F44OZGXn';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlraWJweGlvdnJzbGtuYWdtbnBxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1Nzg5MDAsImV4cCI6MjA5MDE1NDkwMH0.COvqfM1n-6DC9RMv9ZtIF6ZWsXCK28TxvT5NAShC39E';
 
 async function sbGet(table) {
   const r = await fetch(SUPABASE_URL + '/rest/v1/' + table + '?select=*', {
@@ -692,7 +692,7 @@ function buildNavTabs() {
     const navEl = document.getElementById('nav' + s.id.replace('screen',''));
     if (!navEl) return;
     navEl.innerHTML = ALL_SCREENS.map(t =>
-      '<button class="nav-tab ' + (t.id === s.id ? 'active' : '') + '" onclick="showScreen('' + t.id + '')">' + t.label + '</button>'
+      '<button class="nav-tab ' + (t.id === s.id ? 'active' : '') + '" onclick="showScreen('" + t.id + "')">' + t.label + '</button>'
     ).join('') +
     '<button class="nav-tab" onclick="clearAllData()" style="margin-left:auto;border-color:rgba(200,50,50,0.4);color:rgba(255,100,100,0.7)">🗑️ Reset</button>' +
     '<button class="nav-tab" onclick="toggleFullscreen()">⛶ Full</button>';

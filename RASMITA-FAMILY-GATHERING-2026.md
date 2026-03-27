@@ -61,7 +61,7 @@ const SUPABASE_URL = 'https://XXXX.supabase.co';      // ← ganti XXXX
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIs...';  // ← ganti dengan anon key
 ```
 
-> **Catatan:** `rasmita-family-gathering-2026.html` dan `admin.html` sudah berisi credentials aktif (`ykibpxiovrslknagmnpq.supabase.co`). `proyektor.html` masih menggunakan placeholder `XXXX` — perlu diisi manual.
+> **Catatan:** Semua file (`rasmita-family-gathering-2026.html`, `admin.html`, `proyektor.html`) sudah berisi credentials aktif (`ykibpxiovrslknagmnpq.supabase.co`) dengan **Anon Key JWT** yang valid. Tidak perlu edit manual.
 
 ---
 
@@ -614,7 +614,9 @@ Sampai gathering berikutnya! 🏡"
 
 | Masalah | Solusi |
 |---------|--------|
-| Error saat masuk lobby | Update ke file terbaru, refresh browser |
+| Error saat masuk lobby | Update ke file terbaru (v3.1), refresh browser |
+| SyntaxError di console | Sudah diperbaiki di v3.1 — pastikan pakai file terbaru |
+| Supabase auth error / 401 | Sudah diperbaiki di v3.1 — Anon Key JWT sudah diupdate |
 | Admin panel error | Update ke file terbaru |
 | Foto tidak muncul | Refresh halaman, cek bucket Storage bersifat Public |
 | Sing-along tidak muncul | Pastikan peserta ada di halaman tebak lagu |
@@ -662,6 +664,20 @@ Admin upload foto → sbUploadFile('rasmita-photos', 'members/1.jpg', dataUrl)
 Versi ini (v5.0) telah **migrasi penuh dari localStorage ke Supabase**:
 - Sebelum: foto disimpan sebagai base64 di browser lokal (~5MB limit, 1 device saja)
 - Sekarang: foto di Supabase Storage (1GB gratis), URL disimpan di database, semua device sync otomatis
+
+---
+
+## 📋 Changelog
+
+### v3.1 — 28 Maret 2026 (Bug Fix Release)
+- ✅ **Fix:** Supabase Anon Key diupdate dari format `sb_publishable_...` ke JWT (`eyJ...`) yang benar — semua koneksi Supabase kini berjalan normal
+- ✅ **Fix:** `lirik_singalong` di Game 6 diperbaiki dari regular string ke template literal — tidak lagi menyebabkan SyntaxError
+- ✅ **Fix:** Quote escaping di `admin.html` (lines 1179, 1414, 1497, 1504) diperbaiki — fungsi g1RemoveMember & g1AddMember kini berjalan benar
+- ✅ **Fix:** Credentials `proyektor.html` diupdate dari placeholder `XXXX` ke URL & key yang aktif
+- ✅ **Fix:** Typo `pilihanpilihan` pada data lagu diperbaiki kembali ke `pilihan`
+
+### v3.0 — Maret 2026
+- Versi awal dengan 6 game, integrasi Supabase, mode proyektor
 
 ---
 

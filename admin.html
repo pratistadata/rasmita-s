@@ -1014,7 +1014,7 @@
 // SUPABASE CONFIG — ganti dengan credentials project Anda
 // ============================================================
 const SUPABASE_URL = 'https://ykibpxiovrslknagmnpq.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_mC5dlpZLyCUFWgGetANo4w_F44OZGXn';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlraWJweGlvdnJzbGtuYWdtbnBxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1Nzg5MDAsImV4cCI6MjA5MDE1NDkwMH0.COvqfM1n-6DC9RMv9ZtIF6ZWsXCK28TxvT5NAShC39E';
 
 // ── Low-level REST helpers ──
 async function sbGet(table, filters) {
@@ -1176,7 +1176,7 @@ function showPanel(id) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   const panel = document.getElementById('panel-' + id);
   if (panel) panel.classList.add('active');
-  const nav = document.querySelector('.nav-item[onclick*="\'' + id + '\''  + '"]');
+  const nav = document.querySelector('.nav-item[data-panel="' + id + '"]');
   if (nav) nav.classList.add('active');
   if (id === 'game1-admin') setTimeout(initG1AdminPanel, 50);
   if (id === 'photos') setTimeout(g1RenderPhotoAssign, 50);
@@ -1411,7 +1411,7 @@ function renderPlayers() {
       '<td><div class="player-avatar-sm">' + (p.photo_url ? '<img src="' + p.photo_url + '">' : name[0].toUpperCase()) + '</div></td>' +
       '<td style="font-weight:600">' + name + '</td>' +
       '<td><span class="dot-online"></span><span style="font-size:12px;color:#4CAF50">Online</span></td>' +
-      '<td><button class="btn btn-danger btn-sm" onclick="removePlayer(\'' + name + '\')">Hapus</button></td></tr>';
+      '<td><button class="btn btn-danger btn-sm" onclick="removePlayer(this.dataset.name)" data-name="' + name + '">Hapus</button></td></tr>';
   }).join('') :
   '<tr><td colspan="5" style="color:var(--brown-light);font-size:13px;text-align:center;padding:24px">Belum ada pemain.</td></tr>';
 }
@@ -1494,14 +1494,14 @@ function g1RenderTeamBuilder() {
     const membersEl = document.getElementById('g1team-members-' + i);
     if (membersEl) membersEl.innerHTML = (t.members||[]).map(m =>
       '<span style="background:var(--green);color:var(--gold-light);border-radius:20px;padding:3px 10px;font-size:12px;font-weight:700;">' + m +
-      ' <button onclick="g1RemoveMember(' + i + ','' + m + '')" style="background:none;border:none;color:rgba(255,255,255,0.7);cursor:pointer;font-size:10px;padding:0 2px">✕</button></span>'
+      ' <button onclick="g1RemoveMember(' + i + ',&quot;' + m + '&quot;)" style="background:none;border:none;color:rgba(255,255,255,0.7);cursor:pointer;font-size:10px;padding:0 2px">✕</button></span>'
     ).join('') || '<span style="font-size:11px;color:var(--brown-light)">Belum ada anggota</span>';
     const addEl = document.getElementById('g1team-add-' + i);
     if (addEl) {
       const available = players.filter(p => !allInTeam.includes(p));
       addEl.innerHTML = available.length > 0 ?
         '<span style="font-size:11px;color:var(--brown-light)">+ </span>' +
-        available.map(p => '<button onclick="g1AddMember(' + i + ','' + p + '')" style="background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.3);border-radius:20px;padding:2px 10px;font-size:11px;cursor:pointer;color:var(--brown)">' + p + '</button>').join('')
+        available.map(p => '<button onclick="g1AddMember(' + i + ',&quot;' + p + '&quot;)" style="background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.3);border-radius:20px;padding:2px 10px;font-size:11px;cursor:pointer;color:var(--brown)">' + p + '</button>').join('')
         : '';
     }
   });
