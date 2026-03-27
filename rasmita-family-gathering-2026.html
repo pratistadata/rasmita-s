@@ -1368,7 +1368,14 @@
     <button class="btn-primary" onclick="joinRoom()">Masuk ke Lobby 🎉</button>
   </div>
 
-  <a href="#" class="admin-link" onclick="showAdmin(); return false;">🔐 Masuk sebagai Host/Admin</a>
+  <!-- Admin link hidden -->
+
+  <div style="margin-top:1.2rem;display:flex;flex-direction:column;align-items:center;gap:6px;">
+    <p style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);font-weight:600;">Scan untuk Bergabung</p>
+    <img src="https://api.qrserver.com/v1/create-qr-code/?size=130x130&data=https://bit.ly/rasmitas&bgcolor=FDF8EE&color=3D2B1F&margin=8"
+         alt="QR Code" style="border-radius:10px;border:2px solid var(--gold);width:130px;height:130px"/>
+    <p style="font-size:12px;color:var(--brown-light);font-weight:600;">bit.ly/rasmitas</p>
+  </div>
 
   <div style="margin-top:1.5rem;width:100%;max-width:420px;">
     <div class="divider" style="margin-bottom:1rem">
@@ -1821,8 +1828,8 @@
 // ============================================================
 // SUPABASE CONFIG — ganti dengan credentials project Anda
 // ============================================================
-const SUPABASE_URL = 'https://XXXX.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.XXXXXX';
+const SUPABASE_URL = 'https://ykibpxiovrslknagmnpq.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_mC5dlpZLyCUFWgGetANo4w_F44OZGXn';
 
 // ── Low-level REST helpers ──
 async function sbGet(table, filters) {
@@ -2982,31 +2989,126 @@ function showNotif(msg) {
 // GAME 6: TEBAK LAGU (audio logic tidak berubah, hanya sync)
 // ============================================================
 const LAGU_INDONESIA = [
-  { id: 1, judul: "Tabola Bale", artis: "Silet Open Up feat. Jacson Zeran, Juan Reza", tahun: 2025, emoji: "🌴",
-    petunjuk: "Lagu timur viral 2025 yang bikin semua orang goyang — pasti sudah pernah dengar!",
-    lirik_singalong: "Kaka tabola bale lia ade nona e\nSu makin manyala e, kaka hati susah e\nAde bikin kaka mete, tidur malam bola bale\nSejak kaka lia ade, aduh Tuhan ampun e",
-    pilihan: ["Tabola Bale", "Gemu Fa Mi Re", "Poco Poco", "Maumere"], jawaban: "Tabola Bale",
-    intro_nada: [392,392,440,392,330,349,392,330], mp3: null },
-  { id: 2, judul: "Harta yang Paling Berharga", artis: "Hedi Yunus (OST Keluarga Cemara)", tahun: 1996, emoji: "🏡",
+  { id: 1, judul: "Harta yang Paling Berharga", artis: "Hedi Yunus (OST Keluarga Cemara)", tahun: 1996, emoji: "🏡",
     petunjuk: "OST sinetron keluarga legendaris tahun 90-an — anthem keluarga Indonesia!",
-    lirik_singalong: "Harta yang paling berharga adalah keluarga\nIstana yang paling indah adalah keluarga\nPuisi yang paling bermakna adalah keluarga\nMutiara tiada tara adalah keluarga",
+    lirik_singalong: "Harta yang paling berharga adalah keluarga
+Istana yang paling indah adalah keluarga
+Puisi yang paling bermakna adalah keluarga
+Mutiara tiada tara adalah keluarga",
     pilihan: ["Harta yang Paling Berharga", "Satu Nusa Satu Bangsa", "Bintang di Surga", "Rumah Kita"], jawaban: "Harta yang Paling Berharga",
     intro_nada: [261,329,392,329,261,196,220,261], mp3: null },
-  { id: 3, judul: "Dansa Yok Dansa", artis: "Harvey Malaiholo", tahun: 1985, emoji: "💃",
+  { id: 2, judul: "Dansa Yok Dansa", artis: "Harvey Malaiholo", tahun: 1985, emoji: "💃",
     petunjuk: "Lagu joget klasik wajib di setiap pesta keluarga Indonesia!",
-    lirik_singalong: "Dansa yok dansa, dansa yok dansa\nMari bersama kita bergembira\nDansa yok dansa, dansa yok dansa\nSambil bernyanyi kita berdansa",
-    pilihan: ["Dansa Yok Dansa", "Buka Semangat Baru", "Tari Saman", "Joget"], jawaban: "Dansa Yok Dansa",
+    lirik_singalong: "Dansa yok dansa, dansa yok dansa
+Mari bersama kita bergembira
+Dansa yok dansa, dansa yok dansa
+Sambil bernyanyi kita berdansa",
+    pilihan: ["Dansa Yok Dansa", "Buka Semangat Baru", "Joget Poco Poco", "Ayo Menari"], jawaban: "Dansa Yok Dansa",
     intro_nada: [392,440,392,349,330,349,392,440], mp3: null },
-  { id: 4, judul: "Kopi Dangdut", artis: "Fahmi Shahab", tahun: 1987, emoji: "☕",
+  { id: 3, judul: "Kopi Dangdut", artis: "Fahmi Shahab", tahun: 1987, emoji: "☕",
     petunjuk: "Dangdut klasik legendaris yang pasti bikin semua goyang dari nenek sampai cucu!",
-    lirik_singalong: "Kopi dangdut, kopi dangdut\nPanas-panas enak rasanya\nKopi dangdut, kopi dangdut\nCampur gula tambah nikmatnya",
-    pilihan: ["Kopi Dangdut", "Teh Botol", "Goyang Dumang", "Kucing Garong"], jawaban: "Kopi Dangdut",
+    lirik_singalong: "Kopi dangdut, kopi dangdut
+Panas-panas enak rasanya
+Kopi dangdut, kopi dangdut
+Campur gula tambah nikmatnya",
+    pilihan: ["Kopi Dangdut", "Teh Manis", "Goyang Dumang", "Kucing Garong"], jawaban: "Kopi Dangdut",
     intro_nada: [330,349,392,392,349,330,294,294], mp3: null },
-  { id: 5, judul: "Goyang Dumang", artis: "Cita Citata", tahun: 2014, emoji: "🕺",
+  { id: 4, judul: "Goyang Dumang", artis: "Cita Citata", tahun: 2014, emoji: "🕺",
     petunjuk: "Lagu dangdut hits yang pasti bikin semua langsung joget!",
-    lirik_singalong: "Goyang dumang, goyang dumang\nGoyang goyang goyang dumang\nAyo kita goyang bersama-sama\nJangan malu-malu ayoo bergoyang!",
+    lirik_singalong: "Goyang dumang, goyang dumang
+Goyang goyang goyang dumang
+Ayo kita goyang bersama-sama
+Jangan malu-malu ayoo bergoyang!",
     pilihan: ["Goyang Dumang", "Madu dan Racun", "Seksi Seksi", "Kereta Malam"], jawaban: "Goyang Dumang",
     intro_nada: [392,392,440,392,349,330,349,392], mp3: null },
+  { id: 5, judul: "Tabola Bale", artis: "Silet Open Up feat. Jacson Zeran", tahun: 2025, emoji: "🌴",
+    petunjuk: "Lagu timur viral 2025 yang bikin semua orang goyang — pasti sudah pernah dengar!",
+    lirik_singalong: "Kaka tabola bale lia ade nona e
+Su makin manyala e, kaka hati susah e
+Ade bikin kaka mete, tidur malam bola bale
+Sejak kaka lia ade, aduh Tuhan ampun e",
+    pilihan: ["Tabola Bale", "Gemu Fa Mi Re", "Poco Poco", "Maumere"], jawaban: "Tabola Bale",
+    intro_nada: [392,392,440,392,330,349,392,330], mp3: null },
+  { id: 6, judul: "Kemesraan", artis: "Iwan Fals", tahun: 1990, emoji: "❤️",
+    petunjuk: "Lagu romantis legendaris Iwan Fals yang sering dinyanyikan di momen spesial keluarga.",
+    lirik_singalong: "Kemesraan ini janganlah cepat berlalu
+Kemesraan ini ingin kukenang selalu
+Hangat nafasmu, mengalir ke jiwaku
+Kemesraan ini janganlah cepat berlalu",
+    pilihan: ["Kemesraan", "Oemar Bakri", "Bento", "Galang Rambu Anarki"], jawaban: "Kemesraan",
+    intro_nada: [329,349,392,440,392,349,329,294], mp3: null },
+  { id: 7, judul: "Madu dan Racun", artis: "Benyamin Sueb & Ida Royani", tahun: 1976, emoji: "🍯",
+    petunjuk: "Duet legendaris Benyamin Sueb, lagu pop Betawi paling ikonik sepanjang masa!",
+    lirik_singalong: "Kau bagai madu, manis di awal
+Kau bagai racun, pahit di akhir
+Oh kekasih mengapa begini
+Kau berikan madu, lalu racun kini",
+    pilihan: ["Madu dan Racun", "Kompor Meleduk", "Tukang Sayur", "Si Jampang"], jawaban: "Madu dan Racun",
+    intro_nada: [261,294,329,349,329,294,261,246], mp3: null },
+  { id: 8, judul: "Kolam Susu", artis: "Koes Plus", tahun: 1973, emoji: "🌊",
+    petunjuk: "Lagu ikonik Koes Plus tentang keindahan alam Indonesia yang sangat terkenal.",
+    lirik_singalong: "Bukan lautan hanya kolam susu
+Kail dan jala cukup menghidupimu
+Tiada badai tiada topan kautemui
+Ikan dan udang menghampiri dirimu",
+    pilihan: ["Kolam Susu", "Bunga di Tepi Jalan", "Nusantara", "Kembali ke Jakarta"], jawaban: "Kolam Susu",
+    intro_nada: [329,329,392,392,440,392,349,329], mp3: null },
+  { id: 9, judul: "Cinta Pertama dan Terakhir", artis: "Sherina Munaf", tahun: 2000, emoji: "🌟",
+    petunjuk: "Lagu hits penyanyi cilik yang paling terkenal di era 2000-an!",
+    lirik_singalong: "Ku tak mau lagi merasakan
+Sakit hati karena cinta
+Ku tak ingin lagi terluka
+Oleh cinta yang tak terjaga",
+    pilihan: ["Cinta Pertama dan Terakhir", "Andai Aku Besar Nanti", "Lihat Aku", "Kembali"], jawaban: "Cinta Pertama dan Terakhir",
+    intro_nada: [392,440,494,440,392,349,329,294], mp3: null },
+  { id: 10, judul: "Baju Pengantin", artis: "Meggy Z", tahun: 1989, emoji: "👰",
+    petunjuk: "Dangdut klasik Meggy Z yang sering diputar di pesta pernikahan Indonesia!",
+    lirik_singalong: "Baju pengantin yang kau kenakan
+Sungguh membuatku terpesona
+Baju pengantin berwarna putih
+Seperti salju di musim dingin",
+    pilihan: ["Baju Pengantin", "Sekuntum Mawar Merah", "Janda Muda", "Aku Tak Biasa"], jawaban: "Baju Pengantin",
+    intro_nada: [349,392,440,392,349,330,294,330], mp3: null },
+  { id: 11, judul: "Gemu Fa Mi Re", artis: "Trio Ambisi / Maumere", tahun: 1990, emoji: "🎵",
+    petunjuk: "Lagu dansa timur yang pasti bikin semua orang berdiri dan bergoyang!",
+    lirik_singalong: "Gemu fa mi re
+Gemu fa mi re
+Ayo muda mudi ita
+Mari bareng bernyanyi",
+    pilihan: ["Gemu Fa Mi Re", "Poco Poco", "Maumere", "Sajojo"], jawaban: "Gemu Fa Mi Re",
+    intro_nada: [392,349,329,294,329,349,392,392], mp3: null },
+  { id: 12, judul: "Setengah Hati", artis: "Dewa 19", tahun: 2004, emoji: "💔",
+    petunjuk: "Hits Dewa 19 era 2000-an yang liriknya paling banyak dihafal anak muda!",
+    lirik_singalong: "Ku berikan setengah hatiku
+Karena takut terluka lagi
+Ku berikan setengah hatiku
+Hanya untukmu seorang",
+    pilihan: ["Setengah Hati", "Kangen", "Pangeran Cinta", "Risalah Hati"], jawaban: "Setengah Hati",
+    intro_nada: [329,392,440,392,329,294,329,349], mp3: null },
+  { id: 13, judul: "Opo Sing Salah", artis: "Didi Kempot", tahun: 2019, emoji: "😢",
+    petunjuk: "Raja campursari yang dijuluki 'The Godfather of Broken Heart' oleh anak muda!",
+    lirik_singalong: "Opo sing salah
+Atiku sing kesalah
+Apo sing lupak
+Pikiran terus melayang",
+    pilihan: ["Opo Sing Salah", "Suket Teki", "Pamer Bojo", "Banyu Langit"], jawaban: "Opo Sing Salah",
+    intro_nada: [294,329,349,392,349,329,294,261], mp3: null },
+  { id: 14, judul: "Bintang di Surga", artis: "Peterpan", tahun: 2004, emoji: "⭐",
+    petunjuk: "Lagu hits Peterpan yang paling ikonik dan dikenal semua generasi Indonesia!",
+    lirik_singalong: "Masih adakah bintang di surga
+Yang selalu menjagamu setiap saat
+Masih adakah cinta di dunia
+Yang akan selalu bersamamu selamanya",
+    pilihan: ["Bintang di Surga", "Ada Apa Denganmu", "Mungkin Nanti", "Topeng"], jawaban: "Bintang di Surga",
+    intro_nada: [392,440,494,440,392,392,349,392], mp3: null },
+  { id: 15, judul: "Rasa Sayange", artis: "Lagu Tradisional Maluku", tahun: 1970, emoji: "🌺",
+    petunjuk: "Lagu daerah Maluku paling terkenal yang sudah jadi lagu kebanggaan Indonesia!",
+    lirik_singalong: "Rasa sayange, rasa sayang sayange
+He lihat nona jauh rasa sayang sayange
+Rasa sayange, rasa sayang sayange
+He lihat nona jauh rasa sayang sayange",
+    pilihan: ["Rasa Sayange", "Ambon Manise", "O Ina Ni Keke", "Ayo Mama"], jawaban: "Rasa Sayange",
+    intro_nada: [392,392,440,440,392,349,330,349], mp3: null },
 ];
 
 let g6AudioCtx = null;
@@ -3092,7 +3194,7 @@ function loadG6Song() {
   document.getElementById('g6HintBtn').style.display = 'inline-block';
   const shuffled = [...lagu.pilihan].sort(() => Math.random() - 0.5);
   document.getElementById('g6Choices').innerHTML = shuffled.map(p =>
-    '<button class="g6-choice" onclick="answerG6('' + p + '')">' + p + '</button>'
+    '<button class="g6-choice" onclick="answerG6(\'' + p + '\')">' + p + '</button>'
   ).join('');
   stopG6Audio();
 }
