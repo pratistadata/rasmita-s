@@ -711,15 +711,22 @@
         </div>
 
         <!-- Tab: Game 4 Timeline -->
-        <div class="tab-panel" id="photos-tab-g4">
-          <div class="alert alert-info"><strong>Game 4 — Timeline:</strong> Centang foto yang akan dipakai. Jumlah foto menentukan jumlah ronde (5 foto = 1 ronde).</div>
-          <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
-            <button class="btn btn-outline btn-sm" onclick="assignAllToGame('g4')">✅ Pilih Semua</button>
-            <button class="btn btn-outline btn-sm" onclick="unassignAllFromGame('g4')">☐ Kosongkan</button>
-            <button class="btn btn-gold btn-sm" onclick="saveGameAssignment('g4')">💾 Simpan Pilihan Game 4</button>
-          </div>
-          <div class="photo-grid" id="g4AssignGrid"></div>
-        </div>
+<div class="tab-panel" id="photos-tab-g4">
+<div class="alert alert-info"><strong>Game 4 — Timeline:</strong> Atur foto untuk setiap ronde. 5 foto per ronde = 1 ronde. Bisa 3–5 ronde.</div>
+
+<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center;">
+  <span style="font-size:13px;color:var(--brown-light);">Jumlah Ronde:</span>
+  <select id="g4RondeCount" onchange="renderG4RondeUI()" style="padding:6px 12px;border:1px solid rgba(201,168,76,0.4);border-radius:8px;font-size:13px;background:var(--cream);">
+    <option value="3">3 Ronde (15 foto)</option>
+    <option value="4">4 Ronde (20 foto)</option>
+    <option value="5">5 Ronde (25 foto)</option>
+  </select>
+  <button class="btn btn-gold btn-sm" onclick="saveG4RondeAssignment()">💾 Simpan Pengaturan Ronde</button>
+  <button class="btn btn-outline btn-sm" onclick="autoAssignG4()">🔀 Auto-assign Acak</button>
+</div>
+
+<div id="g4RondeUI"></div>
+</div>
       </div>
     </div>
 
@@ -1179,7 +1186,10 @@ function showPanel(id) {
   const nav = document.querySelector('.nav-item[data-panel="' + id + '"]');
   if (nav) nav.classList.add('active');
   if (id === 'game1-admin') setTimeout(initG1AdminPanel, 50);
-  if (id === 'photos') setTimeout(g1RenderPhotoAssign, 50);
+  if (id === 'photos') {
+    setTimeout(g1RenderPhotoAssign, 50);
+    setTimeout(loadG4RondeAssignment, 100);
+  }
   const titles = {
     'dashboard':'📊 Dashboard','players':'👥 Daftar Peserta','settings':'⚙️ Pengaturan Event',
     'projector':'📽️ Panduan Proyektor','photos':'📸 Foto Keluarga','komedian':'🎭 Komedian',
@@ -1209,6 +1219,7 @@ function switchTab(game, tab) {
   });
   if (game === 'g3' && tab === 'pertanyaan') setTimeout(renderG3Questions, 50);
   if (game === 'g6' && tab === 'singalong') setTimeout(renderSingAlongControls, 50);
+  if (tab === 'g4') setTimeout(renderG4RondeUI, 50);
 }
 
 function updateTopbar() {
@@ -1948,19 +1959,34 @@ async function saveG3Questions() {
   const inputs = document.querySelectorAll('[id^="g3q_"]');
   if (inputs.length > 0) g3Questions = Array.from(inputs).map(inp => inp.value.trim()).filter(q => q.length > 0);
   try {
-    // Delete existing
-    const existing = await sbGet('ras_g3_questions');
-    if (existing) for (const r of existing) await sbDelete('ras_g3_questions', { id: r.id });
-    // Insert new
-    for (let i = 0; i < g3Questions.length; i++) {
-      await sbUpsert('ras_g3_questions', { urutan: i, pertanyaan: g3Questions[i] });
+    // Hapus semua dulu dengan satu DELETE query
+    await fetch(SUPABASE_URL + '/rest/v1/ras_g3_questions?urutan=gte.0', {
+      method: 'DELETE',
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+        'Content-Type': 'application/json'
+      }
+    });
+    // Insert semua sekaligus dengan satu request
+    const payload = g3Questions.map((q, i) => ({ urutan: i, pertanyaan: q, aktif: true }));
+    if (payload.length > 0) {
+      await fetch(SUPABASE_URL + '/rest/v1/ras_g3_questions', {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify(payload)
+      });
     }
-  } catch(e) {}
+  } catch(e) { console.warn('saveG3Questions error:', e); }
   const count = document.getElementById('g3QuestionCount');
   if (count) count.textContent = g3Questions.length;
   showNotif('✅ ' + g3Questions.length + ' pertanyaan tersimpan!');
 }
-
 async function resetG3Questions() {
   if (!confirm('Reset ke pertanyaan default?')) return;
   g3Questions = [...DEFAULT_PERTANYAAN_G3];
@@ -1968,6 +1994,124 @@ async function resetG3Questions() {
   renderG3Questions();
   showNotif('↺ Pertanyaan direset ke default.');
 }
+
+// ── GAME 4 TIMELINE RONDE ASSIGNMENT ──────────────────────
+let g4RondeData = {}; // { ronde1: [id1,id2,...], ronde2: [...], ... }
+
+async function loadG4RondeAssignment() {
+  try {
+    const ev = await sbGet('ras_event');
+    if (ev && ev[0] && ev[0].g4_ronde_json) {
+      g4RondeData = JSON.parse(ev[0].g4_ronde_json || '{}');
+    }
+  } catch(e) {}
+  renderG4RondeUI();
+}
+
+function renderG4RondeUI() {
+  const rondeCount = parseInt(document.getElementById('g4RondeCount')?.value || '3');
+  const members = window.allMembers || [];
+  const container = document.getElementById('g4RondeUI');
+  if (!container) return;
+
+  // Build set of already-assigned photo ids
+  const assigned = new Set();
+  for (let r = 1; r <= rondeCount; r++) {
+    (g4RondeData['ronde' + r] || []).forEach(id => assigned.add(id));
+  }
+
+  let html = '';
+  for (let r = 1; r <= rondeCount; r++) {
+    const rondePicks = g4RondeData['ronde' + r] || [];
+    html += '<div style="background:var(--white);border:1px solid rgba(201,168,76,0.3);border-radius:12px;padding:16px;margin-bottom:16px;">';
+    html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">';
+    html += '<strong style="font-family:Playfair Display,serif;font-size:1rem;color:var(--brown);">Ronde ' + r + '</strong>';
+    html += '<span style="font-size:12px;color:' + (rondePicks.length === 5 ? 'var(--green)' : 'var(--gold-dark)') + ';font-weight:600;">' + rondePicks.length + '/5 foto</span>';
+    html += '</div>';
+    html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:8px;">';
+
+    members.forEach(m => {
+      const sel = rondePicks.includes(m.id);
+      const usedElsewhere = !sel && assigned.has(m.id);
+      html += '<div onclick="toggleG4Ronde(' + r + ',' + m.id + ')" style="cursor:pointer;text-align:center;padding:6px;border-radius:8px;border:2px solid ' +
+        (sel ? 'var(--green)' : 'rgba(201,168,76,0.3)') + ';background:' +
+        (sel ? '#E8F5E9' : usedElsewhere ? '#f5f5f5' : 'var(--cream)') + ';opacity:' + (usedElsewhere ? '0.4' : '1') + ';">';
+      html += m.foto_url
+        ? '<img src="' + m.foto_url + '" style="width:54px;height:54px;border-radius:50%;object-fit:cover;border:2px solid ' + (sel ? 'var(--green)' : 'rgba(201,168,76,0.3)') + '">'
+        : '<div style="width:54px;height:54px;border-radius:50%;background:var(--cream-dark);display:flex;align-items:center;justify-content:center;font-size:1.2rem;margin:0 auto;">👤</div>';
+      html += '<div style="font-size:10px;margin-top:4px;color:var(--brown);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + (m.nama || m.name || '') + '</div>';
+      if (sel) html += '<div style="font-size:9px;color:var(--green)">✓ R' + r + '</div>';
+      html += '</div>';
+    });
+
+    html += '</div></div>';
+  }
+
+  if (members.length === 0) {
+    html = '<div style="text-align:center;padding:2rem;color:var(--brown-light);">⚠️ Upload foto keluarga dulu di tab <strong>Semua Foto</strong></div>';
+  }
+
+  container.innerHTML = html;
+}
+
+function toggleG4Ronde(ronde, memberId) {
+  const rondeCount = parseInt(document.getElementById('g4RondeCount')?.value || '3');
+  const key = 'ronde' + ronde;
+  if (!g4RondeData[key]) g4RondeData[key] = [];
+  const idx = g4RondeData[key].indexOf(memberId);
+  if (idx > -1) {
+    g4RondeData[key].splice(idx, 1);
+  } else {
+    if (g4RondeData[key].length >= 5) {
+      showNotif('⚠️ Ronde ' + ronde + ' sudah 5 foto! Hapus salah satu dulu.');
+      return;
+    }
+    g4RondeData[key].push(memberId);
+  }
+  renderG4RondeUI();
+}
+
+function autoAssignG4() {
+  const rondeCount = parseInt(document.getElementById('g4RondeCount')?.value || '3');
+  const members = window.allMembers || [];
+  if (members.length < rondeCount * 5) {
+    showNotif('⚠️ Perlu minimal ' + (rondeCount * 5) + ' foto untuk ' + rondeCount + ' ronde!');
+    return;
+  }
+  const shuffled = [...members].sort(() => Math.random() - 0.5);
+  g4RondeData = {};
+  for (let r = 1; r <= rondeCount; r++) {
+    g4RondeData['ronde' + r] = shuffled.slice((r-1)*5, r*5).map(m => m.id);
+  }
+  renderG4RondeUI();
+  showNotif('🔀 Auto-assign selesai! Klik Simpan untuk menyimpan.');
+}
+
+async function saveG4RondeAssignment() {
+  const rondeCount = parseInt(document.getElementById('g4RondeCount')?.value || '3');
+  // Validate
+  let ok = true;
+  for (let r = 1; r <= rondeCount; r++) {
+    if ((g4RondeData['ronde' + r] || []).length !== 5) {
+      ok = false;
+      showNotif('⚠️ Ronde ' + r + ' belum 5 foto! (sekarang ' + (g4RondeData['ronde' + r] || []).length + ')');
+      return;
+    }
+  }
+  try {
+    await sbUpsert('ras_event', {
+      id: 1,
+      g4_ronde_json: JSON.stringify(g4RondeData),
+      g4_ronde_count: rondeCount,
+      updated_at: new Date().toISOString()
+    });
+    showNotif('✅ Pengaturan ' + rondeCount + ' ronde tersimpan!');
+  } catch(e) {
+    showNotif('✅ Tersimpan lokal (Supabase optional)');
+  }
+}
+// ──────────────────────────────────────────────────────────
+
 
 // ── KOMEDIAN ──
 async function renderKomedianGrid() {

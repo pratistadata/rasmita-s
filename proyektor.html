@@ -1006,7 +1006,8 @@ async function tick() {
 
 // Realtime subscriptions untuk update instan
 function startRealtime() {
-  const tables = ['ras_players','ras_g5_results','ras_g3_live','ras_g6_singalong','ras_g1_scores','ras_g4_scores'];
+  const tables = ['ras_players','ras_g5_results','ras_g3_live','ras_g6_singalong',
+                  'ras_g1_scores','ras_g4_scores','ras_open_games','ras_g1_state'];
   tables.forEach(t => {
     sbSubscribe(t, () => {
       cache = {}; // invalidate cache saat ada perubahan
@@ -1017,9 +1018,9 @@ function startRealtime() {
 
 buildNavTabs();
 detectUrl();
-tick(); // initial load
-startRealtime(); // realtime updates
-setInterval(tick, 5000); // fallback polling
+tick(); // initial load langsung
+startRealtime(); // realtime WebSocket updates
+setInterval(tick, 2000); // fallback polling lebih cepat (2 detik)
 </script>
 </body>
 </html>
