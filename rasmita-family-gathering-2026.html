@@ -1879,21 +1879,18 @@ function sbSubscribe(table, callback) {
   return { close: () => ws && ws.close() };
 }
 async function sbUploadFile(bucket, path, dataUrl) {
-  const mime = dataUrl.split(';')[0].split(':')[1];
-  const blob = await fetch(dataUrl).then(r => r.blob());
-  // Try POST first
-  let r = await fetch(SUPABASE_URL + '/storage/v1/object/' + bucket + '/' + path, {
-    method: 'POST',
-    headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'Content-Type': mime },
-    body: blob
-  });
+  const mime = dataUrl.startsWith('data:') ? dataUrl.split(';')[0].split(':')[1] : 'application/octet-stream';
+  const blob = dataUrl.startsWith('data:') ? await fetch(dataUrl).then(r => r.blob()) : new Blob([dataUrl], {type: mime});
+  const headers = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'Content-Type': mime };
+  // Try POST first (new file)
+  let r = await fetch(SUPABASE_URL + '/storage/v1/object/' + bucket + '/' + path, { method: 'POST', headers, body: blob });
   if (!r.ok) {
     // Already exists — try PUT (update)
-    r = await fetch(SUPABASE_URL + '/storage/v1/object/' + bucket + '/' + path, {
-      method: 'PUT',
-      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'Content-Type': mime },
-      body: blob
-    });
+    r = await fetch(SUPABASE_URL + '/storage/v1/object/' + bucket + '/' + path, { method: 'PUT', headers, body: blob });
+  }
+  if (!r.ok) {
+    const err = await r.text();
+    throw new Error('Upload gagal (' + r.status + '): ' + err.substring(0, 120));
   }
   return SUPABASE_URL + '/storage/v1/object/public/' + bucket + '/' + path;
 }
@@ -2716,7 +2713,7 @@ function renderG5Step() {
   ).join('');
   document.getElementById('quizQuestion').textContent = q.pertanyaan;
   document.getElementById('quizOptions').innerHTML = q.opsi.map(opt =>
-    '<button class="quiz-opt ' + (state.g5Answers[q.field] === opt ? 'selected' : '') + '" onclick="selectG5('' + q.field + '', '' + opt + '')">' + opt + '</button>'
+    '<button class="quiz-opt ' + (state.g5Answers[q.field] === opt ? 'selected' : '') + '" onclick="selectG5(\'' + q.field + '\', \'' + opt + '\')">' + opt + '</button>'
   ).join('');
 }
 

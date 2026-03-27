@@ -445,7 +445,11 @@
       <p style="margin-bottom:0.75rem;font-size:0.9rem;letter-spacing:1px;text-transform:uppercase;color:var(--gold);font-weight:600">Cara Bergabung</p>
       <p>Buka browser di HP-mu, akses:</p>
       <div class="url" id="displayUrl">rasmita-gathering.netlify.app</div>
-      <p style="font-size:0.85rem;margin-top:8px;color:rgba(201,168,76,0.7)">atau scan QR Code yang tersedia di meja</p>
+      <div style="margin-top:14px;display:flex;flex-direction:column;align-items:center;gap:6px;">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=https://bit.ly/rasmitas&bgcolor=1a1a1a&color=C9A84C&margin=8"
+             alt="QR Code" style="border-radius:12px;border:2px solid rgba(201,168,76,0.7);width:160px;height:160px"/>
+        <p style="font-size:1rem;color:var(--gold);font-weight:700;letter-spacing:2px;">bit.ly/rasmitas</p>
+      </div>
     </div>
     <div class="game-pills">
       <div class="game-pill">🃏 Memory Match</div>
@@ -597,8 +601,8 @@
 // ============================================================
 // SUPABASE CONFIG — ganti dengan credentials project Anda
 // ============================================================
-const SUPABASE_URL = 'https://XXXX.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.XXXXXX';
+const SUPABASE_URL = 'https://ykibpxiovrslknagmnpq.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_mC5dlpZLyCUFWgGetANo4w_F44OZGXn';
 
 async function sbGet(table) {
   const r = await fetch(SUPABASE_URL + '/rest/v1/' + table + '?select=*', {
