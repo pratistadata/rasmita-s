@@ -1481,34 +1481,74 @@
     </div>
   </div>
 
+  <!-- SOAL AREA -->
   <div id="g2Soal">
-    <div style="text-align:center;margin-bottom:1rem;">
-      <div style="font-size:12px;color:var(--brown-light);letter-spacing:2px;text-transform:uppercase;">Soal <span id="g2Num">1</span> dari <span id="g2Total">15</span></div>
-      <div class="progress-bar" style="max-width:400px;margin:8px auto 0">
-        <div class="progress-fill" id="g2Progress" style="width:0%"></div>
+
+    <!-- MENUNGGU ADMIN -->
+    <div id="g2WaitAdmin" style="text-align:center;padding:3rem 1rem;">
+      <div style="font-size:3rem;margin-bottom:1rem;">⏳</div>
+      <div style="font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--brown);margin-bottom:0.5rem;">Menunggu Host...</div>
+      <div style="font-size:13px;color:var(--brown-light);">Host akan segera memulai Game Tebak Siapa</div>
+      <div style="margin-top:1.5rem;background:var(--cream-dark);border-radius:10px;padding:1rem;max-width:300px;margin-left:auto;margin-right:auto;">
+        <div style="font-size:11px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:4px;">Skor Kamu Sejauh Ini</div>
+        <div id="g2MyScoreWaiting" style="font-family:'Playfair Display',serif;font-size:2rem;color:var(--brown);font-weight:700;">0</div>
       </div>
     </div>
 
-    <div class="poin-display" id="g2Poin">500</div>
-    <div class="poin-label">Poin tersisa jika jawab sekarang</div>
+    <!-- SOAL AKTIF -->
+    <div id="g2Playing" style="display:none;">
+      <!-- Progress bar -->
+      <div style="text-align:center;margin-bottom:0.75rem;">
+        <div style="font-size:12px;color:var(--brown-light);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;">
+          Soal <span id="g2Num">1</span> dari <span id="g2Total">15</span>
+          &nbsp;·&nbsp; <span id="g2AnswerCount" style="color:var(--green);font-weight:600"></span>
+        </div>
+        <div class="progress-bar" style="max-width:400px;margin:0 auto">
+          <div class="progress-fill" id="g2Progress" style="width:0%"></div>
+        </div>
+      </div>
 
-    <div class="reveal-container">
-      <img src="" id="g2Img" alt="Tebak siapa ini?" style="width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;">
-      <div class="reveal-mask" id="g2Mask"></div>
+      <!-- Poin counter -->
+      <div class="poin-display" id="g2Poin">500</div>
+      <div class="poin-label">Poin tersisa jika jawab sekarang</div>
+
+      <!-- Foto reveal -->
+      <div class="reveal-container" style="position:relative;width:260px;height:320px;margin:0 auto 1.5rem;border-radius:12px;border:2px solid rgba(201,168,76,0.4);overflow:hidden;box-shadow:var(--shadow);">
+        <img src="" id="g2Img" alt="Tebak siapa ini?"
+          style="width:100%;height:100%;object-fit:cover;transition:filter 0.8s ease;">
+        <div class="reveal-mask" id="g2Mask"
+          style="position:absolute;inset:0;background:var(--brown);transition:clip-path 1.5s ease;"></div>
+      </div>
+
+      <!-- Input area (disembunyikan setelah jawab) -->
+      <div class="answer-form" id="g2AnswerArea" style="max-width:400px;margin:0 auto;text-align:center;">
+        <input type="text" class="answer-input" id="g2Answer"
+          placeholder="Siapa ini? Tulis namanya..." maxlength="40"
+          onkeydown="if(event.key==='Enter') submitG2()">
+        <button id="g2SubmitBtn" class="btn-gold" style="width:100%;margin-top:0.75rem" onclick="submitG2()">
+          Kirim Jawaban ✓
+        </button>
+      </div>
+
+      <!-- Feedback -->
+      <div id="g2Feedback" style="margin-top:1rem;font-size:14px;text-align:center;min-height:24px;"></div>
     </div>
 
-    <div class="answer-form">
-      <input type="text" class="answer-input" id="g2Answer" placeholder="Siapa ini? Tulis namanya..." maxlength="40">
-      <button class="btn-gold" style="width:100%" onclick="submitG2()">Kirim Jawaban ✓</button>
-      <div id="g2Feedback" style="margin-top:1rem;font-size:14px;text-align:center;"></div>
+    <!-- GAME SELESAI (intermediate) -->
+    <div id="g2Done" style="display:none;text-align:center;padding:2rem;">
+      <div style="font-size:3rem">🏁</div>
+      <div style="font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--brown);margin:0.5rem 0">Game Selesai!</div>
+      <div style="font-size:13px;color:var(--brown-light)">Menunggu host menampilkan hasil...</div>
     </div>
   </div>
 
+  <!-- LEADERBOARD -->
   <div id="g2Leaderboard" style="display:none;max-width:480px;margin:0 auto;">
-    <h3 style="font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--brown);text-align:center;margin-bottom:1.5rem;">🏆 Hasil Akhir</h3>
+    <h3 style="font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--brown);text-align:center;margin-bottom:0.5rem;">🏆 Hasil Akhir</h3>
+    <div id="g2MyScore" style="text-align:center;font-size:13px;color:var(--green);font-weight:600;margin-bottom:1rem;"></div>
     <div id="g2LBList"></div>
     <div class="center mt1">
-      <button class="btn-gold" onclick="restartGame2()">Main Lagi</button>
+      <button class="btn-gold" onclick="restartGame2()">Kembali ke Waiting</button>
     </div>
   </div>
 </div>
@@ -2551,77 +2591,235 @@ function restartGame1() {
 }
 
 // ============================================================
-// GAME 2: TEBAK SIAPA
+// GAME 2: TEBAK SIAPA — SINKRON via ras_g2_state
 // ============================================================
+// Flow: Admin pilih foto + klik Mulai → state masuk Supabase
+// Semua HP peserta subscribe → lihat foto yang sama
+// Peserta jawab → score disimpan ke state
+// Admin klik Next → foto berikutnya
+// ============================================================
+
+let g2Sub = null;           // realtime subscription
+let g2LastSession = '';     // detect game reset
+let g2HasAnswered = false;  // satu jawaban per soal
+let g2LocalScore = 0;       // skor akumulasi peserta ini
+
 function initGame2() {
   showPage('game2');
-  state.g2Members = [...getPhotosForGame(2)].sort(() => Math.random() - 0.5);
-  state.g2CurrentIdx = 0; state.g2Score = 0; state.g2Scores = {};
+  g2HasAnswered = false;
+  g2LocalScore = 0;
+  // Reset UI
   document.getElementById('g2Soal').style.display = 'block';
   document.getElementById('g2Leaderboard').style.display = 'none';
-  loadG2Soal();
+  document.getElementById('g2WaitAdmin').style.display = 'block';
+  document.getElementById('g2Playing').style.display = 'none';
+  document.getElementById('g2Feedback').innerHTML = '';
+  // Subscribe ke ras_g2_state
+  if (g2Sub) g2Sub.close();
+  g2Sub = sbSubscribe('ras_g2_state', () => { loadG2State(); });
+  loadG2State(); // load state saat ini
 }
 
-function loadG2Soal() {
-  if (state.g2CurrentIdx >= state.g2Members.length) { showG2Leaderboard(); return; }
-  const m = state.g2Members[state.g2CurrentIdx];
-  state.g2PoinLeft = 500; state.g2Stage = 0;
-  document.getElementById('g2Num').textContent = state.g2CurrentIdx + 1;
-  document.getElementById('g2Total').textContent = state.g2Members.length;
-  document.getElementById('g2Progress').style.width = ((state.g2CurrentIdx / state.g2Members.length) * 100) + '%';
-  document.getElementById('g2Poin').textContent = state.g2PoinLeft;
-  document.getElementById('g2Answer').value = '';
-  document.getElementById('g2Feedback').innerHTML = '';
-  if (m.foto) document.getElementById('g2Img').src = m.foto;
-  clearInterval(state.g2Timer);
-  updateG2Mask(0);
-  state.g2Timer = setInterval(() => {
-    state.g2Stage++;
-    state.g2PoinLeft = Math.max(100, 500 - state.g2Stage * 80);
-    document.getElementById('g2Poin').textContent = state.g2PoinLeft;
-    updateG2Mask(state.g2Stage);
-    if (state.g2Stage >= 5) clearInterval(state.g2Timer);
-  }, 2000);
+async function loadG2State() {
+  try {
+    const rows = await sbGet('ras_g2_state');
+    if (!rows || rows.length === 0) return;
+    const st = rows[0];
+    applyG2State(st);
+  } catch(e) { console.warn('loadG2State error', e); }
+}
+
+function applyG2State(st) {
+  // Detect sesi baru (game di-reset admin)
+  if (st.session_id && st.session_id !== g2LastSession) {
+    g2LastSession = st.session_id;
+    g2HasAnswered = false;
+    g2LocalScore = 0;
+    document.getElementById('g2Feedback').innerHTML = '';
+  }
+
+  const status = st.status || 'waiting';
+
+  if (status === 'waiting') {
+    // Menunggu admin mulai game
+    document.getElementById('g2WaitAdmin').style.display = 'block';
+    document.getElementById('g2Playing').style.display = 'none';
+    document.getElementById('g2Done').style.display = 'none';
+    return;
+  }
+
+  if (status === 'done') {
+    // Game selesai — tampil leaderboard
+    showG2Leaderboard(st);
+    return;
+  }
+
+  // status === 'playing' atau 'reveal'
+  document.getElementById('g2WaitAdmin').style.display = 'none';
+  document.getElementById('g2Playing').style.display = 'block';
+  document.getElementById('g2Done').style.display = 'none';
+
+  // Update soal counter & progress
+  const soalIdx   = st.soal_idx || 0;
+  const soalTotal = st.soal_total || 15;
+  document.getElementById('g2Num').textContent   = soalIdx + 1;
+  document.getElementById('g2Total').textContent = soalTotal;
+  document.getElementById('g2Progress').style.width = ((soalIdx / soalTotal) * 100) + '%';
+
+  // Update foto
+  if (st.member_foto_url) {
+    const img = document.getElementById('g2Img');
+    if (img.src !== st.member_foto_url) {
+      img.src = st.member_foto_url;
+      // Reset jawaban saat foto berganti
+      if (!g2HasAnswered) {
+        document.getElementById('g2Answer').value = '';
+        document.getElementById('g2Feedback').innerHTML = '';
+      }
+    }
+  }
+
+  // Update stage (blur reveal)
+  const stage    = st.stage || 0;
+  const poinLeft = st.poin_left || 500;
+  document.getElementById('g2Poin').textContent = poinLeft;
+  updateG2Mask(stage);
+
+  // Jika reveal — jawaban benar muncul
+  if (status === 'reveal') {
+    document.getElementById('g2AnswerArea').style.display = 'none';
+    // Tampil jawaban benar jika peserta belum menjawab
+    if (!g2HasAnswered) {
+      const fb = document.getElementById('g2Feedback');
+      fb.innerHTML = '<span style="color:var(--gold)">⏰ Waktu habis. Jawabannya: <strong>' + st.member_nama + '</strong></span>';
+    }
+    updateG2Mask(5);
+  } else {
+    // playing — aktifkan input
+    const answered = checkG2AlreadyAnswered(st);
+    document.getElementById('g2AnswerArea').style.display = answered ? 'none' : 'block';
+  }
+
+  // Counter jawaban
+  try {
+    const answers = JSON.parse(st.answers_json || '{}');
+    const ansCount = Object.keys(answers).length;
+    const counterEl = document.getElementById('g2AnswerCount');
+    if (counterEl) counterEl.textContent = ansCount + ' sudah menjawab';
+  } catch(e) {}
+}
+
+function checkG2AlreadyAnswered(st) {
+  if (g2HasAnswered) return true;
+  try {
+    const answers = JSON.parse(st.answers_json || '{}');
+    if (answers[state.playerName]) { g2HasAnswered = true; return true; }
+  } catch(e) {}
+  return false;
 }
 
 function updateG2Mask(stage) {
   const mask = document.getElementById('g2Mask');
-  if (mask) mask.style.clipPath = 'inset(' + (stage * 20) + '% 0 0 0)';
+  if (!mask) return;
+  // stage 0 = max blur (95%), stage 5 = no blur (0%)
+  // clip-path inset dari atas: semakin kecil = semakin banyak terlihat
+  const revealed = stage * 20; // 0, 20, 40, 60, 80, 100%
+  mask.style.clipPath = 'inset(0 0 ' + (100 - revealed) + '% 0)';
+  // blur CSS
+  const blurPx = Math.max(0, 20 - stage * 4);
+  const img = document.getElementById('g2Img');
+  if (img) img.style.filter = blurPx > 0 ? 'blur(' + blurPx + 'px)' : 'none';
 }
 
-function submitG2() {
-  clearInterval(state.g2Timer);
-  const ans = document.getElementById('g2Answer').value.trim().toLowerCase();
-  const m = state.g2Members[state.g2CurrentIdx];
-  const correct = m.nama.toLowerCase();
-  const isCorrect = ans.includes(correct.split(' ')[0].toLowerCase()) || correct.includes(ans);
-  const fb = document.getElementById('g2Feedback');
-  if (isCorrect) {
-    state.g2Score += state.g2PoinLeft;
-    state.g2Scores[state.playerName || 'Kamu'] = (state.g2Scores[state.playerName || 'Kamu'] || 0) + state.g2PoinLeft;
-    fb.innerHTML = '<span style="color:var(--green);font-weight:600">✓ Benar! +' + state.g2PoinLeft + ' poin</span>';
-  } else {
-    fb.innerHTML = '<span style="color:var(--red)">✗ Salah. Jawabannya: <strong>' + m.nama + '</strong></span>';
+async function submitG2() {
+  if (g2HasAnswered) return;
+  const ans = document.getElementById('g2Answer').value.trim();
+  if (!ans) { showNotif('Tulis jawabanmu dulu!'); return; }
+
+  const btn = document.getElementById('g2SubmitBtn');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Mengirim...'; }
+
+  try {
+    const rows = await sbGet('ras_g2_state');
+    if (!rows || rows.length === 0) return;
+    const st = rows[0];
+    const correctName = st.member_nama || '';
+    const correct = correctName.toLowerCase();
+    const isCorrect = ans.toLowerCase().includes(correct.split(' ')[0]) ||
+                      correct.includes(ans.toLowerCase()) ||
+                      ans.toLowerCase() === correct;
+    const poin = isCorrect ? (st.poin_left || 100) : 0;
+    g2LocalScore += poin;
+
+    // Simpan jawaban ke state
+    let answers = {};
+    try { answers = JSON.parse(st.answers_json || '{}'); } catch(e) {}
+    answers[state.playerName || 'Anonim'] = {
+      answer: ans, poin, correct: isCorrect, ts: new Date().toISOString()
+    };
+
+    await sbUpsert('ras_g2_state', {
+      id: 1,
+      answers_json: JSON.stringify(answers),
+      updated_at: new Date().toISOString()
+    });
+
+    g2HasAnswered = true;
+    const fb = document.getElementById('g2Feedback');
+    if (isCorrect) {
+      fb.innerHTML = '<span style="color:var(--green);font-weight:600">✓ Benar! +' + poin + ' poin 🎉</span>';
+    } else {
+      fb.innerHTML = '<span style="color:var(--red)">✗ Salah. Jawabannya: <strong>' + correctName + '</strong></span>';
+    }
+    document.getElementById('g2AnswerArea').style.display = 'none';
+  } catch(e) {
+    showNotif('❌ Gagal kirim: ' + e.message);
+    if (btn) { btn.disabled = false; btn.textContent = 'Kirim Jawaban ✓'; }
   }
-  updateG2Mask(5);
-  setTimeout(() => { state.g2CurrentIdx++; loadG2Soal(); }, 2000);
 }
 
-function showG2Leaderboard() {
+function showG2Leaderboard(st) {
   document.getElementById('g2Soal').style.display = 'none';
   document.getElementById('g2Leaderboard').style.display = 'block';
-  const sorted = Object.entries(state.g2Scores).sort((a,b) => b[1]-a[1]);
-  document.getElementById('g2LBList').innerHTML = sorted.map(([name, score], i) => {
-    const bg = i===0?'cream-dark':'white';
-    const medal = i===0?'🥇':i===1?'🥈':'🥉';
-    return '<div style="display:flex;align-items:center;gap:1rem;padding:12px;background:var(--' + bg + ');border-radius:10px;margin-bottom:8px;border:1px solid rgba(201,168,76,0.2)">' +
-    '<div style="font-size:1.5rem">' + medal + '</div>' +
-    '<div style="flex:1;font-weight:600;color:var(--brown)">' + name + '</div>' +
-    '<div style="font-size:1.2rem;color:var(--gold)">' + score + '</div></div>';
-  }).join('');
+  const lbList = document.getElementById('g2LBList');
+  if (!lbList) return;
+  try {
+    const answers = JSON.parse(st.answers_json || '{}');
+    // Compile per-player total score dari soal_order
+    const playerScores = {};
+    // answers: { playerName: { answer, poin, correct, ts } } per soal terakhir
+    // Score kumulatif tidak ada di state lama — tampil apa yang ada
+    Object.entries(answers).forEach(([name, data]) => {
+      playerScores[name] = (playerScores[name] || 0) + (data.poin || 0);
+    });
+    const sorted = Object.entries(playerScores).sort((a, b) => b[1] - a[1]);
+    lbList.innerHTML = sorted.length === 0
+      ? '<p style="color:var(--brown-light);text-align:center;padding:2rem">Belum ada jawaban masuk.</p>'
+      : sorted.map(([name, score], i) => {
+          const medal = i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1+'.') ;
+          return '<div style="display:flex;align-items:center;gap:1rem;padding:12px;background:var(--' + (i===0?'cream-dark':'white') + ');border-radius:10px;margin-bottom:8px;border:1px solid rgba(201,168,76,0.2)">' +
+            '<div style="font-size:1.5rem">' + medal + '</div>' +
+            '<div style="flex:1;font-weight:600;color:var(--brown)">' + name + '</div>' +
+            '<div style="font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--gold)">' + score + '</div></div>';
+        }).join('');
+    // Tambahkan skor diri sendiri
+    const myScore = playerScores[state.playerName] || g2LocalScore;
+    const myEl = document.getElementById('g2MyScore');
+    if (myEl) myEl.textContent = 'Skor kamu: ' + myScore + ' poin';
+  } catch(e) {
+    lbList.innerHTML = '<p style="color:var(--brown-light);padding:1rem">Memuat hasil...</p>';
+  }
 }
 
-function restartGame2() { initGame2(); }
+function restartGame2() {
+  g2HasAnswered = false;
+  g2LocalScore = 0;
+  document.getElementById('g2Soal').style.display = 'block';
+  document.getElementById('g2Leaderboard').style.display = 'none';
+  document.getElementById('g2WaitAdmin').style.display = 'block';
+  document.getElementById('g2Playing').style.display = 'none';
+  loadG2State();
+}
 
 // ============================================================
 // GAME 3: SIAPA PALING

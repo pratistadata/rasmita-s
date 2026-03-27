@@ -623,6 +623,84 @@
   <div class="nav-tabs" id="navGame4"></div>
 </div>
 
+
+<!-- ===== SCREEN: GAME 2 TEBAK SIAPA — BLUR REVEAL ===== -->
+<div id="screenGame2" class="screen" style="background:linear-gradient(160deg,#0a1228 0%,#1a2440 50%,#0a1228 100%)">
+  <div class="topbar">
+    <div class="topbar-title">🔍 Tebak Siapa?</div>
+    <div style="display:flex;gap:12px;align-items:center">
+      <div id="g2ProjAnswerBadge" class="count-badge" style="font-size:1rem;padding:6px 14px">0 jawaban</div>
+      <div class="topbar-badge"><span class="live-dot"></span>LIVE</div>
+    </div>
+  </div>
+  <div class="stats-row">
+    <div class="stat-item">Soal: <strong id="g2ProjSoalNum">—</strong></div>
+    <div class="stat-item">Poin tersisa: <strong id="g2ProjPoin" style="color:var(--gold-light)">500</strong></div>
+    <div class="stat-item">Stage reveal: <strong id="g2ProjStage">0/5</strong></div>
+  </div>
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;">
+    <!-- Waiting state -->
+    <div id="g2ProjWaiting" style="text-align:center;">
+      <div style="font-size:4rem;margin-bottom:1rem;">🔍</div>
+      <div style="font-family:'Playfair Display',serif;font-size:2rem;color:var(--gold-light);margin-bottom:0.5rem;">Tebak Siapa?</div>
+      <div style="font-size:1rem;color:rgba(255,255,255,0.5);">Menunggu host memulai game...</div>
+    </div>
+    <!-- Playing state -->
+    <div id="g2ProjPlaying" style="display:none;text-align:center;width:100%;">
+      <div style="position:relative;width:280px;height:340px;margin:0 auto;border-radius:16px;overflow:hidden;border:3px solid rgba(201,168,76,0.4);box-shadow:0 20px 60px rgba(0,0,0,0.5);">
+        <img id="g2ProjImg" src="" alt="Tebak siapa ini?"
+          style="width:100%;height:100%;object-fit:cover;transition:filter 1.2s ease;">
+        <div id="g2ProjMask"
+          style="position:absolute;inset:0;background:var(--brown);transition:clip-path 1.5s ease;"></div>
+      </div>
+      <div id="g2ProjRevealName" style="display:none;margin-top:1.5rem;">
+        <div style="font-family:'Playfair Display',serif;font-size:2.5rem;color:var(--gold-light);font-weight:700;text-shadow:0 2px 12px rgba(0,0,0,0.5);" id="g2ProjName"></div>
+      </div>
+    </div>
+    <!-- Done state -->
+    <div id="g2ProjDone" style="display:none;text-align:center;">
+      <div style="font-size:3rem;margin-bottom:1rem">🏁</div>
+      <div style="font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--gold-light);">Ronde Selesai!</div>
+    </div>
+    <!-- Live answer list -->
+    <div id="g2ProjAnswerList" style="display:none;margin-top:1.5rem;background:rgba(255,255,255,0.06);border-radius:12px;padding:1rem 1.25rem;max-width:500px;width:100%;max-height:200px;overflow-y:auto;"></div>
+  </div>
+  <div class="nav-tabs" id="navGame2"></div>
+</div>
+
+<!-- ===== SCREEN: RESULT / PEMENANG ===== -->
+<div id="screenResult" class="screen" style="background:linear-gradient(160deg,#1a0f08 0%,#2D1810 40%,#1a3a0a 100%)">
+  <div class="topbar">
+    <div class="topbar-title">🏆 Hasil Akhir & Pemenang</div>
+    <div style="display:flex;gap:12px;align-items:center">
+      <div class="topbar-badge"><span class="live-dot"></span>FINAL</div>
+    </div>
+  </div>
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;overflow-y:auto;">
+
+    <!-- Podium top 3 -->
+    <div id="resultPodium" style="display:flex;align-items:flex-end;justify-content:center;gap:16px;margin-bottom:2rem;max-width:700px;width:100%;">
+      <!-- Filled by JS -->
+    </div>
+
+    <!-- Full leaderboard -->
+    <div style="width:100%;max-width:700px;">
+      <div style="font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:12px;text-align:center;">REKAP SKOR SEMUA GAME</div>
+      <div id="resultTable" style="background:rgba(255,255,255,0.05);border-radius:14px;overflow:hidden;">
+        <!-- Filled by JS -->
+      </div>
+    </div>
+
+    <div id="resultEmpty" style="text-align:center;opacity:0.5;margin-top:2rem;">
+      <div style="font-size:3rem">📊</div>
+      <p style="color:var(--gold-light)">Belum ada data skor tersedia</p>
+      <p style="font-size:0.8rem;color:rgba(255,255,255,0.4)">Admin: klik "Tampilkan Hasil" di panel admin</p>
+    </div>
+  </div>
+  <div class="nav-tabs" id="navResult"></div>
+</div>
+
+
 <!-- New Result Banner -->
 <div class="new-result-banner" id="newResultBanner">
   <div class="label">🎭 HASIL BARU!</div>
@@ -675,11 +753,33 @@ const ALL_SCREENS = [
   { id: 'screenWelcome',  label: '🏠 Welcome' },
   { id: 'screenLobby',   label: '👥 Peserta' },
   { id: 'screenGame1',   label: '🃏 Memory Match' },
+  { id: 'screenGame2',   label: '🔍 Tebak Siapa' },
   { id: 'screenGame3',   label: '🗳️ Siapa Paling' },
   { id: 'screenGame4',   label: '⏳ Timeline' },
   { id: 'screenGame5',   label: '🎭 Mirip Siapa' },
   { id: 'screenGame6',   label: '🎵 Tebak Lagu' },
+  { id: 'screenResult',  label: '🏆 Hasil Akhir' },
 ];
+
+// FEAT-1: Auto-switch mapping
+const GAME_SCREEN_MAP = {
+  1: 'screenGame1',
+  2: 'screenGame2',
+  3: 'screenGame3',
+  4: 'screenGame4',
+  5: 'screenGame5',
+  6: 'screenGame6',
+};
+
+function autoSwitchScreen(openGameIds) {
+  if (!openGameIds || openGameIds.length === 0) {
+    showScreen('screenLobby');
+    return;
+  }
+  const lastOpened = openGameIds[openGameIds.length - 1];
+  const targetScreen = GAME_SCREEN_MAP[lastOpened];
+  if (targetScreen) showScreen(targetScreen);
+}
 
 let currentScreen = 'screenWelcome';
 let lastPlayerCount = 0;
@@ -963,6 +1063,162 @@ async function renderG4() {
   } catch(e) {}
 }
 
+// ── SCREEN: GAME 2 TEBAK SIAPA — proyektor ──
+let g2ProjCache = '';
+async function renderG2() {
+  try {
+    const rows = await sbGet('ras_g2_state');
+    if (!rows || rows.length === 0) return;
+    const st = rows[0];
+    const key = st.updated_at;
+    if (g2ProjCache === key) return;
+    g2ProjCache = key;
+
+    const status = st.status || 'waiting';
+
+    // Status bar
+    const soalEl = document.getElementById('g2ProjSoalNum');
+    const poinEl = document.getElementById('g2ProjPoin');
+    const stageEl = document.getElementById('g2ProjStage');
+    const badgeEl = document.getElementById('g2ProjAnswerBadge');
+
+    if (soalEl) soalEl.textContent = (st.soal_idx + 1) + ' / ' + (st.soal_total || '?');
+    if (poinEl) poinEl.textContent = st.poin_left || 500;
+    if (stageEl) stageEl.textContent = (st.stage || 0) + ' / ' + (st.stage_max || 5);
+
+    let ansCount = 0;
+    let answers = {};
+    try { answers = JSON.parse(st.answers_json || '{}'); ansCount = Object.keys(answers).length; } catch(e) {}
+    if (badgeEl) badgeEl.textContent = ansCount + ' jawaban';
+
+    // State divs
+    const waitEl    = document.getElementById('g2ProjWaiting');
+    const playEl    = document.getElementById('g2ProjPlaying');
+    const doneEl    = document.getElementById('g2ProjDone');
+    const revNameEl = document.getElementById('g2ProjRevealName');
+    const ansListEl = document.getElementById('g2ProjAnswerList');
+
+    if (status === 'waiting') {
+      if (waitEl) waitEl.style.display = 'block';
+      if (playEl) playEl.style.display = 'none';
+      if (doneEl) doneEl.style.display = 'none';
+      if (ansListEl) ansListEl.style.display = 'none';
+      return;
+    }
+
+    if (status === 'done') {
+      if (waitEl) waitEl.style.display = 'none';
+      if (playEl) playEl.style.display = 'none';
+      if (doneEl) doneEl.style.display = 'block';
+      return;
+    }
+
+    // playing / reveal
+    if (waitEl) waitEl.style.display = 'none';
+    if (playEl) playEl.style.display = 'block';
+    if (doneEl) doneEl.style.display = 'none';
+
+    // Foto
+    const img = document.getElementById('g2ProjImg');
+    if (img && st.member_foto_url) img.src = st.member_foto_url;
+
+    // Blur reveal
+    const stage = st.stage || 0;
+    const blurPx = Math.max(0, 20 - stage * 4);
+    if (img) img.style.filter = blurPx > 0 ? 'blur(' + blurPx + 'px) brightness(0.9)' : 'none';
+    const mask = document.getElementById('g2ProjMask');
+    if (mask) {
+      const revealed = Math.min(100, stage * 20);
+      mask.style.clipPath = 'inset(0 0 ' + (100 - revealed) + '% 0)';
+    }
+
+    // Show name on reveal
+    if (status === 'reveal') {
+      if (revNameEl) revNameEl.style.display = 'block';
+      const nameEl = document.getElementById('g2ProjName');
+      if (nameEl) nameEl.textContent = st.member_nama || '?';
+    } else {
+      if (revNameEl) revNameEl.style.display = 'none';
+    }
+
+    // Live answer list (show on reveal only)
+    if (ansListEl) {
+      if (status === 'reveal' && Object.keys(answers).length > 0) {
+        ansListEl.style.display = 'block';
+        const correctLower = (st.member_nama || '').toLowerCase();
+        ansListEl.innerHTML = Object.entries(answers).map(([name, data]) => {
+          const ok = data.correct;
+          return '<div style="display:flex;gap:10px;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.05);">' +
+            '<span style="font-size:1.1rem">' + (ok ? '✓' : '✗') + '</span>' +
+            '<span style="color:' + (ok ? '#69F0AE' : '#FF5252') + ';font-weight:600">' + name + '</span>' +
+            '<span style="color:rgba(255,255,255,0.5)">' + (data.answer || '') + '</span>' +
+            '<span style="margin-left:auto;color:var(--gold-light);font-weight:700">' + (data.poin || 0) + ' poin</span>' +
+          '</div>';
+        }).join('');
+      } else {
+        ansListEl.style.display = 'none';
+      }
+    }
+  } catch(e) { console.warn('renderG2 error', e); }
+}
+
+// ── SCREEN: RESULT / PEMENANG ──
+async function renderResult() {
+  try {
+    const rows = await sbGet('ras_results_summary');
+    const emptyEl  = document.getElementById('resultEmpty');
+    const podiumEl = document.getElementById('resultPodium');
+    const tableEl  = document.getElementById('resultTable');
+    if (!rows || rows.length === 0) {
+      if (emptyEl) emptyEl.style.display = 'block';
+      if (podiumEl) podiumEl.innerHTML = '';
+      if (tableEl) tableEl.innerHTML = '';
+      return;
+    }
+    if (emptyEl) emptyEl.style.display = 'none';
+    const sorted = [...rows].sort((a,b) => b.score_total - a.score_total);
+
+    // Podium top 3
+    if (podiumEl) {
+      const podiumOrder = [sorted[1], sorted[0], sorted[2]].filter(Boolean);
+      const heights = ['100px','140px','80px'];
+      const colors  = ['#B0B0B0','#C9A84C','#CD7F32'];
+      const labels  = ['🥈','🥇','🥉'];
+      podiumEl.innerHTML = podiumOrder.map((p, i) => `
+        <div style="text-align:center;flex:1;max-width:200px;animation:fadeIn ${0.3+i*0.3}s ease">
+          <div style="font-size:2rem;margin-bottom:6px">${labels[i]}</div>
+          <div style="font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--cream);font-weight:700;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.player_name}</div>
+          <div style="font-family:'Playfair Display',serif;font-size:1.5rem;color:${colors[i]};font-weight:900;margin-bottom:8px">${p.score_total}</div>
+          <div style="height:${heights[i]};background:${colors[i]};border-radius:8px 8px 0 0;display:flex;align-items:center;justify-content:center;font-size:1.3rem">
+            ${labels[i]}
+          </div>
+        </div>`).join('');
+    }
+
+    // Full table
+    if (tableEl) {
+      const header = '<div style="display:grid;grid-template-columns:2fr repeat(6,1fr) 1.5fr;padding:10px 14px;background:rgba(0,0,0,0.3);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);font-weight:600;">' +
+        '<div>Nama</div><div>G1</div><div>G2</div><div>G3</div><div>G4</div><div>G5</div><div>G6</div><div>Total</div></div>';
+      const rows_html = sorted.map((r, i) =>
+        '<div style="display:grid;grid-template-columns:2fr repeat(6,1fr) 1.5fr;padding:10px 14px;' +
+        (i%2===0?'background:rgba(255,255,255,0.03)':'') + ';' +
+        (i===0?'border-top:2px solid var(--gold);':'') + 'align-items:center;">' +
+        '<div style="font-weight:' + (i<3?'700':'500') + ';color:var(--cream)">' +
+        (i===0?'🥇 ':i===1?'🥈 ':i===2?'🥉 ':((i+1)+'. ')) + r.player_name + '</div>' +
+        '<div style="color:rgba(255,255,255,0.7)">' + (r.score_g1 || 0) + '</div>' +
+        '<div style="color:rgba(255,255,255,0.7)">' + (r.score_g2 || 0) + '</div>' +
+        '<div style="color:rgba(255,255,255,0.7)">' + (r.score_g3 || 0) + '</div>' +
+        '<div style="color:rgba(255,255,255,0.7)">' + (r.score_g4 || 0) + '</div>' +
+        '<div style="color:rgba(255,255,255,0.5)">—</div>' +
+        '<div style="color:rgba(255,255,255,0.7)">' + (r.score_g6 || 0) + '</div>' +
+        '<div style="font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;color:var(--gold)">' + r.score_total + '</div></div>'
+      ).join('');
+      tableEl.innerHTML = header + rows_html;
+    }
+  } catch(e) { console.warn('renderResult error', e); }
+}
+
+
 function showBanner(player, mirip) {
   const banner = document.getElementById('newResultBanner');
   document.getElementById('bannerPlayer').textContent = player;
@@ -1001,15 +1257,26 @@ async function tick() {
   await renderG6();
   await renderG1();
   await renderG4();
+  await renderG2();
+  // renderResult only when screen is active (expensive)
+  if (currentScreen === 'screenResult') await renderResult();
 }
 
 // Realtime subscriptions untuk update instan
 function startRealtime() {
   const tables = ['ras_players','ras_g5_results','ras_g3_live','ras_g6_singalong',
-                  'ras_g1_scores','ras_g4_scores','ras_open_games','ras_g1_state'];
+                  'ras_g1_scores','ras_g4_scores','ras_open_games','ras_g1_state',
+                  'ras_g2_state','ras_results_summary'];
   tables.forEach(t => {
-    sbSubscribe(t, () => {
-      cache = {}; // invalidate cache saat ada perubahan
+    sbSubscribe(t, async (payload) => {
+      cache = {};
+      // FEAT-1: Auto-switch saat ras_open_games berubah
+      if (t === 'ras_open_games') {
+        try {
+          const rows = await sbGet('ras_open_games');
+          if (rows && rows.length > 0) autoSwitchScreen(rows[0].game_ids || []);
+        } catch(e) {}
+      }
       tick();
     });
   });

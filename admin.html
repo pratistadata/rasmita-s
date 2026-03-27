@@ -856,31 +856,102 @@
     <!-- ════════════════════════════════ GAME 2 ADMIN ════════════════════════════════ -->
     <div class="panel-page" id="panel-game2-admin">
       <div class="card">
-        <div class="card-title"><span>🔍</span> Game 2 — Tebak Siapa?</div>
+        <div class="card-title"><span>🔍</span> Game 2 — Tebak Siapa? (Sinkron)</div>
         <div class="tab-bar">
-          <button class="tab-btn active" onclick="switchTab('g2','info')">ℹ️ Info</button>
-          <button class="tab-btn" onclick="switchTab('g2','aturan')">📋 Aturan</button>
+          <button class="tab-btn active" onclick="switchTab('g2','kontrol')">🎮 Kontrol</button>
+          <button class="tab-btn" onclick="switchTab('g2','info')">ℹ️ Info</button>
           <button class="tab-btn" onclick="switchTab('g2','tips')">💡 Tips MC</button>
         </div>
-        <div class="tab-panel active" id="g2-tab-info">
-          <div class="stat-grid" style="grid-template-columns:repeat(3,1fr)">
-            <div class="stat-card"><div class="stat-label">Pemain</div><div class="stat-value">Semua</div></div>
-            <div class="stat-card"><div class="stat-label">Durasi</div><div class="stat-value gold">20 mnt</div></div>
-            <div class="stat-card"><div class="stat-label">Poin Maks</div><div class="stat-value green">500</div></div>
+
+        <!-- TAB: KONTROL GAME 2 -->
+        <div class="tab-panel active" id="g2-tab-kontrol">
+          <div class="alert alert-info">
+            📡 <strong>Mode Sinkron:</strong> Semua peserta lihat foto yang sama. Kamu yang kontrol kapan foto berganti.
           </div>
-          <div class="instr-box">Foto anggota keluarga <strong>ditampilkan blur/terpotong</strong>, perlahan terlihat. Tebak lebih cepat = poin lebih besar. Semakin banyak foto yang diupload, semakin seru gamenya.</div>
+
+          <!-- Status bar -->
+          <div style="background:var(--cream-dark);border-radius:10px;padding:1rem 1.25rem;margin-bottom:1rem;display:flex;gap:1.5rem;flex-wrap:wrap;align-items:center;">
+            <div><div style="font-size:11px;letter-spacing:1px;color:var(--brown-light);text-transform:uppercase;">Status</div>
+              <div id="g2AdminStatus" style="font-weight:700;color:var(--green);font-size:1rem;">⏳ Menunggu</div></div>
+            <div><div style="font-size:11px;letter-spacing:1px;color:var(--brown-light);text-transform:uppercase;">Soal</div>
+              <div id="g2AdminSoalInfo" style="font-weight:700;color:var(--brown);font-size:1rem;">—</div></div>
+            <div><div style="font-size:11px;letter-spacing:1px;color:var(--brown-light);text-transform:uppercase;">Sudah Menjawab</div>
+              <div id="g2AdminAnswerCount" style="font-weight:700;color:var(--gold-dark);font-size:1rem;">0</div></div>
+            <div style="margin-left:auto;">
+              <div style="font-size:11px;letter-spacing:1px;color:var(--brown-light);text-transform:uppercase;">Stage Reveal</div>
+              <div id="g2AdminStage" style="font-weight:700;color:var(--brown);font-size:1rem;">—</div></div>
+          </div>
+
+          <!-- Foto aktif -->
+          <div id="g2AdminFotoPreview" style="text-align:center;margin-bottom:1rem;display:none;">
+            <img id="g2AdminCurrentFoto" src="" style="width:120px;height:140px;object-fit:cover;border-radius:10px;border:2px solid var(--gold);box-shadow:var(--shadow);" alt="">
+            <div id="g2AdminCurrentNama" style="font-weight:700;color:var(--brown);margin-top:6px;font-size:13px;"></div>
+          </div>
+
+          <!-- Pilih foto dari anggota keluarga -->
+          <div style="margin-bottom:1rem;">
+            <div style="font-size:12px;font-weight:600;color:var(--brown-light);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Urutan Soal (anggota yang akan ditebak)</div>
+            <div id="g2SoalPicker" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:8px;max-height:200px;overflow-y:auto;background:var(--cream);border:1px solid rgba(201,168,76,0.2);border-radius:8px;padding:10px;"></div>
+            <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
+              <button class="btn btn-outline btn-sm" onclick="g2SelectAll()">☑️ Pilih Semua</button>
+              <button class="btn btn-outline btn-sm" onclick="g2ClearAll()">☐ Kosongkan</button>
+              <button class="btn btn-outline btn-sm" onclick="g2ShuffleSoal()">🔀 Acak Urutan</button>
+            </div>
+          </div>
+
+          <!-- Tombol kontrol -->
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:1rem;">
+            <button class="btn btn-gold" onclick="g2AdminStart()" id="g2BtnStart">▶ Mulai Game</button>
+            <button class="btn btn-outline" onclick="g2AdminReveal()" id="g2BtnReveal" style="display:none;">👁️ Reveal Jawaban</button>
+            <button class="btn btn-gold" onclick="g2AdminNext()" id="g2BtnNext" style="display:none;">⏭ Foto Berikutnya</button>
+            <button class="btn btn-outline" onclick="g2AdminEndGame()" id="g2BtnEnd" style="display:none;">🏁 Selesaikan Game</button>
+            <button class="btn btn-danger" onclick="g2AdminReset()">🔄 Reset Game</button>
+          </div>
+
+          <!-- Tombol reveal stage manual -->
+          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:1rem;">
+            <span style="font-size:12px;color:var(--brown-light);font-weight:600;">Reveal:</span>
+            <button class="btn btn-sm btn-outline" onclick="g2AdminSetStage(1)">Stage 1</button>
+            <button class="btn btn-sm btn-outline" onclick="g2AdminSetStage(2)">Stage 2</button>
+            <button class="btn btn-sm btn-outline" onclick="g2AdminSetStage(3)">Stage 3</button>
+            <button class="btn btn-sm btn-outline" onclick="g2AdminSetStage(4)">Stage 4</button>
+            <button class="btn btn-sm btn-outline" onclick="g2AdminSetStage(5)">Full Reveal</button>
+          </div>
+
+          <!-- Live answers dari peserta -->
+          <div style="font-size:12px;font-weight:600;color:var(--brown-light);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Jawaban Peserta (Soal Ini)</div>
+          <div id="g2AdminAnswers" style="max-height:200px;overflow-y:auto;background:var(--cream);border-radius:8px;padding:8px;border:1px solid rgba(201,168,76,0.2);font-size:13px;color:var(--brown-light);">
+            Belum ada jawaban...
+          </div>
+
+          <div style="margin-top:8px;">
+            <button class="btn btn-sm btn-outline" onclick="g2AdminLoadState()">🔄 Refresh Status</button>
+          </div>
+        </div>
+
+        <!-- TAB: INFO -->
+        <div class="tab-panel" id="g2-tab-info">
+          <div class="stat-grid" style="grid-template-columns:repeat(3,1fr)">
+            <div class="stat-card"><div class="stat-label">Mode</div><div class="stat-value" style="font-size:1rem">Sinkron</div></div>
+            <div class="stat-card"><div class="stat-label">Poin Maks</div><div class="stat-value green">500</div></div>
+            <div class="stat-card"><div class="stat-label">Timer Stage</div><div class="stat-value gold">Manual</div></div>
+          </div>
+          <div class="instr-box">
+            <strong>Flow Game 2 Sinkron:</strong><br>
+            1. Pilih foto anggota yang akan ditebak, klik <strong>Mulai Game</strong><br>
+            2. Semua HP peserta langsung melihat foto blur yang sama<br>
+            3. Klik <strong>Reveal Stage</strong> untuk membuka bagian foto lebih jelas<br>
+            4. Peserta submit jawaban dari HP masing-masing<br>
+            5. Klik <strong>Reveal Jawaban</strong> lalu <strong>Foto Berikutnya</strong><br>
+            6. Ulangi hingga semua foto selesai, klik <strong>Selesaikan Game</strong>
+          </div>
           <button class="btn btn-gold" onclick="showPanel('photos')">📸 Upload Foto Keluarga →</button>
         </div>
-        <div class="tab-panel" id="g2-tab-aturan">
-          <div class="step-guide">
-            <div class="step-item"><div class="step-num">1</div><div class="step-body"><h4>Foto Muncul Buram</h4><p>Foto anggota keluarga tampil tersembunyi. Tiap pemain lihat di HP masing-masing.</p></div></div>
-            <div class="step-item"><div class="step-num">2</div><div class="step-body"><h4>Poin Menurun</h4><p>400–500 poin jika tebak saat masih blur. Makin lama menunggu, makin kecil poinnya (min 100).</p></div></div>
-            <div class="step-item"><div class="step-num">3</div><div class="step-body"><h4>Ketik Nama</h4><p>Tulis nama anggota keluarga di kolom jawaban. Ejaan tidak harus tepat — nama panggilan diterima.</p></div></div>
-          </div>
-          <div class="instr-box">❌ Dilarang tanya ke orang lain. ❌ Dilarang lihat HP orang lain. ✅ Nama panggilan boleh.</div>
-        </div>
+
+        <!-- TAB: TIPS -->
         <div class="tab-panel" id="g2-tab-tips">
-          <div class="instr-box"><strong>Script MC:</strong><br><em>"Foto pertama selalu yang paling susah karena masih blur total. Tapi kalau kamu kenal betul anggota keluarga ini, pasti bisa tebak dari rambut atau bentuk muka aja! Jangan tunggu foto jelas — rugi poin!"</em></div>
+          <div class="instr-box"><strong>Script MC:</strong><br><em>"Lihat layar proyektor — foto ini siapa? Makin lama menunggu, makin kecil poinnya! Yang paling cepat menjawab dapat poin penuh 500!"</em></div>
+          <div class="instr-box"><strong>Pro tip:</strong> Tampilkan foto di proyektor (<strong>screenGame2</strong>) supaya semua bisa lihat di layar besar. Peserta tetap jawab di HP masing-masing.</div>
         </div>
       </div>
     </div>
@@ -2202,6 +2273,250 @@ function renderPhotoPreviewForGame(containerId) {
     '<div class="photo-name">' + m.nama + '</div><div class="photo-status has-photo">✓ Ada foto</div></div>'
   ).join('');
 }
+
+// ============================================================
+// GAME 2 ADMIN — Kontrol sinkron via ras_g2_state
+// ============================================================
+let g2AdminSoalOrder = []; // array member IDs yang dipilih admin
+let g2AdminCurrentSoal = 0; // index soal aktif
+
+async function g2AdminLoadState() {
+  try {
+    const rows = await sbGet('ras_g2_state');
+    if (!rows || rows.length === 0) return;
+    const st = rows[0];
+    const status = st.status || 'waiting';
+    const statusEl = document.getElementById('g2AdminStatus');
+    const soalEl   = document.getElementById('g2AdminSoalInfo');
+    const stageEl  = document.getElementById('g2AdminStage');
+    const countEl  = document.getElementById('g2AdminAnswerCount');
+
+    if (statusEl) statusEl.textContent = status === 'waiting' ? '⏳ Menunggu' : status === 'playing' ? '🟢 Berjalan' : status === 'reveal' ? '👁️ Reveal' : '🏁 Selesai';
+    if (soalEl)   soalEl.textContent   = (st.soal_idx + 1) + ' / ' + st.soal_total;
+    if (stageEl)  stageEl.textContent  = st.stage + ' / ' + st.stage_max;
+
+    // Count answers
+    let ansCount = 0;
+    try { ansCount = Object.keys(JSON.parse(st.answers_json || '{}')).length; } catch(e) {}
+    if (countEl) countEl.textContent = ansCount + ' peserta';
+
+    // Show current foto preview
+    const previewEl = document.getElementById('g2AdminFotoPreview');
+    if (previewEl && st.member_foto_url && status !== 'waiting') {
+      previewEl.style.display = 'block';
+      document.getElementById('g2AdminCurrentFoto').src = st.member_foto_url;
+      document.getElementById('g2AdminCurrentNama').textContent = st.member_nama;
+    }
+
+    // Show answers
+    const answersEl = document.getElementById('g2AdminAnswers');
+    if (answersEl) {
+      try {
+        const answers = JSON.parse(st.answers_json || '{}');
+        const correctName = (st.member_nama || '').toLowerCase();
+        const entries = Object.entries(answers);
+        if (entries.length === 0) {
+          answersEl.textContent = 'Belum ada jawaban...';
+        } else {
+          answersEl.innerHTML = entries.map(([name, data]) => {
+            const ok = data.correct;
+            return '<div style="display:flex;gap:8px;align-items:center;padding:5px 8px;background:var(--' + (ok?'white':'cream') + ');border-radius:6px;margin-bottom:4px;">' +
+              '<span style="color:' + (ok?'var(--green)':'var(--red)') + ';font-size:1rem">' + (ok?'✓':'✗') + '</span>' +
+              '<span style="font-weight:600;color:var(--brown)">' + name + '</span>' +
+              '<span style="color:var(--brown-light)">' + data.answer + '</span>' +
+              '<span style="margin-left:auto;font-weight:700;color:var(--gold-dark)">' + (data.poin || 0) + ' poin</span></div>';
+          }).join('');
+        }
+      } catch(e) { answersEl.textContent = 'Error memuat jawaban'; }
+    }
+
+    // Update button visibility
+    const btnStart  = document.getElementById('g2BtnStart');
+    const btnReveal = document.getElementById('g2BtnReveal');
+    const btnNext   = document.getElementById('g2BtnNext');
+    const btnEnd    = document.getElementById('g2BtnEnd');
+    if (btnStart)  btnStart.style.display  = status === 'waiting' ? '' : 'none';
+    if (btnReveal) btnReveal.style.display = status === 'playing' ? '' : 'none';
+    if (btnNext)   btnNext.style.display   = status === 'reveal' ? '' : 'none';
+    if (btnEnd)    btnEnd.style.display    = (status === 'playing' || status === 'reveal') ? '' : 'none';
+  } catch(e) { console.warn('g2AdminLoadState error', e); }
+}
+
+// Render foto picker dari FAMILY_MEMBERS
+function g2RenderSoalPicker() {
+  const container = document.getElementById('g2SoalPicker');
+  if (!container) return;
+  const members = FAMILY_MEMBERS.filter(m => m.foto);
+  if (members.length === 0) {
+    container.innerHTML = '<p style="color:var(--brown-light);font-size:12px;padding:8px">Belum ada foto. Upload di Foto Keluarga dulu.</p>';
+    return;
+  }
+  container.innerHTML = members.map(m => {
+    const selected = g2AdminSoalOrder.includes(m.id);
+    return '<div onclick="g2ToggleSoal(' + m.id + ')" style="cursor:pointer;text-align:center;border:2px solid ' + (selected ? 'var(--green)' : 'rgba(201,168,76,0.3)') + ';border-radius:8px;padding:6px 4px;background:' + (selected ? '#e8f5e9' : 'var(--white)') + ';transition:all 0.2s;">' +
+      '<img src="' + m.foto + '" style="width:52px;height:52px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(201,168,76,0.3);display:block;margin:0 auto 4px;">' +
+      '<div style="font-size:9px;font-weight:600;color:var(--brown);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + m.nama + '</div>' +
+      (selected ? '<div style="font-size:9px;color:var(--green);font-weight:700">#' + (g2AdminSoalOrder.indexOf(m.id)+1) + '</div>' : '') +
+    '</div>';
+  }).join('');
+}
+
+function g2ToggleSoal(id) {
+  const idx = g2AdminSoalOrder.indexOf(id);
+  if (idx >= 0) g2AdminSoalOrder.splice(idx, 1);
+  else g2AdminSoalOrder.push(id);
+  g2RenderSoalPicker();
+}
+
+function g2SelectAll() {
+  g2AdminSoalOrder = FAMILY_MEMBERS.filter(m => m.foto).map(m => m.id);
+  g2RenderSoalPicker();
+}
+
+function g2ClearAll() {
+  g2AdminSoalOrder = [];
+  g2RenderSoalPicker();
+}
+
+function g2ShuffleSoal() {
+  for (let i = g2AdminSoalOrder.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [g2AdminSoalOrder[i], g2AdminSoalOrder[j]] = [g2AdminSoalOrder[j], g2AdminSoalOrder[i]];
+  }
+  g2RenderSoalPicker();
+}
+
+function g2GetMemberById(id) {
+  return FAMILY_MEMBERS.find(m => m.id === id) || null;
+}
+
+async function g2AdminStart() {
+  if (g2AdminSoalOrder.length === 0) { showNotif('⚠️ Pilih minimal 1 foto dulu!'); return; }
+  const sessionId = Date.now().toString();
+  g2AdminCurrentSoal = 0;
+  const firstMember = g2GetMemberById(g2AdminSoalOrder[0]);
+  if (!firstMember) { showNotif('⚠️ Foto tidak ditemukan'); return; }
+  try {
+    await sbUpsert('ras_g2_state', {
+      id: 1,
+      status: 'playing',
+      member_id: firstMember.id,
+      member_nama: firstMember.nama,
+      member_foto_url: firstMember.foto,
+      stage: 0,
+      poin_left: 500,
+      soal_idx: 0,
+      soal_total: g2AdminSoalOrder.length,
+      answers_json: '{}',
+      soal_order_json: JSON.stringify(g2AdminSoalOrder),
+      session_id: sessionId,
+      updated_at: new Date().toISOString()
+    });
+    showNotif('▶ Game 2 dimulai! Soal 1/' + g2AdminSoalOrder.length);
+    g2AdminLoadState();
+  } catch(e) { showNotif('❌ Gagal mulai: ' + e.message); }
+}
+
+async function g2AdminSetStage(stage) {
+  try {
+    const poin = Math.max(100, 500 - stage * 80);
+    await sbUpsert('ras_g2_state', {
+      id: 1, stage, poin_left: poin, updated_at: new Date().toISOString()
+    });
+    showNotif('Stage ' + stage + ' — poin tersisa: ' + poin);
+    g2AdminLoadState();
+  } catch(e) { showNotif('❌ Error: ' + e.message); }
+}
+
+async function g2AdminReveal() {
+  try {
+    await sbUpsert('ras_g2_state', {
+      id: 1, status: 'reveal', stage: 5, poin_left: 0, updated_at: new Date().toISOString()
+    });
+    showNotif('👁️ Jawaban direvel! Klik Foto Berikutnya untuk lanjut.');
+    g2AdminLoadState();
+  } catch(e) { showNotif('❌ Error: ' + e.message); }
+}
+
+async function g2AdminNext() {
+  try {
+    const rows = await sbGet('ras_g2_state');
+    if (!rows || rows.length === 0) return;
+    const st = rows[0];
+    let order = [];
+    try { order = JSON.parse(st.soal_order_json || '[]'); } catch(e) {}
+    const nextIdx = (st.soal_idx || 0) + 1;
+    if (nextIdx >= order.length) {
+      // Game selesai
+      await g2AdminEndGame();
+      return;
+    }
+    const nextId = order[nextIdx];
+    const nextMember = g2GetMemberById(nextId);
+    if (!nextMember) { showNotif('⚠️ Member tidak ditemukan (id=' + nextId + ')'); return; }
+    await sbUpsert('ras_g2_state', {
+      id: 1,
+      status: 'playing',
+      member_id: nextMember.id,
+      member_nama: nextMember.nama,
+      member_foto_url: nextMember.foto,
+      stage: 0,
+      poin_left: 500,
+      soal_idx: nextIdx,
+      answers_json: '{}',
+      updated_at: new Date().toISOString()
+    });
+    showNotif('⏭ Soal ' + (nextIdx+1) + '/' + order.length);
+    g2AdminLoadState();
+  } catch(e) { showNotif('❌ Error: ' + e.message); }
+}
+
+async function g2AdminEndGame() {
+  try {
+    await sbUpsert('ras_g2_state', {
+      id: 1, status: 'done', updated_at: new Date().toISOString()
+    });
+    showNotif('🏁 Game 2 selesai!');
+    g2AdminLoadState();
+  } catch(e) { showNotif('❌ Error: ' + e.message); }
+}
+
+async function g2AdminReset() {
+  if (!confirm('Reset Game 2? Semua jawaban dan skor akan dihapus.')) return;
+  try {
+    await sbUpsert('ras_g2_state', {
+      id: 1, status: 'waiting', member_id: 0, member_nama: '', member_foto_url: '',
+      stage: 0, poin_left: 500, soal_idx: 0, soal_total: 0,
+      answers_json: '{}', soal_order_json: '[]', session_id: '',
+      updated_at: new Date().toISOString()
+    });
+    g2AdminSoalOrder = [];
+    g2RenderSoalPicker();
+    g2AdminLoadState();
+    showNotif('🔄 Game 2 direset.');
+  } catch(e) { showNotif('❌ Error: ' + e.message); }
+}
+
+// Poll game 2 status saat panel terbuka
+setInterval(async () => {
+  const panel = document.getElementById('panel-game2-admin');
+  if (panel && panel.classList.contains('active')) {
+    g2AdminLoadState();
+  }
+}, 3000);
+
+// Render soal picker saat panel dibuka
+const _origShowPanel = showPanel;
+showPanel = function(id) {
+  _origShowPanel(id);
+  if (id === 'game2-admin') {
+    setTimeout(() => {
+      g2RenderSoalPicker();
+      g2AdminLoadState();
+    }, 100);
+  }
+};
+
 </script>
 </body>
 </html>
