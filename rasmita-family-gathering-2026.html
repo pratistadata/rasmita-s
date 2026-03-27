@@ -2800,7 +2800,7 @@ function showG2Leaderboard(st) {
           return '<div style="display:flex;align-items:center;gap:1rem;padding:12px;background:var(--' + (i===0?'cream-dark':'white') + ');border-radius:10px;margin-bottom:8px;border:1px solid rgba(201,168,76,0.2)">' +
             '<div style="font-size:1.5rem">' + medal + '</div>' +
             '<div style="flex:1;font-weight:600;color:var(--brown)">' + name + '</div>' +
-            '<div style="font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--gold)">' + score + '</div></div>';
+            '<div style="font-family:var(--font-serif),serif;font-size:1.2rem;color:var(--gold)">' + score + '</div></div>';
         }).join('');
     // Tambahkan skor diri sendiri
     const myScore = playerScores[state.playerName] || g2LocalScore;

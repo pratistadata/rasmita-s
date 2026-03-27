@@ -1211,7 +1211,7 @@ async function renderResult() {
         '<div style="color:rgba(255,255,255,0.7)">' + (r.score_g4 || 0) + '</div>' +
         '<div style="color:rgba(255,255,255,0.5)">—</div>' +
         '<div style="color:rgba(255,255,255,0.7)">' + (r.score_g6 || 0) + '</div>' +
-        '<div style="font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;color:var(--gold)">' + r.score_total + '</div></div>'
+        '<div style="font-family:var(--font-serif),serif;font-size:1.1rem;font-weight:700;color:var(--gold)">' + r.score_total + '</div></div>'
       ).join('');
       tableEl.innerHTML = header + rows_html;
     }
@@ -1284,7 +1284,15 @@ function startRealtime() {
 
 buildNavTabs();
 detectUrl();
-tick(); // initial load langsung
+tick().then(async () => {
+  // FEAT-1: Auto-switch ke game yang sudah terbuka saat proyektor pertama dibuka
+  try {
+    const rows = await sbGet('ras_open_games');
+    if (rows && rows.length > 0 && rows[0].game_ids && rows[0].game_ids.length > 0) {
+      autoSwitchScreen(rows[0].game_ids);
+    }
+  } catch(e) {}
+}); // initial load langsung
 startRealtime(); // realtime WebSocket updates
 setInterval(tick, 2000); // fallback polling lebih cepat (2 detik)
 </script>

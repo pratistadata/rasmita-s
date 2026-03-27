@@ -1404,10 +1404,10 @@ async function handlePhotoUpload(event) {
         try {
           const storageUrl = await sbUploadFile('rasmita-photos', 'members/' + m.id + '.jpg', dataUrl);
           m.foto = storageUrl;
-          await sbUpsert('ras_members', { member_id: m.id, nama: m.nama, foto_url: storageUrl });
+          await sbUpsert('ras_members', { member_id: m.id, nama: m.nama, foto_url: storageUrl, game_tags: m.game_tags || ['g1','g2','g3','g4'] });
         } catch(err) {
           m.foto = dataUrl;
-          await sbUpsert('ras_members', { member_id: m.id, nama: m.nama, foto_url: dataUrl });
+          await sbUpsert('ras_members', { member_id: m.id, nama: m.nama, foto_url: dataUrl, game_tags: m.game_tags || ['g1','g2','g3','g4'] });
         }
         renderPhotoGrid(); renderDashboard(); showNotif('✅ Foto ' + m.nama + ' disimpan!');
       }
@@ -1699,7 +1699,7 @@ async function g1AdminReset() {
 // ── PHOTO ASSIGNMENT PER GAME ──────────────────────────────
 
 function getAssignedPhotos(gameTag) {
-  return FAMILY_MEMBERS.filter(m => m.foto && Array.isArray(m.game_tags) && m.game_tags.includes(gameTag));
+  return FAMILY_MEMBERS.filter(m => m.foto && (!Array.isArray(m.game_tags) || m.game_tags.length === 0 || m.game_tags.includes(gameTag)));
 }
 
 async function g1RenderPhotoAssign() {
