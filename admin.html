@@ -978,11 +978,16 @@ let eventSettings = { name:"Rasmita's Family Gathering 2026", date:"28 Maret 202
 let komedianPhotos = {}; // id -> base64
 
 const LAGU_DATA = [
-  { id:1, judul:"Keluarga Cemara", artis:"Hedi Yunus", file:"lagu1.mp3", ts:"0:00 – 0:14" },
-  { id:2, judul:"Tabo Balik", artis:"Pop Minang", file:"lagu2.mp3", ts:"0:00 – 0:12" },
-  { id:3, judul:"Kangen", artis:"Dewa 19", file:"lagu3.mp3", ts:"0:05 – 0:18" },
-  { id:4, judul:"Laskar Pelangi", artis:"Nidji", file:"lagu4.mp3", ts:"0:00 – 0:13" },
-  { id:5, judul:"Pergi Pagi Pulang Pagi", artis:"Armada", file:"lagu5.mp3", ts:"0:00 – 0:11" },
+  { id:1, judul:"Tabola Bale", artis:"Silet Open Up feat. Jacson Zeran", file:"lagu1.mp3", ts:"0:00 – 0:30", tahun:2025, emoji:"🌴",
+    lirik_default:"Kaka tabola bale lia ade nona e\nSu makin manyala e, kaka hati susah e\nAde bikin kaka mete, tidur malam bola bale\nSejak kaka lia ade, aduh Tuhan ampun e" },
+  { id:2, judul:"Harta yang Paling Berharga", artis:"Hedi Yunus (OST Keluarga Cemara)", file:"lagu2.mp3", ts:"0:00 – 0:30", tahun:1996, emoji:"🏡",
+    lirik_default:"Harta yang paling berharga adalah keluarga\nIstana yang paling indah adalah keluarga\nPuisi yang paling bermakna adalah keluarga\nMutiara tiada tara adalah keluarga" },
+  { id:3, judul:"Dansa Yok Dansa", artis:"Harvey Malaiholo", file:"lagu3.mp3", ts:"0:00 – 0:30", tahun:1985, emoji:"💃",
+    lirik_default:"Dansa yok dansa, dansa yok dansa\nMari bersama kita bergembira\nDansa yok dansa, dansa yok dansa\nSambil bernyanyi kita berdansa" },
+  { id:4, judul:"Kopi Dangdut", artis:"Fahmi Shahab", file:"lagu4.mp3", ts:"0:00 – 0:30", tahun:1987, emoji:"☕",
+    lirik_default:"Kopi dangdut, kopi dangdut\nPanas-panas enak rasanya\nKopi dangdut, kopi dangdut\nCampur gula tambah nikmatnya" },
+  { id:5, judul:"Goyang Dumang", artis:"Cita Citata", file:"lagu5.mp3", ts:"0:00 – 0:30", tahun:2014, emoji:"🕺",
+    lirik_default:"Goyang dumang, goyang dumang\nGoyang goyang goyang dumang\nAyo kita goyang bersama-sama\nJangan malu-malu ayoo bergoyang!" },
 ];
 
 const KOMEDIAN_TOP = [
@@ -1062,19 +1067,38 @@ function showPanel(id) {
   };
   document.getElementById('topbarTitle').textContent = titles[id] || id;
   window.scrollTo(0,0);
+  // Trigger renders for specific panels
+  if (id === 'lagu') setTimeout(renderLaguCards, 50);
+  if (id === 'game6-admin') setTimeout(renderSingAlongControls, 50);
+  if (id === 'game3-admin') setTimeout(renderG3Questions, 50);
+  if (id === 'photos') setTimeout(() => {
+    renderPhotoPreviewForGame('g1PhotoPreview');
+    renderPhotoPreviewForGame('g2PhotoPreview');
+    renderPhotoPreviewForGame('g3PhotoPreview');
+    renderPhotoPreviewForGame('g4PhotoPreview');
+  }, 50);
 }
 
 function switchTab(game, tab) {
   const prefix = game + '-tab-';
   document.querySelectorAll(`[id^="${prefix}"]`).forEach(p => p.classList.remove('active'));
-  document.getElementById(prefix + tab).classList.add('active');
-  // Update tab buttons
-  const card = document.getElementById(`panel-${game}-admin`);
+  const targetTab = document.getElementById(prefix + tab);
+  if (targetTab) targetTab.classList.add('active');
+  const card = document.getElementById(`panel-${game}-admin`) || document.getElementById(`panel-${game}`);
   if (card) {
     card.querySelectorAll('.tab-btn').forEach(b => {
-      b.classList.toggle('active', b.getAttribute('onclick').includes(`'${tab}'`));
+      if (b.getAttribute('onclick')) b.classList.toggle('active', b.getAttribute('onclick').includes(`'${tab}'`));
     });
   }
+  // Trigger renders
+  if (game === 'photos') setTimeout(() => {
+    renderPhotoPreviewForGame('g1PhotoPreview');
+    renderPhotoPreviewForGame('g2PhotoPreview');
+    renderPhotoPreviewForGame('g3PhotoPreview');
+    renderPhotoPreviewForGame('g4PhotoPreview');
+  }, 50);
+  if (game === 'g3' && tab === 'pertanyaan') setTimeout(renderG3Questions, 50);
+  if (game === 'g6' && tab === 'singalong') setTimeout(renderSingAlongControls, 50);
 }
 
 // ── TOPBAR ──
@@ -1452,21 +1476,8 @@ function showNotif(msg) {
 }
 
 // ════════════════════════════════════════════════════
-// LAGU DATA (mirror dari game file)
+// LAGU STORAGE & RENDER
 // ════════════════════════════════════════════════════
-const LAGU_DATA = [
-  { id:1, judul:"Tabola Bale", artis:"Silet Open Up feat. Jacson Zeran", tahun:2025, emoji:"🌴",
-    lirik_default:"Kaka tabola bale lia ade nona e\nSu makin manyala e, kaka hati susah e\nAde bikin kaka mete, tidur malam bola bale\nSejak kaka lia ade, aduh Tuhan ampun e" },
-  { id:2, judul:"Harta yang Paling Berharga", artis:"Hedi Yunus (OST Keluarga Cemara)", tahun:1996, emoji:"🏡",
-    lirik_default:"Harta yang paling berharga adalah keluarga\nIstana yang paling indah adalah keluarga\nPuisi yang paling bermakna adalah keluarga\nMutiara tiada tara adalah keluarga" },
-  { id:3, judul:"Dansa Yok Dansa", artis:"Harvey Malaiholo", tahun:1985, emoji:"💃",
-    lirik_default:"Dansa yok dansa, dansa yok dansa\nMari bersama kita bergembira\nDansa yok dansa, dansa yok dansa\nSambil bernyanyi kita berdansa" },
-  { id:4, judul:"Kopi Dangdut", artis:"Fahmi Shahab", tahun:1987, emoji:"☕",
-    lirik_default:"Kopi dangdut, kopi dangdut\nPanas-panas enak rasanya\nKopi dangdut, kopi dangdut\nCampur gula tambah nikmatnya" },
-  { id:5, judul:"Goyang Dumang", artis:"Cita Citata", tahun:2014, emoji:"🕺",
-    lirik_default:"Goyang dumang, goyang dumang\nGoyang goyang goyang dumang\nAyo kita goyang bersama-sama\nJangan malu-malu ayoo bergoyang!" },
-];
-
 // Storage untuk MP3 & lirik per lagu
 let laguStorage = {};
 
@@ -1741,39 +1752,6 @@ function renderPhotoPreviewForGame(containerId) {
       <div class="photo-name">${m.nama}</div>
       <div class="photo-status has-photo">✓ Ada foto</div>
     </div>`).join('');
-}
-
-// Patch showPanel to trigger renders
-const _origShowPanel = showPanel;
-function showPanel(id) {
-  _origShowPanel(id);
-  if (id === 'lagu') { setTimeout(renderLaguCards, 50); }
-  if (id === 'game6-admin') { setTimeout(renderSingAlongControls, 50); }
-  if (id === 'game3-admin') { setTimeout(renderG3Questions, 50); }
-  if (id === 'photos') {
-    setTimeout(() => {
-      renderPhotoPreviewForGame('g1PhotoPreview');
-      renderPhotoPreviewForGame('g2PhotoPreview');
-      renderPhotoPreviewForGame('g3PhotoPreview');
-      renderPhotoPreviewForGame('g4PhotoPreview');
-    }, 50);
-  }
-}
-
-// Also patch switchTab to render photo previews
-const _origSwitchTab = switchTab;
-function switchTab(group, tab) {
-  _origSwitchTab(group, tab);
-  if (group === 'photos') {
-    setTimeout(() => {
-      renderPhotoPreviewForGame('g1PhotoPreview');
-      renderPhotoPreviewForGame('g2PhotoPreview');
-      renderPhotoPreviewForGame('g3PhotoPreview');
-      renderPhotoPreviewForGame('g4PhotoPreview');
-    }, 50);
-  }
-  if (group === 'g3' && tab === 'pertanyaan') setTimeout(renderG3Questions, 50);
-  if (group === 'g6' && tab === 'singalong') setTimeout(renderSingAlongControls, 50);
 }
 </script>
 </body>

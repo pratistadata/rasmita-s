@@ -407,14 +407,14 @@
 
   .memory-grid {
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 8px;
-    max-width: 600px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    max-width: 680px;
     margin: 0 auto;
   }
 
   @media (max-width: 500px) {
-    .memory-grid { grid-template-columns: repeat(5, 1fr); }
+    .memory-grid { grid-template-columns: repeat(4, 1fr); gap: 8px; }
   }
 
   .mem-card {
@@ -467,17 +467,17 @@
 
   .mem-back img {
     width: 100%;
-    height: 70%;
+    height: 75%;
     object-fit: cover;
-    border-radius: 4px;
+    border-radius: 6px;
   }
 
   .mem-back .mem-name {
-    font-size: 9px;
-    font-weight: 600;
+    font-size: 11px;
+    font-weight: 700;
     color: var(--brown);
     text-align: center;
-    margin-top: 3px;
+    margin-top: 5px;
     line-height: 1.2;
   }
 
@@ -1424,21 +1424,26 @@
     </div>
   </div>
 
-  <div class="player-tabs" id="playerTabs"></div>
-  <div class="score-display" id="scoreDisplay"></div>
-
-  <div style="text-align:center;margin-bottom:1rem;">
-    <div id="turnAnnounce" style="font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--green);margin-bottom:8px;"></div>
+  <!-- Player Selector (muncul sebelum mulai) -->
+  <div id="g1PlayerSelector" style="max-width:500px;margin:1rem auto;background:var(--white);border:1px solid rgba(201,168,76,0.3);border-radius:14px;padding:1.25rem;">
+    <div style="font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--brown);font-weight:700;margin-bottom:0.75rem;">👥 Pilih Pemain (maks. 4)</div>
+    <div id="g1PlayerList" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:1rem;"></div>
+    <button class="btn-gold" onclick="startG1WithPlayers()" style="width:100%;">▶ Mulai Game!</button>
   </div>
 
-  <div class="memory-grid" id="memoryGrid"></div>
-
-  <div class="center mt2" id="game1Result" style="display:none">
-    <h3 style="font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--brown);margin-bottom:1rem;">🏆 Game Selesai!</h3>
-    <div class="podium" id="g1Podium"></div>
-    <button class="btn-gold mt1" onclick="restartGame1()">Main Lagi</button>
+  <div id="g1GameArea" style="display:none;">
+    <div class="player-tabs" id="playerTabs"></div>
+    <div class="score-display" id="scoreDisplay"></div>
+    <div style="text-align:center;margin-bottom:1rem;">
+      <div id="turnAnnounce" style="font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--green);margin-bottom:8px;"></div>
+    </div>
+    <div class="memory-grid" id="memoryGrid"></div>
+    <div class="center mt2" id="game1Result" style="display:none">
+      <h3 style="font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--brown);margin-bottom:1rem;">🏆 Game Selesai!</h3>
+      <div class="podium" id="g1Podium"></div>
+      <button class="btn-gold mt1" onclick="restartGame1()">Main Lagi</button>
+    </div>
   </div>
-</div>
 
 <!-- ===== GAME 2: TEBAK SIAPA ===== -->
 <div id="game2" class="game-page page">
@@ -2005,7 +2010,7 @@ let state = {
 
   // Game 1
   g1Cards: [], g1Flipped: [], g1Matched: [], g1CurrentPlayer: 0,
-  g1Scores: [0,0,0,0], g1CanFlip: true,
+  g1Scores: [0,0,0,0], g1CanFlip: true, g1SelectedPlayers: [],
 
   // Game 2
   g2Members: [], g2CurrentIdx: 0, g2Score: 0, g2PoinLeft: 500,
@@ -2131,10 +2136,81 @@ function openGame(id) {
 // ===== GAME 1: MEMORY MATCH =====
 function initGame1() {
   showPage('game1');
+  // Show player selector
+  const selector = document.getElementById('g1PlayerSelector');
+  const gameArea = document.getElementById('g1GameArea');
+  if (selector) selector.style.display = 'block';
+  if (gameArea) gameArea.style.display = 'none';
+  renderG1PlayerSelector();
+}
+
+function renderG1PlayerSelector() {
+  const list = document.getElementById('g1PlayerList');
+  if (!list) return;
+  // Ambil dari localStorage (peserta yang sudah join)
+  let joined = [];
+  try { joined = JSON.parse(localStorage.getItem('ras_players') || '[]').map(p => p.name); } catch(e) {}
+  // Tambah state.players juga
+  state.players.forEach(n => { if (!joined.includes(n)) joined.push(n); });
+  // Tambah pemain manual jika belum ada siapapun
+  if (joined.length === 0) joined = ['Pemain 1','Pemain 2','Pemain 3','Pemain 4'];
+
+  // State selected players
+  if (!state.g1SelectedPlayers) state.g1SelectedPlayers = [];
+  // Auto-select current player
+  if (state.g1SelectedPlayers.length === 0 && state.playerName) {
+    state.g1SelectedPlayers = [state.playerName];
+  }
+
+  list.innerHTML = joined.map(name => {
+    const selected = state.g1SelectedPlayers.includes(name);
+    return `<div onclick="toggleG1Player('${name}')" style="
+      cursor:pointer;padding:8px 16px;border-radius:20px;font-size:13px;font-weight:600;
+      border:2px solid ${selected ? 'var(--green)' : 'rgba(201,168,76,0.3)'};
+      background:${selected ? '#e8f5e9' : 'var(--cream)'};
+      color:${selected ? 'var(--green)' : 'var(--brown)'};
+      transition:all 0.2s;">
+      ${selected ? '✓ ' : ''}${name}
+    </div>`;
+  }).join('') + `
+    <div onclick="addG1CustomPlayer()" style="cursor:pointer;padding:8px 16px;border-radius:20px;font-size:13px;font-weight:600;border:2px dashed rgba(201,168,76,0.4);background:transparent;color:var(--brown-light);">+ Tambah</div>`;
+}
+
+function toggleG1Player(name) {
+  if (!state.g1SelectedPlayers) state.g1SelectedPlayers = [];
+  const idx = state.g1SelectedPlayers.indexOf(name);
+  if (idx >= 0) {
+    state.g1SelectedPlayers.splice(idx, 1);
+  } else {
+    if (state.g1SelectedPlayers.length >= 4) { showNotif('Maksimal 4 pemain!'); return; }
+    state.g1SelectedPlayers.push(name);
+  }
+  renderG1PlayerSelector();
+}
+
+function addG1CustomPlayer() {
+  const name = prompt('Nama pemain:');
+  if (!name || !name.trim()) return;
+  if (!state.g1SelectedPlayers) state.g1SelectedPlayers = [];
+  if (state.g1SelectedPlayers.length >= 4) { showNotif('Maksimal 4 pemain!'); return; }
+  state.g1SelectedPlayers.push(name.trim());
+  renderG1PlayerSelector();
+}
+
+function startG1WithPlayers() {
+  if (!state.g1SelectedPlayers || state.g1SelectedPlayers.length === 0) {
+    showNotif('Pilih minimal 1 pemain!'); return;
+  }
+  // Set players dari selector
+  state.players = [...state.g1SelectedPlayers];
+
+  const selector = document.getElementById('g1PlayerSelector');
+  const gameArea = document.getElementById('g1GameArea');
+  if (selector) selector.style.display = 'none';
+  if (gameArea) gameArea.style.display = 'block';
+
   const members = getPhotosForGame(1).slice(0, 8);
-  // Create pairs
   let cards = [...members, ...members].map((m, i) => ({...m, cardId: i, flipped: false, matched: false}));
-  // Shuffle
   for (let i = cards.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [cards[i], cards[j]] = [cards[j], cards[i]];
@@ -2246,7 +2322,10 @@ function showG1Result() {
   } catch(e) {}
 }
 
-function restartGame1() { initGame1(); }
+function restartGame1() {
+  state.g1SelectedPlayers = [];
+  initGame1();
+}
 
 // ===== GAME 2: TEBAK SIAPA =====
 function initGame2() {
