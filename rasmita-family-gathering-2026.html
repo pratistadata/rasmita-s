@@ -1688,10 +1688,29 @@
       <!-- Sing along section -->
       <div id="g6SingAlong" style="background:var(--green);border-radius:12px;padding:1.5rem;margin-bottom:1rem;">
         <div style="color:var(--gold-light);font-size:13px;font-weight:600;letter-spacing:1px;margin-bottom:0.5rem;">🎤 NYANYIKAN BERSAMA!</div>
-        <div id="g6SongTitle" style="font-family:'Playfair Display',serif;font-size:1.2rem;color:white;margin-bottom:0.5rem;"></div>
+        <div id="g6SongTitle" style="font-family:'Playfair Display',serif;font-size:1.2rem;color:white;margin-bottom:0.25rem;"></div>
         <div id="g6SongArtist" style="font-size:12px;color:var(--gold-light);margin-bottom:1rem;"></div>
-        <div id="g6Lirik" style="background:rgba(255,255,255,0.1);border-radius:8px;padding:1rem;text-align:left;font-size:13px;color:white;line-height:1.8;font-style:italic;"></div>
-        <button onclick="playG6Full()" style="margin-top:1rem;background:var(--gold);color:var(--brown);border:none;border-radius:8px;padding:10px 24px;font-weight:700;cursor:pointer;font-size:13px;" id="g6PlayFullBtn">▶ Play Intro Lagi</button>
+        <!-- Waiting for host -->
+        <div id="g6WaitHost" style="background:rgba(0,0,0,0.2);border-radius:10px;padding:1rem;margin-bottom:0.75rem;display:flex;align-items:center;gap:10px;">
+          <div style="font-size:1.4rem;animation:pulse 1.5s infinite;">⏳</div>
+          <div style="text-align:left;">
+            <div style="color:white;font-size:13px;font-weight:600;">Menunggu Host...</div>
+            <div style="color:var(--gold-light);font-size:11px;">Host akan play musik dari admin</div>
+          </div>
+        </div>
+        <!-- Lirik -->
+        <div id="g6Lirik" style="background:rgba(255,255,255,0.1);border-radius:8px;padding:1rem;text-align:left;font-size:14px;color:white;line-height:2;font-style:italic;display:none;white-space:pre-line;"></div>
+        <!-- Playing state -->
+        <div id="g6PlayingState" style="display:none;margin-top:0.75rem;">
+          <div style="display:flex;justify-content:center;gap:4px;margin-bottom:8px;" id="g6AudioBars2">
+            <div style="width:4px;background:var(--gold-light);border-radius:2px;animation:audioBar 0.8s ease-in-out infinite;" class="abar"></div>
+            <div style="width:4px;background:var(--gold-light);border-radius:2px;animation:audioBar 0.8s ease-in-out infinite 0.1s;" class="abar"></div>
+            <div style="width:4px;background:var(--gold-light);border-radius:2px;animation:audioBar 0.8s ease-in-out infinite 0.2s;" class="abar"></div>
+            <div style="width:4px;background:var(--gold-light);border-radius:2px;animation:audioBar 0.8s ease-in-out infinite 0.3s;" class="abar"></div>
+            <div style="width:4px;background:var(--gold-light);border-radius:2px;animation:audioBar 0.8s ease-in-out infinite 0.4s;" class="abar"></div>
+          </div>
+          <div style="color:var(--gold-light);font-size:12px;font-weight:600;letter-spacing:1px;">♪ SEDANG DIPUTAR ♪</div>
+        </div>
       </div>
     </div>
     <button class="btn-gold" onclick="nextG6Song()" id="g6NextBtn" style="width:100%;">Lagu Berikutnya →</button>
@@ -2065,8 +2084,10 @@ function joinRoom() {
   state.playerName = name;
   state.roomCode = code;
   if (state.playerPhoto) state.playerPhotos[name] = state.playerPhoto;
-  document.getElementById('welcomeName').textContent = name;
-  document.getElementById('displayRoomCode').textContent = code;
+  const _wn = document.getElementById('welcomeName');
+  if (_wn) _wn.textContent = name;
+  const _rc = document.getElementById('displayRoomCode');
+  if (_rc) _rc.textContent = code;
   if (!state.players.includes(name)) state.players.push(name);
   // Save to localStorage for projector view
   try {
@@ -2208,6 +2229,21 @@ function showG1Result() {
   const scores = state.g1Scores.map((s, i) => ({ name: state.players[i] || 'P' + (i+1), score: s }));
   scores.sort((a, b) => b.score - a.score);
   document.getElementById('g1Podium').innerHTML = buildPodium(scores);
+  // Broadcast ke proyektor
+  try {
+    const players = JSON.parse(localStorage.getItem('ras_players') || '[]');
+    const scoreData = state.g1Scores.map((s, i) => {
+      const name = state.players[i] || 'P' + (i+1);
+      const p = players.find(p => p.name === name);
+      return { name, photo: p ? p.photo : '', score: s, done: true, time: Date.now() };
+    }).filter(s => s.name && s.name !== 'P1' && s.name !== 'P2' && s.name !== 'P3' && s.name !== 'P4');
+    const existing = JSON.parse(localStorage.getItem('ras_g1_scores') || '[]');
+    scoreData.forEach(s => {
+      const idx = existing.findIndex(e => e.name === s.name);
+      if (idx >= 0) existing[idx] = s; else existing.push(s);
+    });
+    localStorage.setItem('ras_g1_scores', JSON.stringify(existing));
+  } catch(e) {}
 }
 
 function restartGame1() { initGame1(); }
@@ -2323,6 +2359,19 @@ function loadG3Question() {
   document.getElementById('g3Timer').style.width = '100%';
   document.getElementById('g3SubmitBtn').disabled = false;
 
+  // Broadcast ke proyektor
+  try {
+    const members = getPhotosForGame(3).slice(0, 20);
+    localStorage.setItem('ras_g3_live', JSON.stringify({
+      question: q,
+      questionNum: state.g3CurrentQ + 1,
+      totalQ: state.g3Questions.length,
+      votes: {},
+      members: members.map(m => ({ id: m.id, nama: m.nama, foto: m.foto || '' })),
+      ts: Date.now()
+    }));
+  } catch(e) {}
+
   // Render vote grid
   const members = getPhotosForGame(3).slice(0, 20);
   document.getElementById('voteGrid').innerHTML = members.map(m => `
@@ -2360,6 +2409,19 @@ function submitVote() {
       }
     });
   }
+  // Broadcast hasil vote ke proyektor
+  try {
+    const q = state.g3Questions[state.g3CurrentQ];
+    const members = getPhotosForGame(3).slice(0, 20);
+    localStorage.setItem('ras_g3_live', JSON.stringify({
+      question: q,
+      questionNum: state.g3CurrentQ + 1,
+      totalQ: state.g3Questions.length,
+      votes: state.g3Votes,
+      members: members.map(m => ({ id: m.id, nama: m.nama, foto: m.foto || '' })),
+      ts: Date.now()
+    }));
+  } catch(e) {}
   showG3Result();
 }
 
@@ -2550,6 +2612,18 @@ function showG4Result() {
   document.getElementById('g4FinalScore').textContent = state.g4Score + ' Poin';
   const scores = [{ name: state.playerName || 'Kamu', score: state.g4Score }];
   document.getElementById('g4Podium').innerHTML = buildPodium(scores);
+  // Broadcast ke proyektor
+  try {
+    const players = JSON.parse(localStorage.getItem('ras_players') || '[]');
+    const name = state.playerName || 'Kamu';
+    const p = players.find(p => p.name === name);
+    const newEntry = { name, photo: p ? p.photo : '', score: state.g4Score, ronde: state.g4Ronde };
+    const existing = JSON.parse(localStorage.getItem('ras_g4_scores') || '[]');
+    const idx = existing.findIndex(e => e.name === name);
+    if (idx >= 0) { if (newEntry.score > existing[idx].score) existing[idx] = newEntry; }
+    else existing.push(newEntry);
+    localStorage.setItem('ras_g4_scores', JSON.stringify(existing));
+  } catch(e) {}
 }
 
 function restartGame4() { initGame4(); }
@@ -2714,6 +2788,42 @@ function loadSavedData() {
         });
       }
     }
+
+    // Load custom lirik sing-along dari admin
+    const savedLirik = localStorage.getItem('ras_lagu_lirik');
+    if (savedLirik) {
+      const lirikMap = JSON.parse(savedLirik);
+      LAGU_INDONESIA.forEach(l => {
+        if (lirikMap[l.id] !== undefined) l.lirik_singalong = lirikMap[l.id];
+      });
+    }
+
+    // Load MP3 data dari admin
+    const savedLaguStorage = localStorage.getItem('ras_lagu_storage');
+    if (savedLaguStorage) {
+      const laguSt = JSON.parse(savedLaguStorage);
+      LAGU_INDONESIA.forEach(l => {
+        if (laguSt[l.id] && laguSt[l.id].mp3) l.mp3 = laguSt[l.id].mp3;
+        if (laguSt[l.id] && laguSt[l.id].lirik !== undefined) l.lirik_singalong = laguSt[l.id].lirik;
+      });
+    }
+
+    // Load custom pertanyaan G3 dari admin
+    const savedG3Q = localStorage.getItem('ras_g3_questions');
+    if (savedG3Q) {
+      const customQ = JSON.parse(savedG3Q);
+      if (customQ && customQ.length >= 3) {
+        PERTANYAAN_G3.length = 0;
+        customQ.forEach(q => PERTANYAAN_G3.push(q));
+      }
+    }
+
+    // Load open games dari admin
+    const savedOpenGames = localStorage.getItem('ras_open_games');
+    if (savedOpenGames) {
+      state.openGames = JSON.parse(savedOpenGames);
+    }
+
   } catch(e) {
     console.log('No saved data or parse error', e);
   }
@@ -2921,99 +3031,68 @@ function showNotif(msg) {
 const LAGU_INDONESIA = [
   {
     id: 1,
+    judul: "Tabola Bale",
+    artis: "Silet Open Up feat. Jacson Zeran, Juan Reza",
+    tahun: 2025,
+    emoji: "🌴",
+    petunjuk: "Lagu timur viral 2025 yang bikin semua orang goyang — pasti sudah pernah dengar!",
+    lirik_singalong: "Kaka tabola bale lia ade nona e\nSu makin manyala e, kaka hati susah e\nAde bikin kaka mete, tidur malam bola bale\nSejak kaka lia ade, aduh Tuhan ampun e",
+    pilihan: ["Tabola Bale", "Gemu Fa Mi Re", "Poco Poco", "Maumere"],
+    jawaban: "Tabola Bale",
+    intro_nada: [392,392,440,392,330,349,392,330],
+    mp3: null,
+  },
+  {
+    id: 2,
     judul: "Harta yang Paling Berharga",
     artis: "Hedi Yunus (OST Keluarga Cemara)",
     tahun: 1996,
     emoji: "🏡",
     petunjuk: "OST sinetron keluarga legendaris tahun 90-an — anthem keluarga Indonesia!",
-    lirik: "Harta yang paling berharga adalah keluarga\nIstana yang paling indah adalah keluarga\nPuisi yang paling bermakna adalah keluarga\nMutiara tiada tara adalah keluarga\n\nSelamat pagi Emak, selamat pagi Abah\nMentari hari ini berseri indah...",
+    lirik_singalong: "Harta yang paling berharga adalah keluarga\nIstana yang paling indah adalah keluarga\nPuisi yang paling bermakna adalah keluarga\nMutiara tiada tara adalah keluarga",
     pilihan: ["Harta yang Paling Berharga", "Satu Nusa Satu Bangsa", "Bintang di Surga", "Rumah Kita"],
     jawaban: "Harta yang Paling Berharga",
     intro_nada: [261,329,392,329,261,196,220,261],
-  },
-  {
-    id: 2,
-    judul: "Tabo Balik",
-    artis: "Pop Minang / Tradisional",
-    tahun: 1990,
-    emoji: "🎶",
-    petunjuk: "Lagu Minang kerinduan kampung halaman — familiar buat yang punya darah Minang!",
-    lirik: "Tabo balik ka nagari\nTampek lahia den barinduang\nTagak di lereng Singgalang\nMandanga bunyi talempong...\n\nDi siko den marantau jauah\nHati rindu ka kampuang...",
-    pilihan: ["Tabo Balik", "Ayam Den Lapeh", "Kampuang Nan Jauh Di Mato", "Tak Tong Tong"],
-    jawaban: "Tabo Balik",
-    intro_nada: [261,293,329,392,329,293,261,220],
+    mp3: null,
   },
   {
     id: 3,
+    judul: "Dansa Yok Dansa",
+    artis: "Harvey Malaiholo",
+    tahun: 1985,
+    emoji: "💃",
+    petunjuk: "Lagu joget klasik wajib di setiap pesta keluarga Indonesia — semua generasi hafal!",
+    lirik_singalong: "Dansa yok dansa, dansa yok dansa\nMari bersama kita bergembira\nDansa yok dansa, dansa yok dansa\nSambil bernyanyi kita berdansa",
+    pilihan: ["Dansa Yok Dansa", "Buka Semangat Baru", "Tari Saman", "Joget"],
+    jawaban: "Dansa Yok Dansa",
+    intro_nada: [392,440,392,349,330,349,392,440],
+    mp3: null,
+  },
+  {
+    id: 4,
+    judul: "Kopi Dangdut",
+    artis: "Fahmi Shahab",
+    tahun: 1987,
+    emoji: "☕",
+    petunjuk: "Dangdut klasik legendaris yang pasti bikin semua goyang dari nenek sampai cucu!",
+    lirik_singalong: "Kopi dangdut, kopi dangdut\nPanas-panas enak rasanya\nKopi dangdut, kopi dangdut\nCampur gula tambah nikmatnya",
+    pilihan: ["Kopi Dangdut", "Teh Botol", "Goyang Dumang", "Kucing Garong"],
+    jawaban: "Kopi Dangdut",
+    intro_nada: [330,349,392,392,349,330,294,294],
+    mp3: null,
+  },
+  {
+    id: 5,
     judul: "Goyang Dumang",
     artis: "Cita Citata",
     tahun: 2014,
     emoji: "🕺",
     petunjuk: "Lagu dangdut hits yang pasti bikin semua langsung joget — ayoo goyang!",
-    lirik: "Goyang dumang, goyang dumang\nGoyang dumang, goyang dumang\nGoyang goyang goyang dumang\nGoyang goyang goyang dumang\n\nDumang dumang dumang dang\nAyo kita goyang bersama-sama\nJangan malu-malu, ayoo bergoyang!",
+    lirik_singalong: "Goyang dumang, goyang dumang\nGoyang goyang goyang dumang\nAyo kita goyang bersama-sama\nJangan malu-malu ayoo bergoyang!",
     pilihan: ["Goyang Dumang", "Madu dan Racun", "Seksi Seksi", "Kereta Malam"],
     jawaban: "Goyang Dumang",
     intro_nada: [392,392,440,392,349,330,349,392],
-  },
-  {
-    id: 4,
-    judul: "Madu dan Racun",
-    artis: "Duo Kribo",
-    tahun: 1981,
-    emoji: "🍯",
-    petunjuk: "Lagu jadul era 80-an yang sampai sekarang masih bikin goyang — klasik abadi!",
-    lirik: "Kau adalah madu\nKau adalah racun\nKau bisa jadi obat\nKau bisa membunuhku\n\nKau adalah segalanya\nKau adalah hidupku\nTanpa kamu aku tiada apa-apanya\nCintamu membutakanku!",
-    pilihan: ["Madu dan Racun", "Bento", "Kopi Dangdut", "Bang Bang Tut"],
-    jawaban: "Madu dan Racun",
-    intro_nada: [330,349,392,440,392,349,330,294],
-  },
-  {
-    id: 5,
-    judul: "Asal Kau Bahagia",
-    artis: "Armada",
-    tahun: 2017,
-    emoji: "💕",
-    petunjuk: "Lagu galau hits yang selalu jadi sing-along seru — semua pasti hafal liriknya!",
-    lirik: "Mungkin memang sudah takdir kita\nHarus berjalan sendiri-sendiri\nDan perpisahan ini bukan akhir segalanya\nMasih ada hari esok yang indah\n\nAsal kau bahagia, ku kan mengikhlaskan\nAsal kau bahagia, walau bukan bersamaku...",
-    pilihan: ["Asal Kau Bahagia", "Pergi Pagi Pulang Pagi", "Mau Dibawa Kemana", "Tegar"],
-    jawaban: "Asal Kau Bahagia",
-    intro_nada: [294,330,349,392,349,330,294,261],
-  },
-  {
-    id: 6,
-    judul: "Satu Satu Aku Sayang Ibu",
-    artis: "Lagu Anak Tradisional",
-    tahun: 1970,
-    emoji: "❤️",
-    petunjuk: "Lagu anak Indonesia yang SEMUA orang hafal dari SD — dari generasi manapun!",
-    lirik: "Satu satu aku sayang ibu\nDua dua juga sayang ayah\nTiga tiga sayang adik kakak\nSatu dua tiga sayang semuanya\n\nAyo kita nyanyikan bersama\nDengan hati yang gembira!",
-    pilihan: ["Satu Satu Aku Sayang Ibu", "Balonku", "Pelangi", "Bintang Kecil"],
-    jawaban: "Satu Satu Aku Sayang Ibu",
-    intro_nada: [261,261,329,329,392,392,329,0],
-  },
-  {
-    id: 7,
-    judul: "Laskar Pelangi",
-    artis: "Nidji",
-    tahun: 2008,
-    emoji: "🌈",
-    petunjuk: "OST film fenomenal tentang semangat anak bangsa — anthem generasi 2000an!",
-    lirik: "Mimpi adalah kunci\nUntuk kita menaklukkan dunia\nBerlarilah tanpa lelah\nSampai engkau meraihnya\n\nLaskar pelangi, takkan terikat waktu\nBebaskan mimpimu di angkasa\nRaih bintang di jiwa, mimpilah yang besar!",
-    pilihan: ["Garuda di Dadaku", "Laskar Pelangi", "Sang Pemimpi", "Dealova"],
-    jawaban: "Laskar Pelangi",
-    intro_nada: [392,392,349,392,440,392,349,330],
-  },
-  {
-    id: 8,
-    judul: "Kangen",
-    artis: "Dewa 19",
-    tahun: 1992,
-    emoji: "💿",
-    petunjuk: "Lagu rock legendaris Indonesia era 90-an — Ahmad Dhani di masa kejayaannya!",
-    lirik: "Kau begitu sempurna di mataku\nKau bagaikan tiada yang lain\nResahku yang selalu membuatku\nTak dapat melupakan dirimu\n\nKuingin kau tahu, kuingin kau mengerti\nBetapa aku sangat merindukanmu...",
-    pilihan: ["Kangen", "Separuh Aku", "Sempurna", "Pupus"],
-    jawaban: "Kangen",
-    intro_nada: [349,330,294,261,220,261,294,330],
+    mp3: null,
   },
 ];
 
@@ -3229,20 +3308,89 @@ function showG6RoundResult(benar, poin, lagu) {
   document.getElementById('g6RoundScore').textContent = '+' + poin;
   document.getElementById('g6SongTitle').textContent = lagu.judul;
   document.getElementById('g6SongArtist').textContent = lagu.artis + ' · ' + lagu.tahun;
-  document.getElementById('g6Lirik').textContent = lagu.lirik;
-  document.getElementById('g6PlayFullBtn').textContent = '▶ Play Intro Lagi';
+  document.getElementById('g6Lirik').textContent = lagu.lirik_singalong || '';
+  document.getElementById('g6Lirik').style.display = 'none';
+  document.getElementById('g6WaitHost').style.display = 'flex';
+  document.getElementById('g6PlayingState').style.display = 'none';
 
   const isLast = state.g6Idx >= LAGU_INDONESIA.length - 1;
   const nextBtn = document.getElementById('g6NextBtn');
   nextBtn.textContent = isLast ? '🏆 Lihat Hasil Akhir' : 'Lagu Berikutnya →';
   nextBtn.onclick = isLast ? showG6FinalResult : nextG6Song;
+  nextBtn.disabled = true;
+  nextBtn.style.opacity = '0.5';
 
-  // Auto play intro for sing along
-  setTimeout(() => playG6Full(), 500);
+  // Broadcast current lagu to localStorage for admin + projector
+  try {
+    localStorage.setItem('ras_g6_singalong', JSON.stringify({
+      laguId: lagu.id, judul: lagu.judul, artis: lagu.artis,
+      lirik: lagu.lirik_singalong || '', status: 'waiting', ts: Date.now()
+    }));
+    localStorage.removeItem('ras_g6_play_cmd');
+  } catch(e) {}
+
+  // Poll for host play command
+  startG6SingAlongPoll(lagu);
+}
+
+let g6SingAlongPollTimer = null;
+let g6SingAlongAudio = null;
+
+function startG6SingAlongPoll(lagu) {
+  clearInterval(g6SingAlongPollTimer);
+  g6SingAlongPollTimer = setInterval(() => {
+    try {
+      const cmd = JSON.parse(localStorage.getItem('ras_g6_play_cmd') || 'null');
+      if (!cmd) return;
+      if (cmd.laguId === lagu.id && cmd.action === 'play' && cmd.ts > (Date.now() - 30000)) {
+        clearInterval(g6SingAlongPollTimer);
+        triggerG6SingAlong(lagu, cmd.mp3DataUrl || null);
+      }
+      if (cmd.laguId === lagu.id && cmd.action === 'next') {
+        clearInterval(g6SingAlongPollTimer);
+        const isLast = state.g6Idx >= LAGU_INDONESIA.length - 1;
+        if (isLast) showG6FinalResult(); else nextG6Song();
+      }
+    } catch(e) {}
+  }, 1000);
+}
+
+function triggerG6SingAlong(lagu, mp3DataUrl) {
+  // Show lirik, hide waiting
+  document.getElementById('g6WaitHost').style.display = 'none';
+  document.getElementById('g6Lirik').style.display = 'block';
+  document.getElementById('g6PlayingState').style.display = 'block';
+
+  // Enable next button
+  const nextBtn = document.getElementById('g6NextBtn');
+  nextBtn.disabled = false;
+  nextBtn.style.opacity = '1';
+
+  // Update status ke playing untuk proyektor
+  try {
+    const sa = JSON.parse(localStorage.getItem('ras_g6_singalong') || '{}');
+    sa.status = 'playing';
+    sa.lirik = lagu.lirik_singalong || '';
+    localStorage.setItem('ras_g6_singalong', JSON.stringify(sa));
+  } catch(e) {}
+
+  // Play MP3 if available, else play sintetis
+  if (mp3DataUrl) {
+    try {
+      if (g6SingAlongAudio) { g6SingAlongAudio.pause(); g6SingAlongAudio = null; }
+      g6SingAlongAudio = new Audio(mp3DataUrl);
+      g6SingAlongAudio.play();
+      g6SingAlongAudio.onended = () => { document.getElementById('g6PlayingState').style.display = 'none'; };
+    } catch(e) { playG6Full(); }
+  } else {
+    playG6Full();
+  }
 }
 
 function nextG6Song() {
   stopG6Audio();
+  clearInterval(g6SingAlongPollTimer);
+  if (g6SingAlongAudio) { g6SingAlongAudio.pause(); g6SingAlongAudio = null; }
   state.g6Idx++;
   document.getElementById('g6Playing').style.display = 'block';
   document.getElementById('g6RoundResult').style.display = 'none';

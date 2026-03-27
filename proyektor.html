@@ -126,6 +126,56 @@
 
   @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
 
+  @keyframes audioBar {
+    0%, 100% { height: 8px; }
+    50% { height: 28px; }
+  }
+
+  .leaderboard-card {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(201,168,76,0.3);
+    border-radius: 14px;
+    padding: 18px;
+    text-align: center;
+    animation: fadeIn 0.4s ease;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .leaderboard-rank {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--gold);
+    min-width: 44px;
+  }
+
+  .leaderboard-avatar {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    background: var(--brown-light);
+    border: 2px solid var(--gold);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .leaderboard-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+  .leaderboard-info { flex: 1; text-align: left; }
+  .leaderboard-name { font-weight: 700; color: var(--cream); font-size: 1rem; }
+  .leaderboard-score { font-size: 1.4rem; font-weight: 900; color: var(--gold); font-family: 'Playfair Display', serif; }
+
+  .vote-bar-wrap { background: rgba(255,255,255,0.07); border: 1px solid rgba(201,168,76,0.2); border-radius: 14px; padding: 16px; animation: fadeIn 0.4s ease; }
+  .vote-bar-name { font-weight: 700; color: var(--cream); font-size: 1rem; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
+  .vote-bar-photo { width: 36px; height: 36px; border-radius: 50%; background: var(--brown-light); border: 2px solid var(--gold); overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+  .vote-bar-photo img { width: 100%; height: 100%; object-fit: cover; }
+  .vote-bar-track { background: rgba(255,255,255,0.1); border-radius: 6px; height: 12px; overflow: hidden; margin-bottom: 4px; }
+  .vote-bar-fill { background: var(--gold); height: 100%; border-radius: 6px; transition: width 0.5s ease; }
+  .vote-bar-count { font-size: 12px; color: var(--gold-light); }
+
   .player-avatar {
     width: 64px;
     height: 64px;
@@ -409,13 +459,7 @@
       Belum ada peserta bergabung...
     </div>
   </div>
-  <div class="nav-tabs">
-    <button class="nav-tab active" onclick="showScreen('screenWelcome')">🏠 Welcome</button>
-    <button class="nav-tab" onclick="showScreen('screenLobby')">👥 Peserta</button>
-    <button class="nav-tab" onclick="showScreen('screenGame5')">🎭 Hasil Mirip Siapa</button>
-    <button class="nav-tab" onclick="clearAllData()" style="margin-left:auto;border-color:rgba(200,50,50,0.4);color:rgba(255,100,100,0.7)">🗑️ Reset Data</button>
-    <button class="nav-tab" onclick="toggleFullscreen()">⛶ Fullscreen</button>
-  </div>
+  <div class="nav-tabs" id="navWelcome"></div>
 </div>
 
 <!-- ===== SCREEN: LOBBY / PESERTA ===== -->
@@ -441,13 +485,7 @@
       </div>
     </div>
   </div>
-  <div class="nav-tabs">
-    <button class="nav-tab" onclick="showScreen('screenWelcome')">🏠 Welcome</button>
-    <button class="nav-tab active" onclick="showScreen('screenLobby')">👥 Peserta</button>
-    <button class="nav-tab" onclick="showScreen('screenGame5')">🎭 Hasil Mirip Siapa</button>
-    <button class="nav-tab" onclick="clearAllData()" style="margin-left:auto;border-color:rgba(200,50,50,0.4);color:rgba(255,100,100,0.7)">🗑️ Reset Data</button>
-    <button class="nav-tab" onclick="toggleFullscreen()">⛶ Fullscreen</button>
-  </div>
+  <div class="nav-tabs" id="navLobby"></div>
 </div>
 
 <!-- ===== SCREEN: GAME 5 RESULTS ===== -->
@@ -473,13 +511,79 @@
       </div>
     </div>
   </div>
-  <div class="nav-tabs">
-    <button class="nav-tab" onclick="showScreen('screenWelcome')">🏠 Welcome</button>
-    <button class="nav-tab" onclick="showScreen('screenLobby')">👥 Peserta</button>
-    <button class="nav-tab active" onclick="showScreen('screenGame5')">🎭 Hasil Mirip Siapa</button>
-    <button class="nav-tab" onclick="clearAllData()" style="margin-left:auto;border-color:rgba(200,50,50,0.4);color:rgba(255,100,100,0.7)">🗑️ Reset Data</button>
-    <button class="nav-tab" onclick="toggleFullscreen()">⛶ Fullscreen</button>
+  <div class="nav-tabs" id="navGame5"></div>
+</div>
+
+<!-- ===== SCREEN: GAME 3 SIAPA PALING (Voting Live) ===== -->
+<div id="screenGame3" class="screen" style="background:linear-gradient(160deg,#0d1f0a 0%,#1a3a0a 50%,#0d1f0a 100%)">
+  <div class="topbar">
+    <div class="topbar-title">🗳️ Siapa yang Paling...?</div>
+    <div class="topbar-badge"><span class="live-dot"></span>VOTING LIVE</div>
   </div>
+  <div class="stats-row">
+    <div class="stat-item">Pertanyaan: <strong id="g3ProjQ" style="color:var(--gold-light)">—</strong></div>
+    <div class="stat-item">Votes masuk: <strong id="g3ProjVoteCount">0</strong></div>
+  </div>
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;text-align:center;">
+    <div style="font-size:1rem;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:1rem;font-weight:600;">SIAPA YANG PALING...</div>
+    <div id="g3ProjQuestion" style="font-family:'Playfair Display',serif;font-size:clamp(2rem,5vw,4rem);font-weight:700;color:var(--cream);margin-bottom:2.5rem;line-height:1.2;">Menunggu game dimulai...</div>
+    <div id="g3ProjResults" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;width:100%;max-width:900px;"></div>
+  </div>
+  <div class="nav-tabs" id="navGame3"></div>
+</div>
+
+<!-- ===== SCREEN: GAME 6 SING-ALONG ===== -->
+<div id="screenGame6" class="screen" style="background:linear-gradient(160deg,#1a0f08 0%,#2D1810 40%,#1a3a0a 100%)">
+  <div class="topbar">
+    <div class="topbar-title">🎵 Tebak Lagu — Sing-Along!</div>
+    <div class="topbar-badge"><span class="live-dot"></span>LIVE</div>
+  </div>
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;text-align:center;">
+    <div id="g6ProjStatus" style="font-size:1rem;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:1rem;font-weight:600;">⏳ MENUNGGU LAGU BERIKUTNYA...</div>
+    <div id="g6ProjEmoji" style="font-size:5rem;margin-bottom:1rem;">🎵</div>
+    <div id="g6ProjTitle" style="font-family:'Playfair Display',serif;font-size:clamp(2rem,5vw,4rem);font-weight:700;color:var(--cream);margin-bottom:0.5rem;">—</div>
+    <div id="g6ProjArtis" style="font-size:1.1rem;color:var(--gold-light);margin-bottom:2.5rem;font-style:italic;">—</div>
+
+    <!-- Lirik besar untuk sing-along -->
+    <div id="g6ProjLirikBox" style="display:none;background:rgba(255,255,255,0.08);border:1px solid rgba(201,168,76,0.4);border-radius:20px;padding:2.5rem 3rem;max-width:800px;width:100%;">
+      <div style="font-size:1rem;letter-spacing:2px;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:1.5rem;">🎤 NYANYIKAN BERSAMA!</div>
+      <pre id="g6ProjLirik" style="font-family:'Playfair Display',serif;font-size:clamp(1.4rem,3vw,2rem);color:white;line-height:2;white-space:pre-wrap;font-style:italic;margin:0;"></pre>
+      <div id="g6ProjPlayingBar" style="display:flex;justify-content:center;gap:5px;margin-top:1.5rem;height:36px;align-items:flex-end;">
+        <div style="width:5px;background:var(--gold-light);border-radius:3px;animation:audioBar 0.8s ease-in-out infinite;"></div>
+        <div style="width:5px;background:var(--gold-light);border-radius:3px;animation:audioBar 0.8s ease-in-out infinite 0.1s;"></div>
+        <div style="width:5px;background:var(--gold-light);border-radius:3px;animation:audioBar 0.8s ease-in-out infinite 0.2s;"></div>
+        <div style="width:5px;background:var(--gold-light);border-radius:3px;animation:audioBar 0.8s ease-in-out infinite 0.3s;"></div>
+        <div style="width:5px;background:var(--gold-light);border-radius:3px;animation:audioBar 0.8s ease-in-out infinite 0.4s;"></div>
+      </div>
+    </div>
+  </div>
+  <div class="nav-tabs" id="navGame6"></div>
+</div>
+
+<!-- ===== SCREEN: GAME 1 MEMORY MATCH ===== -->
+<div id="screenGame1" class="screen" style="background:linear-gradient(160deg,#0a1628 0%,#1a2a40 50%,#0a1628 100%)">
+  <div class="topbar">
+    <div class="topbar-title">🃏 Memory Match — Leaderboard</div>
+    <div class="topbar-badge"><span class="live-dot"></span>LIVE</div>
+  </div>
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;">
+    <div class="section-label" style="margin-bottom:1.5rem;">Pemain yang sedang & sudah main</div>
+    <div id="g1ProjGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;width:100%;max-width:1000px;overflow-y:auto;max-height:70vh;"></div>
+  </div>
+  <div class="nav-tabs" id="navGame1"></div>
+</div>
+
+<!-- ===== SCREEN: GAME 4 TIMELINE ===== -->
+<div id="screenGame4" class="screen" style="background:linear-gradient(160deg,#1a1200 0%,#3a2800 50%,#1a1200 100%)">
+  <div class="topbar">
+    <div class="topbar-title">⏳ Timeline Keluarga — Leaderboard</div>
+    <div class="topbar-badge"><span class="live-dot"></span>LIVE</div>
+  </div>
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;">
+    <div class="section-label" style="margin-bottom:1.5rem;">Skor real-time peserta</div>
+    <div id="g4ProjGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;width:100%;max-width:1000px;overflow-y:auto;max-height:70vh;"></div>
+  </div>
+  <div class="nav-tabs" id="navGame4"></div>
 </div>
 
 <!-- New Result Banner -->
@@ -490,32 +594,51 @@
 </div>
 
 <script>
+// ═══════════════════════════════════════════════════════
+// PROYEKTOR — Full Live Display
+// ═══════════════════════════════════════════════════════
+
+const ALL_SCREENS = [
+  { id: 'screenWelcome',  label: '🏠 Welcome' },
+  { id: 'screenLobby',   label: '👥 Peserta' },
+  { id: 'screenGame1',   label: '🃏 Memory Match' },
+  { id: 'screenGame3',   label: '🗳️ Siapa Paling' },
+  { id: 'screenGame4',   label: '⏳ Timeline' },
+  { id: 'screenGame5',   label: '🎭 Mirip Siapa' },
+  { id: 'screenGame6',   label: '🎵 Tebak Lagu' },
+];
+
 let currentScreen = 'screenWelcome';
 let lastPlayerCount = 0;
 let lastG5Count = 0;
+let lastG3State = '';
+let lastG6State = '';
+let lastG1State = '';
+let lastG4State = '';
+
+// ── Build nav tabs dinamis di semua screen ──
+function buildNavTabs() {
+  ALL_SCREENS.forEach(s => {
+    const navEl = document.getElementById('nav' + s.id.replace('screen',''));
+    if (!navEl) return;
+    navEl.innerHTML = ALL_SCREENS.map(t => `
+      <button class="nav-tab ${t.id === s.id ? 'active' : ''}" onclick="showScreen('${t.id}')">${t.label}</button>
+    `).join('') +
+    `<button class="nav-tab" onclick="clearAllData()" style="margin-left:auto;border-color:rgba(200,50,50,0.4);color:rgba(255,100,100,0.7)">🗑️ Reset</button>
+     <button class="nav-tab" onclick="toggleFullscreen()">⛶ Full</button>`;
+  });
+}
 
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   currentScreen = id;
-  // Update nav tabs active state
-  document.querySelectorAll('.nav-tab').forEach(t => {
-    if (t.onclick && t.onclick.toString().includes(id)) {
-      if (!t.onclick.toString().includes('clearAll') && !t.onclick.toString().includes('Fullscreen')) {
-        t.classList.add('active');
-      }
-    } else {
-      t.classList.remove('active');
-    }
-  });
+  buildNavTabs();
 }
 
 function toggleFullscreen() {
-  if (!document.fullscreenElement) {
-    document.documentElement.requestFullscreen();
-  } else {
-    document.exitFullscreen();
-  }
+  if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+  else document.exitFullscreen();
 }
 
 function timeAgo(ts) {
@@ -525,41 +648,29 @@ function timeAgo(ts) {
   return Math.floor(diff/3600) + 'j lalu';
 }
 
+// ── SCREEN: PESERTA ──
 function renderPlayers() {
   try {
     const players = JSON.parse(localStorage.getItem('ras_players') || '[]');
     const grid = document.getElementById('playersGrid');
     const count = players.length;
-
     document.getElementById('playerCount').textContent = count;
     document.getElementById('statTotal').textContent = count;
-
     if (count === 0) {
-      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
-        <div class="icon">⏳</div>
-        <p>Menunggu peserta bergabung...</p>
-        <p style="font-size:0.8rem">Peserta buka game di HP masing-masing</p>
-      </div>`;
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="icon">⏳</div><p>Menunggu peserta bergabung...</p><p style="font-size:0.8rem">Peserta buka game di HP masing-masing</p></div>`;
       document.getElementById('statLast').textContent = '—';
       document.getElementById('playerCountWelcome').textContent = 'Belum ada peserta bergabung...';
     } else {
       const sorted = [...players].sort((a,b) => b.joinedAt - a.joinedAt);
-      const latest = sorted[0];
-      document.getElementById('statLast').textContent = latest.name + ' (' + timeAgo(latest.joinedAt) + ')';
+      document.getElementById('statLast').textContent = sorted[0].name + ' (' + timeAgo(sorted[0].joinedAt) + ')';
       document.getElementById('playerCountWelcome').textContent = '🎉 ' + count + ' peserta sudah bergabung!';
-
       grid.innerHTML = players.map(p => `
         <div class="player-card">
-          <div class="player-avatar">
-            ${p.photo ? `<img src="${p.photo}" alt="${p.name}">` : '👤'}
-          </div>
+          <div class="player-avatar">${p.photo ? `<img src="${p.photo}" alt="${p.name}">` : '👤'}</div>
           <div class="player-name">${p.name}</div>
           <div class="player-time">${timeAgo(p.joinedAt)}</div>
-        </div>
-      `).join('');
+        </div>`).join('');
     }
-
-    // Detect new player
     if (count > lastPlayerCount && lastPlayerCount > 0) {
       const newest = [...players].sort((a,b) => b.joinedAt - a.joinedAt)[0];
       showBanner('👋 ' + newest.name + ' baru bergabung!', '');
@@ -568,47 +679,173 @@ function renderPlayers() {
   } catch(e) {}
 }
 
+// ── SCREEN: GAME 5 MIRIP SIAPA ──
 function renderG5() {
   try {
     const results = JSON.parse(localStorage.getItem('ras_g5_results') || '[]');
     const grid = document.getElementById('g5Grid');
     const count = results.length;
-
     document.getElementById('g5Count').textContent = count;
     document.getElementById('statG5Count').textContent = count + ' peserta';
-
     if (count === 0) {
-      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
-        <div class="icon">🎭</div>
-        <p>Belum ada yang main Game 5</p>
-        <p style="font-size:0.8rem">Hasil akan muncul otomatis saat peserta selesai</p>
-      </div>`;
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="icon">🎭</div><p>Belum ada yang main Game 5</p><p style="font-size:0.8rem">Hasil akan muncul otomatis saat peserta selesai</p></div>`;
       document.getElementById('statG5Last').textContent = '—';
       return;
     }
-
     const sorted = [...results].sort((a,b) => b.timestamp - a.timestamp);
     document.getElementById('statG5Last').textContent = sorted[0].player + ': ' + sorted[0].komedian;
-
     grid.innerHTML = sorted.map(r => `
       <div class="g5-card">
-        <div class="g5-player-photo">
-          ${r.photo ? `<img src="${r.photo}" alt="${r.player}">` : '👤'}
-        </div>
+        <div class="g5-player-photo">${r.photo ? `<img src="${r.photo}" alt="${r.player}">` : '👤'}</div>
         <div class="g5-player-name">${r.player}</div>
         <div class="g5-arrow">↓</div>
         <div style="font-size:1.8rem;margin:4px 0">🎭</div>
         <div class="g5-komedian-name">${r.komedian}</div>
         <div class="g5-persen">${r.persen}% Mirip</div>
-      </div>
-    `).join('');
-
-    // Detect new result
+      </div>`).join('');
     if (count > lastG5Count && lastG5Count >= 0) {
       const newest = sorted[0];
       showBanner('🎭 ' + newest.player, 'mirip ' + newest.komedian + ' (' + newest.persen + '%)');
     }
     lastG5Count = count;
+  } catch(e) {}
+}
+
+// ── SCREEN: GAME 3 SIAPA PALING (Voting Live) ──
+function renderG3() {
+  try {
+    const raw = localStorage.getItem('ras_g3_live');
+    if (!raw || raw === lastG3State) return;
+    lastG3State = raw;
+    const data = JSON.parse(raw);
+    if (!data) return;
+
+    const qEl = document.getElementById('g3ProjQuestion');
+    const qLabel = document.getElementById('g3ProjQ');
+    const voteCount = document.getElementById('g3ProjVoteCount');
+    const resultsEl = document.getElementById('g3ProjResults');
+
+    if (qEl) qEl.textContent = data.question || 'Menunggu game dimulai...';
+    if (qLabel) qLabel.textContent = data.questionNum ? `${data.questionNum} / ${data.totalQ}` : '—';
+
+    const votes = data.votes || {};
+    const total = Object.values(votes).reduce((s, v) => s + v, 0);
+    if (voteCount) voteCount.textContent = total;
+
+    if (!resultsEl) return;
+    if (total === 0) {
+      resultsEl.innerHTML = `<div style="color:rgba(201,168,76,0.5);font-size:1rem;grid-column:1/-1;">Menunggu vote masuk...</div>`;
+      return;
+    }
+
+    const members = data.members || [];
+    const sorted = [...members].sort((a,b) => (votes[b.id]||0) - (votes[a.id]||0));
+    const maxVote = Math.max(...sorted.map(m => votes[m.id]||0), 1);
+
+    resultsEl.innerHTML = sorted.filter(m => (votes[m.id]||0) > 0).map(m => {
+      const v = votes[m.id] || 0;
+      const pct = Math.round(v / total * 100);
+      return `
+      <div class="vote-bar-wrap">
+        <div class="vote-bar-name">
+          <div class="vote-bar-photo">${m.foto ? `<img src="${m.foto}">` : '👤'}</div>
+          <span>${m.nama}</span>
+          <span style="margin-left:auto;font-size:1.1rem;font-weight:700;color:var(--gold)">${v} vote</span>
+        </div>
+        <div class="vote-bar-track">
+          <div class="vote-bar-fill" style="width:${Math.round(v/maxVote*100)}%"></div>
+        </div>
+        <div class="vote-bar-count">${pct}% dari total vote</div>
+      </div>`;
+    }).join('');
+  } catch(e) {}
+}
+
+// ── SCREEN: GAME 6 TEBAK LAGU / SING-ALONG ──
+function renderG6() {
+  try {
+    const raw = localStorage.getItem('ras_g6_singalong');
+    if (!raw || raw === lastG6State) return;
+    lastG6State = raw;
+    const data = JSON.parse(raw);
+    if (!data) return;
+
+    const EMOJI_MAP = {1:'🌴',2:'🏡',3:'💃',4:'☕',5:'🕺'};
+
+    document.getElementById('g6ProjEmoji').textContent = EMOJI_MAP[data.laguId] || '🎵';
+    document.getElementById('g6ProjTitle').textContent = data.judul || '—';
+    document.getElementById('g6ProjArtis').textContent = data.artis || '—';
+
+    const lirikBox = document.getElementById('g6ProjLirikBox');
+    const lirikEl = document.getElementById('g6ProjLirik');
+
+    if (data.status === 'playing') {
+      document.getElementById('g6ProjStatus').textContent = '♪ NYANYIKAN BERSAMA! ♪';
+      document.getElementById('g6ProjStatus').style.color = 'var(--gold-light)';
+      if (lirikBox) lirikBox.style.display = 'block';
+      if (lirikEl) lirikEl.textContent = data.lirik || '';
+    } else {
+      document.getElementById('g6ProjStatus').textContent = '⏳ Peserta sedang menebak...';
+      document.getElementById('g6ProjStatus').style.color = 'var(--gold)';
+      if (lirikBox) lirikBox.style.display = 'none';
+    }
+  } catch(e) {}
+}
+
+// ── SCREEN: GAME 1 MEMORY MATCH Leaderboard ──
+function renderG1() {
+  try {
+    const raw = localStorage.getItem('ras_g1_scores');
+    if (!raw || raw === lastG1State) return;
+    lastG1State = raw;
+    const scores = JSON.parse(raw); // [{name, photo, score, time, done}]
+    const grid = document.getElementById('g1ProjGrid');
+    if (!grid) return;
+    if (!scores || scores.length === 0) {
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="icon">🃏</div><p>Belum ada yang main Memory Match</p></div>`;
+      return;
+    }
+    const sorted = [...scores].sort((a,b) => {
+      if (a.done && !b.done) return -1;
+      if (!a.done && b.done) return 1;
+      if (a.done && b.done) return a.time - b.time;
+      return b.score - a.score;
+    });
+    grid.innerHTML = sorted.map((s, i) => `
+      <div class="leaderboard-card">
+        <div class="leaderboard-rank">${i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1)}</div>
+        <div class="leaderboard-avatar">${s.photo ? `<img src="${s.photo}">` : '👤'}</div>
+        <div class="leaderboard-info">
+          <div class="leaderboard-name">${s.name}</div>
+          <div class="leaderboard-score">${s.done ? '✓ Selesai · '+Math.round(s.time/1000)+'s' : s.score+' pasang'}</div>
+        </div>
+      </div>`).join('');
+  } catch(e) {}
+}
+
+// ── SCREEN: GAME 4 TIMELINE Leaderboard ──
+function renderG4() {
+  try {
+    const raw = localStorage.getItem('ras_g4_scores');
+    if (!raw || raw === lastG4State) return;
+    lastG4State = raw;
+    const scores = JSON.parse(raw); // [{name, photo, score, ronde}]
+    const grid = document.getElementById('g4ProjGrid');
+    if (!grid) return;
+    if (!scores || scores.length === 0) {
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="icon">⏳</div><p>Belum ada yang main Timeline</p></div>`;
+      return;
+    }
+    const sorted = [...scores].sort((a,b) => b.score - a.score);
+    grid.innerHTML = sorted.map((s, i) => `
+      <div class="leaderboard-card">
+        <div class="leaderboard-rank">${i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1)}</div>
+        <div class="leaderboard-avatar">${s.photo ? `<img src="${s.photo}">` : '👤'}</div>
+        <div class="leaderboard-info">
+          <div class="leaderboard-name">${s.name}</div>
+          <div class="leaderboard-score">${s.score} poin · Ronde ${s.ronde||1}</div>
+        </div>
+      </div>`).join('');
   } catch(e) {}
 }
 
@@ -622,30 +859,32 @@ function showBanner(player, mirip) {
 
 function clearAllData() {
   if (!confirm('Reset semua data peserta dan hasil game? (Tidak bisa dibatalkan)')) return;
-  localStorage.removeItem('ras_players');
-  localStorage.removeItem('ras_g5_results');
-  lastPlayerCount = 0;
-  lastG5Count = 0;
-  renderPlayers();
-  renderG5();
+  ['ras_players','ras_g5_results','ras_g3_live','ras_g6_singalong',
+   'ras_g6_play_cmd','ras_g1_scores','ras_g4_scores'].forEach(k => localStorage.removeItem(k));
+  lastPlayerCount = 0; lastG5Count = 0;
+  lastG3State = ''; lastG6State = ''; lastG1State = ''; lastG4State = '';
+  tick();
 }
 
-// Set URL display
 function detectUrl() {
   const url = window.location.href.replace('proyektor.html', 'rasmita-family-gathering-2026.html');
   const display = url.replace('http://','').replace('https://','').replace('/rasmita-family-gathering-2026.html','');
   document.getElementById('displayUrl').textContent = display || 'buka file HTML di browser';
 }
 
-// Auto refresh every 3 seconds
 function tick() {
   renderPlayers();
   renderG5();
+  renderG3();
+  renderG6();
+  renderG1();
+  renderG4();
 }
 
+buildNavTabs();
 detectUrl();
 tick();
-setInterval(tick, 3000);
+setInterval(tick, 2000);
 </script>
 </body>
 </html>

@@ -654,17 +654,60 @@
     <!-- ════════════════════════════════ FOTO KELUARGA ════════════════════════════════ -->
     <div class="panel-page" id="panel-photos">
       <div class="card">
-        <div class="card-title"><span>📸</span> Upload Foto Anggota Keluarga</div>
-        <div class="alert alert-info">Foto ini digunakan di Game 1 (Memory Match), Game 2 (Tebak Siapa), Game 3 (Voting), dan Game 4 (Timeline). Upload minimal <strong>10 foto</strong> agar semua game berjalan optimal (15–20 foto ideal).</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;">
-          <button class="btn btn-gold" onclick="addMember()">+ Tambah Anggota</button>
-          <button class="btn btn-outline" onclick="importPhotosJSON()">📂 Import JSON</button>
-          <button class="btn btn-outline" onclick="exportMemberData()">📋 Export Data</button>
-          <button class="btn btn-danger" onclick="clearAllPhotos()">🗑️ Hapus Semua Foto</button>
+        <div class="card-title"><span>📸</span> Foto Keluarga per Game</div>
+        <div class="tab-bar">
+          <button class="tab-btn active" onclick="switchTab('photos','semua')">👨‍👩‍👧 Semua Foto</button>
+          <button class="tab-btn" onclick="switchTab('photos','g1')">🃏 Memory Match</button>
+          <button class="tab-btn" onclick="switchTab('photos','g2')">🔍 Tebak Siapa</button>
+          <button class="tab-btn" onclick="switchTab('photos','g3')">🗳️ Siapa Paling</button>
+          <button class="tab-btn" onclick="switchTab('photos','g4')">⏳ Timeline</button>
         </div>
-        <div class="photo-grid" id="uploadGrid"></div>
-        <input type="file" id="photoFileInput" accept="image/*" style="display:none" onchange="handlePhotoUpload(event)">
-        <input type="file" id="importJsonInput" accept=".json" style="display:none" onchange="handleImportJSON(event)">
+
+        <!-- Tab: Semua Foto -->
+        <div class="tab-panel active" id="photos-tab-semua">
+          <div class="alert alert-info">Foto di sini digunakan di Game 1, 2, 3, dan 4. Upload minimal <strong>10 foto</strong> agar semua game berjalan optimal (15–20 foto ideal).</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;">
+            <button class="btn btn-gold" onclick="addMember()">+ Tambah Anggota</button>
+            <button class="btn btn-outline" onclick="importPhotosJSON()">📂 Import JSON</button>
+            <button class="btn btn-outline" onclick="exportMemberData()">📋 Export Data</button>
+            <button class="btn btn-danger" onclick="clearAllPhotos()">🗑️ Hapus Semua Foto</button>
+          </div>
+          <div class="photo-grid" id="uploadGrid"></div>
+          <input type="file" id="photoFileInput" accept="image/*" style="display:none" onchange="handlePhotoUpload(event)">
+          <input type="file" id="importJsonInput" accept=".json" style="display:none" onchange="handleImportJSON(event)">
+        </div>
+
+        <!-- Tab: Game 1 Memory Match -->
+        <div class="tab-panel" id="photos-tab-g1">
+          <div class="alert alert-info"><strong>Game 1 — Memory Match:</strong> Menampilkan pasangan kartu dari foto keluarga. Minimal 8 foto agar kartu tidak berulang terlalu cepat.</div>
+          <div class="instr-box">Foto yang sudah diupload di tab <strong>Semua Foto</strong> otomatis dipakai di sini. Game mengambil foto secara acak untuk membuat pasangan kartu.</div>
+          <div class="photo-grid" id="g1PhotoPreview"></div>
+          <button class="btn btn-gold" onclick="switchTab('photos','semua');setTimeout(()=>document.getElementById('uploadGrid').scrollIntoView(),100)">📸 Upload / Kelola Foto →</button>
+        </div>
+
+        <!-- Tab: Game 2 Tebak Siapa -->
+        <div class="tab-panel" id="photos-tab-g2">
+          <div class="alert alert-info"><strong>Game 2 — Tebak Siapa:</strong> Foto ditampilkan blur/terpotong, peserta menebak siapa orangnya. Semakin banyak foto = semakin seru!</div>
+          <div class="instr-box">Foto yang sudah diupload di tab <strong>Semua Foto</strong> otomatis dipakai di sini. Pastikan foto wajah jelas dan tidak terlalu gelap.</div>
+          <div class="photo-grid" id="g2PhotoPreview"></div>
+          <button class="btn btn-gold" onclick="switchTab('photos','semua');setTimeout(()=>document.getElementById('uploadGrid').scrollIntoView(),100)">📸 Upload / Kelola Foto →</button>
+        </div>
+
+        <!-- Tab: Game 3 Siapa Paling -->
+        <div class="tab-panel" id="photos-tab-g3">
+          <div class="alert alert-info"><strong>Game 3 — Siapa Paling:</strong> Foto anggota keluarga ditampilkan sebagai pilihan voting. Pastikan semua anggota yang ikut sudah ada fotonya.</div>
+          <div class="instr-box">Foto yang sudah diupload di tab <strong>Semua Foto</strong> otomatis muncul sebagai kandidat di game voting.</div>
+          <div class="photo-grid" id="g3PhotoPreview"></div>
+          <button class="btn btn-gold" onclick="switchTab('photos','semua');setTimeout(()=>document.getElementById('uploadGrid').scrollIntoView(),100)">📸 Upload / Kelola Foto →</button>
+        </div>
+
+        <!-- Tab: Game 4 Timeline -->
+        <div class="tab-panel" id="photos-tab-g4">
+          <div class="alert alert-info"><strong>Game 4 — Timeline:</strong> Foto disusun dari termuda ke tertua. Upload minimal <strong>15 foto</strong> agar 3 ronde tidak ada foto berulang.</div>
+          <div class="instr-box">Pastikan nama anggota keluarga sudah diisi dengan benar. Urutan ID digunakan sebagai proxy usia dalam game.</div>
+          <div class="photo-grid" id="g4PhotoPreview"></div>
+          <button class="btn btn-gold" onclick="switchTab('photos','semua');setTimeout(()=>document.getElementById('uploadGrid').scrollIntoView(),100)">📸 Upload / Kelola Foto →</button>
+        </div>
       </div>
     </div>
 
@@ -692,40 +735,18 @@
     <!-- ════════════════════════════════ LAGU ════════════════════════════════ -->
     <div class="panel-page" id="panel-lagu">
       <div class="card">
-        <div class="card-title"><span>🎵</span> Game 6 — Setting Lagu</div>
+        <div class="card-title"><span>🎵</span> Game 6 — Upload MP3 & Kelola Lagu</div>
         <div class="alert alert-info">
-          Game 6 berjalan dengan <strong>melodi sintetis otomatis</strong> (tidak perlu file apapun). Untuk kualitas audio lebih baik, upload file MP3 intro lagu. Jika file tidak ada, otomatis fallback ke sintetis.
+          Upload MP3 per lagu untuk sing-along. Tanpa MP3 → otomatis pakai melodi sintetis. Setelah peserta menjawab, klik <strong>▶ Play Sing-Along</strong> untuk mulai nyanyi bareng!
         </div>
-
-        <table class="lagu-table">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Judul</th>
-              <th>Artis</th>
-              <th>Potong di</th>
-              <th>Mode Audio</th>
-              <th>Upload MP3</th>
-            </tr>
-          </thead>
-          <tbody id="laguTableBody"></tbody>
-        </table>
+        <div id="laguCardsAdmin"></div>
       </div>
 
       <div class="card">
         <div class="card-title"><span>✂️</span> Panduan Potong Audio</div>
         <div class="instr-box">
-          <strong>Tool gratis online:</strong> <a href="https://online-audio-cutter.com" target="_blank" style="color:var(--green)">online-audio-cutter.com</a> atau <a href="https://mp3cut.net" target="_blank" style="color:var(--green)">mp3cut.net</a><br><br>
-          <strong>Langkah:</strong><br>
-          1. Download lagu dari sumber legal (Spotify, Apple Music, etc.)<br>
-          2. Buka online-audio-cutter.com → Upload file<br>
-          3. Potong sesuai timestamp di tabel atas<br>
-          4. Export sebagai MP3<br>
-          5. Rename file sesuai kolom "Nama File"<br>
-          6. Upload di tombol "Upload MP3" di tabel atas
-        </div>
-        <div class="alert alert-warn">
-          ⚠️ Setelah upload MP3, kamu perlu edit 2 baris kode di <code>rasmita-family-gathering-2026.html</code> untuk mengaktifkan mode MP3. Lihat panduan di README.md.
+          <strong>Tool gratis:</strong> <a href="https://online-audio-cutter.com" target="_blank" style="color:var(--green)">online-audio-cutter.com</a> atau <a href="https://mp3cut.net" target="_blank" style="color:var(--green)">mp3cut.net</a><br><br>
+          Potong bagian <strong>chorus/ref</strong> lagu (biasanya 30–60 detik) untuk sing-along. Simpan sebagai MP3 lalu upload di masing-masing lagu di atas.
         </div>
       </div>
     </div>
@@ -814,35 +835,32 @@
         <div class="card-title"><span>🗳️</span> Game 3 — Siapa yang Paling...?</div>
         <div class="tab-bar">
           <button class="tab-btn active" onclick="switchTab('g3','info')">ℹ️ Info</button>
-          <button class="tab-btn" onclick="switchTab('g3','pertanyaan')">❓ Pertanyaan</button>
+          <button class="tab-btn" onclick="switchTab('g3','pertanyaan')">❓ Edit Pertanyaan</button>
+          <button class="tab-btn" onclick="switchTab('g3','foto')">📸 Foto Kandidat</button>
           <button class="tab-btn" onclick="switchTab('g3','tips')">💡 Tips MC</button>
         </div>
         <div class="tab-panel active" id="g3-tab-info">
           <div class="stat-grid" style="grid-template-columns:repeat(3,1fr)">
             <div class="stat-card"><div class="stat-label">Pemain</div><div class="stat-value">Semua</div></div>
-            <div class="stat-card"><div class="stat-label">Pertanyaan</div><div class="stat-value gold">10</div></div>
+            <div class="stat-card"><div class="stat-label">Pertanyaan</div><div class="stat-value gold" id="g3QuestionCount">10</div></div>
             <div class="stat-card"><div class="stat-label">Timer</div><div class="stat-value green">30 dtk</div></div>
           </div>
-          <div class="instr-box">Game voting — semua pilih siapa anggota keluarga yang paling sesuai pertanyaan. Hasilnya <strong>sangat seru ditampilkan di proyektor!</strong> Yang paling sering dipilih masuk Hall of Fame.</div>
+          <div class="instr-box">Game voting — semua pilih siapa anggota keluarga yang paling sesuai pertanyaan. Hasilnya <strong>sangat seru ditampilkan di proyektor!</strong></div>
         </div>
         <div class="tab-panel" id="g3-tab-pertanyaan">
-          <div class="instr-box"><strong>10 Pertanyaan Voting yang Sudah Ada:</strong><br>
-            1. Siapa yang paling suka tidur?<br>
-            2. Siapa yang paling cerewet?<br>
-            3. Siapa yang paling sering telat?<br>
-            4. Siapa yang paling lebay kalau sakit?<br>
-            5. Siapa yang paling banyak makan?<br>
-            6. Siapa yang paling susah bangun pagi?<br>
-            7. Siapa yang paling gampang nangis?<br>
-            8. Siapa yang paling keras kepala?<br>
-            9. Siapa yang paling suka selfie?<br>
-            10. Siapa yang paling bawel kalau lapar?
-          </div>
-          <div class="alert alert-info">Untuk mengganti atau menambah pertanyaan, edit array <code>PERTANYAAN_G3</code> di file <code>rasmita-family-gathering-2026.html</code>.</div>
+          <div class="alert alert-info">Edit pertanyaan langsung di sini. Perubahan tersimpan otomatis ke browser dan langsung aktif di game.</div>
+          <div id="g3QuestionList" style="margin-bottom:12px;"></div>
+          <button class="btn btn-gold" onclick="addG3Question()">+ Tambah Pertanyaan</button>
+          <button class="btn btn-outline" onclick="saveG3Questions()" style="margin-left:8px;">💾 Simpan</button>
+          <button class="btn" onclick="resetG3Questions()" style="margin-left:8px;background:#eee;color:#666;border:none;border-radius:6px;padding:8px 14px;cursor:pointer;font-size:13px;">↺ Reset Default</button>
+        </div>
+        <div class="tab-panel" id="g3-tab-foto">
+          <div class="alert alert-info">Upload foto anggota keluarga sebagai kandidat pilihan. Foto yang sama dipakai juga di Game 1 (Memory Match) dan Game 2 (Tebak Siapa).</div>
+          <button class="btn btn-gold" onclick="showPanel('photos')">📸 Kelola Foto Keluarga →</button>
         </div>
         <div class="tab-panel" id="g3-tab-tips">
-          <div class="instr-box"><strong>Script MC:</strong><br><em>"Jujur ya! Kalau ada yang tersinggung... itu berarti semua sepakat! Ini bukan celaan, ini sayang! 😂 Yang paling sering dapat suara, nanti ada 'penghargaan' khusus!"</em></div>
-          <div class="instr-box"><strong>Pro tip proyektor:</strong> Tampilkan layar hasil voting di proyektor setelah semua orang submit. Reaksi langsung dijamin heboh!</div>
+          <div class="instr-box"><strong>Script MC:</strong><br><em>"Jujur ya! Kalau ada yang tersinggung... itu berarti semua sepakat! Ini bukan celaan, ini sayang! 😂"</em></div>
+          <div class="instr-box"><strong>Pro tip:</strong> Tampilkan hasil voting di proyektor setelah semua orang submit. Reaksi langsung dijamin heboh!</div>
         </div>
       </div>
     </div>
@@ -853,7 +871,7 @@
         <div class="card-title"><span>⏳</span> Game 4 — Timeline Keluarga</div>
         <div class="tab-bar">
           <button class="tab-btn active" onclick="switchTab('g4','info')">ℹ️ Info</button>
-          <button class="tab-btn" onclick="switchTab('g4','setup')">🔧 Setup</button>
+          <button class="tab-btn" onclick="switchTab('g4','foto')">📸 Foto Timeline</button>
           <button class="tab-btn" onclick="switchTab('g4','tips')">💡 Tips MC</button>
         </div>
         <div class="tab-panel active" id="g4-tab-info">
@@ -862,18 +880,14 @@
             <div class="stat-card"><div class="stat-label">Foto/Ronde</div><div class="stat-value gold">5</div></div>
             <div class="stat-card"><div class="stat-label">Poin Maks</div><div class="stat-value green">450</div></div>
           </div>
-          <div class="instr-box">Susun 5 foto anggota keluarga dari <strong>termuda ke tertua</strong> dengan drag & drop. 3 ronde × 5 foto berbeda. Semakin cepat dan akurat = poin lebih besar.</div>
+          <div class="instr-box">Susun foto anggota keluarga dari <strong>termuda ke tertua</strong> dengan drag & drop. Semakin cepat dan akurat = poin lebih besar.</div>
         </div>
-        <div class="tab-panel" id="g4-tab-setup">
-          <div class="instr-box"><strong>Yang perlu disiapkan:</strong><br>
-            1. Upload minimal <strong>15 foto</strong> anggota keluarga (agar 3 ronde × 5 foto tidak ada foto yang diulang)<br>
-            2. Pastikan <strong>nama anggota keluarga</strong> sudah diisi dengan benar<br>
-            3. Data umur/kelahiran tidak diperlukan di sistem — game menggunakan urutan ID sebagai proxy usia
-          </div>
-          <button class="btn btn-gold" onclick="showPanel('photos')">📸 Upload Foto Keluarga →</button>
+        <div class="tab-panel" id="g4-tab-foto">
+          <div class="alert alert-info">Foto yang diupload di sini dipakai sebagai kartu di Game 4 (Timeline). Upload minimal <strong>15 foto</strong> agar 3 ronde tidak ada foto berulang. Foto yang sama juga dipakai di Game 1 & 2.</div>
+          <button class="btn btn-gold" onclick="showPanel('photos')">📸 Kelola Foto Keluarga →</button>
         </div>
         <div class="tab-panel" id="g4-tab-tips">
-          <div class="instr-box"><strong>Script MC:</strong><br><em>"Kamu tau nggak usia pasti semua anggota keluarga ini? Sekarang saatnya membuktikan! Kalau salah, berarti kamu kurang perhatian sama keluarga! 😄 Drag and drop foto dari kiri (termuda) ke kanan (tertua)!"</em></div>
+          <div class="instr-box"><strong>Script MC:</strong><br><em>"Kamu tau nggak usia pasti semua anggota keluarga ini? Drag and drop foto dari kiri (termuda) ke kanan (tertua)!"</em></div>
         </div>
       </div>
     </div>
@@ -921,8 +935,7 @@
         <div class="card-title"><span>🎵</span> Game 6 — Tebak Lagu Indonesia</div>
         <div class="tab-bar">
           <button class="tab-btn active" onclick="switchTab('g6','info')">ℹ️ Info</button>
-          <button class="tab-btn" onclick="switchTab('g6','daftar')">🎼 Daftar Lagu</button>
-          <button class="tab-btn" onclick="switchTab('g6','singalong')">🎤 Sing-Along</button>
+          <button class="tab-btn" onclick="switchTab('g6','singalong')">🎤 Kontrol Sing-Along</button>
           <button class="tab-btn" onclick="switchTab('g6','tips')">💡 Tips MC</button>
         </div>
         <div class="tab-panel active" id="g6-tab-info">
@@ -931,28 +944,15 @@
             <div class="stat-card"><div class="stat-label">Poin/Lagu</div><div class="stat-value gold">100</div></div>
             <div class="stat-card"><div class="stat-label">Poin Maks</div><div class="stat-value green">500</div></div>
           </div>
-          <div class="instr-box">Game berjalan otomatis dengan <strong>melodi sintetis</strong>. Untuk kualitas audio lebih baik, upload file MP3 intro lagu di tab <strong>Lagu</strong>. Setelah terjawab, lirik ditampilkan untuk sing-along bersama!</div>
-        </div>
-        <div class="tab-panel" id="g6-tab-daftar">
-          <table class="lagu-table">
-            <thead><tr><th>#</th><th>Judul</th><th>Artis</th><th>Tahun</th><th>Timestamp Potong</th></tr></thead>
-            <tbody>
-              <tr><td>1</td><td><strong>Keluarga Cemara</strong></td><td>Hedi Yunus</td><td>1996</td><td><span class="timestamp-badge">0:00 – 0:14</span></td></tr>
-              <tr><td>2</td><td><strong>Tabo Balik</strong></td><td>Pop Minang</td><td>Klasik</td><td><span class="timestamp-badge">0:00 – 0:12</span></td></tr>
-              <tr><td>3</td><td><strong>Kangen</strong></td><td>Dewa 19</td><td>1992</td><td><span class="timestamp-badge">0:05 – 0:18</span></td></tr>
-              <tr><td>4</td><td><strong>Laskar Pelangi</strong></td><td>Nidji</td><td>2008</td><td><span class="timestamp-badge">0:00 – 0:13</span></td></tr>
-              <tr><td>5</td><td><strong>Pergi Pagi Pulang Pagi</strong></td><td>Armada</td><td>2016</td><td><span class="timestamp-badge">0:00 – 0:11</span></td></tr>
-            </tbody>
-          </table>
-          <div class="instr-box" style="margin-top:16px"><strong>Nama file MP3:</strong> <code>lagu1.mp3</code>, <code>lagu2.mp3</code>, <code>lagu3.mp3</code>, <code>lagu4.mp3</code>, <code>lagu5.mp3</code><br>Taruh di folder yang sama dengan file HTML game.</div>
+          <div class="instr-box">Game berjalan otomatis dengan melodi sintetis. Upload MP3 chorus di tab <strong>Lagu</strong> untuk kualitas audio lebih baik. Setelah peserta menjawab, gunakan tab <strong>Kontrol Sing-Along</strong> untuk play musik.</div>
         </div>
         <div class="tab-panel" id="g6-tab-singalong">
-          <div class="instr-box"><strong>Fitur Sing-Along:</strong> Setelah tiap lagu terjawab, lirik bait pertama otomatis muncul di layar. Ini momen paling seru — tampilkan di proyektor agar semua orang bisa ikut bernyanyi!</div>
-          <div class="instr-box"><strong>Skenario proyektor ideal:</strong><br>1. Admin navigasi game ke layar proyektor/TV<br>2. Setelah lagu terjawab → lirik muncul besar di layar<br>3. MC: "Semua nyanyi bareng, satu... dua... tiga!"<br>4. Punya mikrofon? Lebih seru lagi!</div>
+          <div class="alert alert-info">Setelah semua peserta menjawab satu lagu, klik <strong>▶ Play Sing-Along</strong> di lagu yang sedang berjalan. Musik akan diputar di HP semua peserta sekaligus!</div>
+          <div id="g6SingAlongControls"></div>
         </div>
         <div class="tab-panel" id="g6-tab-tips">
-          <div class="instr-box"><strong>Script MC:</strong><br><em>"Audio yang kalian dengar adalah nada sintetis — bukan rekaman asli. Kalau masih susah ditebak dari suara, tekan tombol 💡 Petunjuk! Yang langsung tahu tanpa petunjuk — berarti kamu legend musik Indonesia!"</em></div>
-          <div class="instr-box"><strong>Bonus seru:</strong> Minta satu orang maju ke depan dan nyanyi a cappella dari intro yang sudah diputar. Grup yang paling kompak dapat hadiah!</div>
+          <div class="instr-box"><strong>Script MC:</strong><br><em>"Audio yang kalian dengar adalah nada sintetis. Kalau masih susah ditebak, tekan 💡 Petunjuk! Yang langsung tahu tanpa petunjuk — berarti kamu legend musik Indonesia!"</em></div>
+          <div class="instr-box"><strong>Alur ideal:</strong><br>1. Peserta dengar melodi & tebak lagu di HP<br>2. Setelah semua jawab → admin klik Play Sing-Along<br>3. Musik diputar + lirik muncul di semua HP & proyektor<br>4. MC: "Satu, dua, tiga — nyanyi bareng!" 🎤</div>
         </div>
       </div>
     </div>
@@ -1449,6 +1449,331 @@ function showNotif(msg) {
   n.textContent = msg;
   n.classList.add('show');
   setTimeout(()=>n.classList.remove('show'),3000);
+}
+
+// ════════════════════════════════════════════════════
+// LAGU DATA (mirror dari game file)
+// ════════════════════════════════════════════════════
+const LAGU_DATA = [
+  { id:1, judul:"Tabola Bale", artis:"Silet Open Up feat. Jacson Zeran", tahun:2025, emoji:"🌴",
+    lirik_default:"Kaka tabola bale lia ade nona e\nSu makin manyala e, kaka hati susah e\nAde bikin kaka mete, tidur malam bola bale\nSejak kaka lia ade, aduh Tuhan ampun e" },
+  { id:2, judul:"Harta yang Paling Berharga", artis:"Hedi Yunus (OST Keluarga Cemara)", tahun:1996, emoji:"🏡",
+    lirik_default:"Harta yang paling berharga adalah keluarga\nIstana yang paling indah adalah keluarga\nPuisi yang paling bermakna adalah keluarga\nMutiara tiada tara adalah keluarga" },
+  { id:3, judul:"Dansa Yok Dansa", artis:"Harvey Malaiholo", tahun:1985, emoji:"💃",
+    lirik_default:"Dansa yok dansa, dansa yok dansa\nMari bersama kita bergembira\nDansa yok dansa, dansa yok dansa\nSambil bernyanyi kita berdansa" },
+  { id:4, judul:"Kopi Dangdut", artis:"Fahmi Shahab", tahun:1987, emoji:"☕",
+    lirik_default:"Kopi dangdut, kopi dangdut\nPanas-panas enak rasanya\nKopi dangdut, kopi dangdut\nCampur gula tambah nikmatnya" },
+  { id:5, judul:"Goyang Dumang", artis:"Cita Citata", tahun:2014, emoji:"🕺",
+    lirik_default:"Goyang dumang, goyang dumang\nGoyang goyang goyang dumang\nAyo kita goyang bersama-sama\nJangan malu-malu ayoo bergoyang!" },
+];
+
+// Storage untuk MP3 & lirik per lagu
+let laguStorage = {};
+
+function loadLaguStorage() {
+  try { laguStorage = JSON.parse(localStorage.getItem('ras_lagu_storage') || '{}'); } catch(e) { laguStorage = {}; }
+}
+function saveLaguStorage() {
+  try { localStorage.setItem('ras_lagu_storage', JSON.stringify(laguStorage)); } catch(e) {
+    showNotif('⚠️ File MP3 terlalu besar untuk disimpan. Coba kompres dulu.');
+  }
+}
+
+// ════════════════════════════════════════════════════
+// RENDER LAGU CARDS (panel-lagu)
+// ════════════════════════════════════════════════════
+function renderLaguCards() {
+  loadLaguStorage();
+  const container = document.getElementById('laguCardsAdmin');
+  if (!container) return;
+  container.innerHTML = LAGU_DATA.map(l => {
+    const stored = laguStorage[l.id] || {};
+    const hasMP3 = !!stored.mp3;
+    const lirik = stored.lirik !== undefined ? stored.lirik : l.lirik_default;
+    return `
+    <div style="border:1px solid rgba(201,168,76,0.3);border-radius:14px;padding:1.25rem;margin-bottom:1rem;background:var(--white);">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:1rem;">
+        <div style="font-size:2rem;">${l.emoji}</div>
+        <div>
+          <div style="font-weight:700;color:var(--brown);font-size:1rem;">${l.judul}</div>
+          <div style="font-size:12px;color:var(--brown-light);">${l.artis} · ${l.tahun}</div>
+        </div>
+        <div style="margin-left:auto;">
+          <span style="background:${hasMP3?'#e8f5e9':'#fff3e0'};color:${hasMP3?'#2d5016':'#8B6914'};border-radius:20px;padding:4px 12px;font-size:11px;font-weight:600;">
+            ${hasMP3 ? '✓ MP3 Uploaded' : '○ Sintetis'}
+          </span>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem;">
+        <label style="background:var(--green);color:white;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;">
+          📁 ${hasMP3 ? 'Ganti MP3' : 'Upload MP3'}
+          <input type="file" accept="audio/mp3,audio/*" style="display:none" onchange="handleLaguMP3Upload(event,${l.id})">
+        </label>
+        ${hasMP3 ? `<button onclick="deleteLaguMP3(${l.id})" style="background:#fff0f0;color:#c62828;border:1px solid #ffcdd2;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;">🗑️ Hapus MP3</button>` : ''}
+      </div>
+
+      <div style="margin-bottom:0.75rem;">
+        <div style="font-size:12px;font-weight:600;color:var(--brown);margin-bottom:6px;">✏️ Lirik Sing-Along (bisa diedit):</div>
+        <textarea id="lirik_${l.id}" rows="4" style="width:100%;border:1px solid rgba(201,168,76,0.4);border-radius:8px;padding:10px;font-size:13px;font-family:inherit;color:var(--brown);background:var(--cream);resize:vertical;" onchange="saveLirik(${l.id})">${lirik}</textarea>
+      </div>
+      <button onclick="saveLirik(${l.id})" style="background:var(--gold);color:var(--brown);border:none;border-radius:8px;padding:7px 18px;font-size:12px;font-weight:700;cursor:pointer;">💾 Simpan Lirik</button>
+    </div>`;
+  }).join('');
+}
+
+function handleLaguMP3Upload(event, laguId) {
+  const file = event.target.files[0];
+  if (!file) return;
+  if (file.size > 8 * 1024 * 1024) { showNotif('⚠️ File terlalu besar (maks 8MB). Potong dulu ya!'); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    loadLaguStorage();
+    if (!laguStorage[laguId]) laguStorage[laguId] = {};
+    laguStorage[laguId].mp3 = e.target.result;
+    saveLaguStorage();
+    showNotif('✅ MP3 Lagu ' + laguId + ' berhasil diupload!');
+    renderLaguCards();
+    renderSingAlongControls();
+  };
+  reader.readAsDataURL(file);
+}
+
+function deleteLaguMP3(laguId) {
+  if (!confirm('Hapus MP3 lagu ini?')) return;
+  loadLaguStorage();
+  if (laguStorage[laguId]) delete laguStorage[laguId].mp3;
+  saveLaguStorage();
+  renderLaguCards();
+  renderSingAlongControls();
+  showNotif('🗑️ MP3 dihapus, akan pakai sintetis.');
+}
+
+function saveLirik(laguId) {
+  loadLaguStorage();
+  if (!laguStorage[laguId]) laguStorage[laguId] = {};
+  const ta = document.getElementById('lirik_' + laguId);
+  if (ta) laguStorage[laguId].lirik = ta.value;
+  saveLaguStorage();
+  // Sync ke game via localStorage
+  try {
+    const allLirik = {};
+    LAGU_DATA.forEach(l => {
+      const stored = laguStorage[l.id] || {};
+      allLirik[l.id] = stored.lirik !== undefined ? stored.lirik : l.lirik_default;
+    });
+    localStorage.setItem('ras_lagu_lirik', JSON.stringify(allLirik));
+  } catch(e) {}
+  showNotif('✅ Lirik lagu ' + laguId + ' disimpan!');
+}
+
+// ════════════════════════════════════════════════════
+// SING-ALONG CONTROLS (panel game6-admin)
+// ════════════════════════════════════════════════════
+let singAlongAudio = null;
+
+function renderSingAlongControls() {
+  loadLaguStorage();
+  const container = document.getElementById('g6SingAlongControls');
+  if (!container) return;
+
+  // Check current waiting lagu from game
+  let waitingLagu = null;
+  try { waitingLagu = JSON.parse(localStorage.getItem('ras_g6_singalong') || 'null'); } catch(e) {}
+
+  container.innerHTML = LAGU_DATA.map(l => {
+    const stored = laguStorage[l.id] || {};
+    const hasMP3 = !!stored.mp3;
+    const isWaiting = waitingLagu && waitingLagu.laguId === l.id && waitingLagu.status === 'waiting';
+    return `
+    <div style="border:1px solid ${isWaiting ? 'var(--gold)' : 'rgba(201,168,76,0.2)'};border-radius:14px;padding:1rem 1.25rem;margin-bottom:0.75rem;background:${isWaiting ? '#fffbf0' : 'var(--white)'};transition:all 0.3s;">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div style="font-size:1.8rem;">${l.emoji}</div>
+        <div style="flex:1;">
+          <div style="font-weight:700;color:var(--brown);font-size:0.95rem;">${l.judul}</div>
+          <div style="font-size:11px;color:var(--brown-light);">${l.artis} · ${hasMP3 ? '<span style="color:var(--green);font-weight:600;">MP3 Ready</span>' : 'Sintetis'}</div>
+          ${isWaiting ? '<div style="font-size:11px;color:var(--gold-dark);font-weight:600;margin-top:2px;">⏳ Peserta sedang menunggu play...</div>' : ''}
+        </div>
+        <div style="display:flex;gap:6px;">
+          <button onclick="playSingAlong(${l.id})" style="background:var(--green);color:white;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;${isWaiting ? 'animation:pulse 1.5s infinite;' : ''}">▶ Play</button>
+          <button onclick="nextLaguCmd(${l.id})" style="background:var(--gold);color:var(--brown);border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer;" title="Skip ke lagu berikutnya">⏭ Next</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function playSingAlong(laguId) {
+  loadLaguStorage();
+  const stored = laguStorage[laguId] || {};
+  const mp3 = stored.mp3 || null;
+
+  // Kirim perintah ke game via localStorage
+  try {
+    localStorage.setItem('ras_g6_play_cmd', JSON.stringify({
+      laguId, action: 'play', mp3DataUrl: mp3, ts: Date.now()
+    }));
+    // Update singalong status
+    const sa = JSON.parse(localStorage.getItem('ras_g6_singalong') || '{}');
+    if (sa.laguId === laguId) { sa.status = 'playing'; localStorage.setItem('ras_g6_singalong', JSON.stringify(sa)); }
+  } catch(e) {}
+
+  // Play di admin juga (sebagai monitor)
+  if (singAlongAudio) { singAlongAudio.pause(); singAlongAudio = null; }
+  if (mp3) {
+    singAlongAudio = new Audio(mp3);
+    singAlongAudio.play().catch(()=>{});
+  }
+  showNotif('▶ Play Sing-Along Lagu ' + laguId + ' dikirim ke semua HP!');
+  renderSingAlongControls();
+}
+
+function nextLaguCmd(laguId) {
+  try {
+    localStorage.setItem('ras_g6_play_cmd', JSON.stringify({ laguId, action: 'next', ts: Date.now() }));
+  } catch(e) {}
+  if (singAlongAudio) { singAlongAudio.pause(); singAlongAudio = null; }
+  showNotif('⏭ Lanjut ke lagu berikutnya!');
+}
+
+// Poll status dari game setiap 2 detik
+setInterval(() => {
+  const ctrl = document.getElementById('g6SingAlongControls');
+  if (ctrl && ctrl.closest('.tab-panel.active')) renderSingAlongControls();
+}, 2000);
+
+// ════════════════════════════════════════════════════
+// GAME 3 — EDIT PERTANYAAN
+// ════════════════════════════════════════════════════
+const DEFAULT_PERTANYAAN_G3 = [
+  "Siapa yang paling suka tidur?","Siapa yang paling cerewet?",
+  "Siapa yang paling sering telat?","Siapa yang paling pelit?",
+  "Siapa yang paling lebay kalau sakit?","Siapa yang paling suka drama?",
+  "Siapa yang paling susah bangun pagi?","Siapa yang paling boros?",
+  "Siapa yang paling banyak makan?","Siapa yang paling sering lupa?",
+  "Siapa yang paling gampang nangis?","Siapa yang paling keras kepala?",
+  "Siapa yang paling suka selfie?","Siapa yang paling suka gosip?",
+  "Siapa yang paling gampang marah?",
+];
+
+let g3Questions = [];
+
+function loadG3Questions() {
+  try {
+    const saved = localStorage.getItem('ras_g3_questions');
+    g3Questions = saved ? JSON.parse(saved) : [...DEFAULT_PERTANYAAN_G3];
+  } catch(e) { g3Questions = [...DEFAULT_PERTANYAAN_G3]; }
+}
+
+function renderG3Questions() {
+  loadG3Questions();
+  const list = document.getElementById('g3QuestionList');
+  if (!list) return;
+  const count = document.getElementById('g3QuestionCount');
+  if (count) count.textContent = g3Questions.length;
+
+  list.innerHTML = g3Questions.map((q, i) => `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+      <span style="min-width:24px;text-align:center;font-size:12px;color:var(--brown-light);font-weight:600;">${i+1}</span>
+      <input type="text" value="${q.replace(/"/g,'&quot;')}" id="g3q_${i}"
+        style="flex:1;border:1px solid rgba(201,168,76,0.4);border-radius:8px;padding:8px 12px;font-size:13px;color:var(--brown);background:var(--cream);font-family:inherit;">
+      <button onclick="deleteG3Question(${i})" style="background:#fff0f0;color:#c62828;border:1px solid #ffcdd2;border-radius:8px;padding:6px 10px;cursor:pointer;font-size:12px;" title="Hapus">✕</button>
+    </div>`).join('');
+}
+
+function addG3Question() {
+  loadG3Questions();
+  g3Questions.push("Siapa yang paling ...?");
+  saveG3Questions();
+  renderG3Questions();
+  // Scroll to bottom & focus last input
+  setTimeout(() => {
+    const inputs = document.querySelectorAll('[id^="g3q_"]');
+    const last = inputs[inputs.length - 1];
+    if (last) { last.focus(); last.select(); last.scrollIntoView({behavior:'smooth'}); }
+  }, 100);
+}
+
+function deleteG3Question(idx) {
+  loadG3Questions();
+  if (g3Questions.length <= 3) { showNotif('⚠️ Minimal 3 pertanyaan!'); return; }
+  g3Questions.splice(idx, 1);
+  saveG3Questions();
+  renderG3Questions();
+}
+
+function saveG3Questions() {
+  // Baca dari input fields dulu
+  const inputs = document.querySelectorAll('[id^="g3q_"]');
+  if (inputs.length > 0) {
+    g3Questions = Array.from(inputs).map(inp => inp.value.trim()).filter(q => q.length > 0);
+  }
+  try {
+    localStorage.setItem('ras_g3_questions', JSON.stringify(g3Questions));
+  } catch(e) {}
+  const count = document.getElementById('g3QuestionCount');
+  if (count) count.textContent = g3Questions.length;
+  showNotif('✅ ' + g3Questions.length + ' pertanyaan tersimpan!');
+}
+
+function resetG3Questions() {
+  if (!confirm('Reset ke pertanyaan default?')) return;
+  g3Questions = [...DEFAULT_PERTANYAAN_G3];
+  localStorage.setItem('ras_g3_questions', JSON.stringify(g3Questions));
+  renderG3Questions();
+  showNotif('↺ Pertanyaan direset ke default.');
+}
+
+// ════════════════════════════════════════════════════
+// PHOTO PREVIEW PER GAME
+// ════════════════════════════════════════════════════
+function renderPhotoPreviewForGame(containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  const members = FAMILY_MEMBERS.filter(m => m.foto);
+  if (members.length === 0) {
+    container.innerHTML = '<p style="color:var(--brown-light);font-size:13px;padding:1rem 0;">Belum ada foto. Upload dulu di tab Semua Foto.</p>';
+    return;
+  }
+  container.innerHTML = members.map(m => `
+    <div class="photo-item" style="cursor:default;">
+      <img src="${m.foto}" alt="${m.nama}">
+      <div class="photo-name">${m.nama}</div>
+      <div class="photo-status has-photo">✓ Ada foto</div>
+    </div>`).join('');
+}
+
+// Patch showPanel to trigger renders
+const _origShowPanel = showPanel;
+function showPanel(id) {
+  _origShowPanel(id);
+  if (id === 'lagu') { setTimeout(renderLaguCards, 50); }
+  if (id === 'game6-admin') { setTimeout(renderSingAlongControls, 50); }
+  if (id === 'game3-admin') { setTimeout(renderG3Questions, 50); }
+  if (id === 'photos') {
+    setTimeout(() => {
+      renderPhotoPreviewForGame('g1PhotoPreview');
+      renderPhotoPreviewForGame('g2PhotoPreview');
+      renderPhotoPreviewForGame('g3PhotoPreview');
+      renderPhotoPreviewForGame('g4PhotoPreview');
+    }, 50);
+  }
+}
+
+// Also patch switchTab to render photo previews
+const _origSwitchTab = switchTab;
+function switchTab(group, tab) {
+  _origSwitchTab(group, tab);
+  if (group === 'photos') {
+    setTimeout(() => {
+      renderPhotoPreviewForGame('g1PhotoPreview');
+      renderPhotoPreviewForGame('g2PhotoPreview');
+      renderPhotoPreviewForGame('g3PhotoPreview');
+      renderPhotoPreviewForGame('g4PhotoPreview');
+    }, 50);
+  }
+  if (group === 'g3' && tab === 'pertanyaan') setTimeout(renderG3Questions, 50);
+  if (group === 'g6' && tab === 'singalong') setTimeout(renderSingAlongControls, 50);
 }
 </script>
 </body>
