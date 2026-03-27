@@ -567,13 +567,47 @@
 <!-- ===== SCREEN: GAME 1 MEMORY MATCH ===== -->
 <div id="screenGame1" class="screen" style="background:linear-gradient(160deg,#0a1628 0%,#1a2a40 50%,#0a1628 100%)">
   <div class="topbar">
-    <div class="topbar-title">🃏 Memory Match — Leaderboard</div>
+    <div class="topbar-title" id="g1ProjTitle">🃏 Memory Match — Menunggu...</div>
     <div class="topbar-badge"><span class="live-dot"></span>LIVE</div>
   </div>
-  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;">
-    <div class="section-label" style="margin-bottom:1.5rem;">Pemain yang sedang & sudah main</div>
-    <div id="g1ProjGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;width:100%;max-width:1000px;overflow-y:auto;max-height:70vh;"></div>
+
+  <div style="flex:1;display:flex;gap:24px;padding:1.5rem;overflow:hidden;">
+
+    <!-- KIRI: Grid kartu live -->
+    <div style="flex:1;display:flex;flex-direction:column;">
+      <!-- Turn indicator -->
+      <div id="g1ProjTurnBar" style="background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.3);border-radius:12px;padding:12px 20px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;">
+        <div>
+          <div style="font-size:11px;letter-spacing:2px;color:rgba(201,168,76,0.7);text-transform:uppercase;margin-bottom:4px">Giliran Sekarang</div>
+          <div id="g1ProjCurrentTeam" style="font-family:'Playfair Display',serif;font-size:1.4rem;color:#F0D080;font-weight:700">—</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:11px;letter-spacing:2px;color:rgba(201,168,76,0.7);text-transform:uppercase;margin-bottom:4px">Pasangan</div>
+          <div id="g1ProjMatchCount" style="font-family:'Playfair Display',serif;font-size:1.4rem;color:#00E676;font-weight:700">0 / 0</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:11px;letter-spacing:2px;color:rgba(201,168,76,0.7);text-transform:uppercase;margin-bottom:4px">Sisa Giliran</div>
+          <div id="g1ProjCountdown" style="font-family:'Playfair Display',serif;font-size:1.4rem;color:#FF9800;font-weight:700">—</div>
+        </div>
+      </div>
+
+      <!-- Memory grid proyektor -->
+      <div id="g1ProjMemGrid" style="
+        display:grid;
+        grid-template-columns:repeat(auto-fill,minmax(90px,1fr));
+        gap:8px;
+        overflow-y:auto;
+        flex:1;
+      "></div>
+    </div>
+
+    <!-- KANAN: Leaderboard tim -->
+    <div style="width:280px;flex-shrink:0;display:flex;flex-direction:column;gap:12px;">
+      <div style="font-size:11px;letter-spacing:2px;color:rgba(201,168,76,0.7);text-transform:uppercase;margin-bottom:4px">🏆 Leaderboard Tim</div>
+      <div id="g1ProjLeaderboard" style="display:flex;flex-direction:column;gap:10px;overflow-y:auto;flex:1;"></div>
+    </div>
   </div>
+
   <div class="nav-tabs" id="navGame1"></div>
 </div>
 
@@ -821,30 +855,89 @@ async function renderG6() {
 // ── SCREEN: GAME 1 ──
 async function renderG1() {
   try {
-    const scores = await sbGet('ras_g1_scores');
-    const key = JSON.stringify(scores);
+    // Load game state (cards, teams, scores, turn)
+    const rows = await sbGet('ras_g1_state');
+    if (!rows || rows.length === 0) return;
+    const st = rows[0];
+    const key = st.updated_at;
     if (cache.g1 === key) return;
     cache.g1 = key;
-    const grid = document.getElementById('g1ProjGrid');
-    if (!grid) return;
-    if (!scores || scores.length === 0) {
-      grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="icon">🃏</div><p>Belum ada yang main Memory Match</p></div>';
-      return;
+
+    const status  = st.status || 'waiting';
+    const teams   = JSON.parse(st.teams_json   || '[]');
+    const scores  = JSON.parse(st.scores_json  || '[0,0,0,0,0]');
+    const curTeam = st.current_team || 0;
+    const cards   = JSON.parse(st.cards_json   || '[]');
+    const flipped = JSON.parse(st.flipped_json || '[]');
+    const matched = JSON.parse(st.matched_json || '[]');
+
+    // Title
+    const titleEl = document.getElementById('g1ProjTitle');
+    if (titleEl) titleEl.textContent = '🃏 Memory Match — ' +
+      (status === 'waiting' ? 'Menunggu Admin...' : status === 'done' ? 'Selesai!' : 'LIVE 🔴');
+
+    // Turn bar
+    const curName = teams[curTeam] || 'Tim ' + (curTeam+1);
+    const turnEl  = document.getElementById('g1ProjCurrentTeam');
+    const cdEl    = document.getElementById('g1ProjCountdown');
+    const matchEl = document.getElementById('g1ProjMatchCount');
+    if (turnEl)  turnEl.textContent  = status === 'playing' ? curName : (status === 'done' ? '🏆 Selesai!' : '⏳ Menunggu');
+    if (cdEl)    cdEl.textContent    = (st.countdown > 0 && status==='playing') ? st.countdown + 's' : '—';
+    if (matchEl) matchEl.textContent = matched.length + ' / ' + (cards.length/2||0);
+
+    // Memory grid proyektor (mini cards)
+    const grid = document.getElementById('g1ProjMemGrid');
+    if (grid && cards.length > 0) {
+      grid.innerHTML = cards.map((c, idx) => {
+        const isFlipped = flipped.includes(idx) || matched.includes(c.id);
+        const isMatched = matched.includes(c.id);
+        return '<div style="' +
+          'background:' + (isMatched ? 'rgba(0,230,118,0.2)' : isFlipped ? 'rgba(201,168,76,0.3)' : 'rgba(255,255,255,0.05)') + ';' +
+          'border:1.5px solid ' + (isMatched ? '#00E676' : isFlipped ? '#C9A84C' : 'rgba(255,255,255,0.1)') + ';' +
+          'border-radius:8px;aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;' +
+          'font-size:0.7rem;color:rgba(255,255,255,0.8);overflow:hidden;transition:all 0.3s;">' +
+          (isFlipped ?
+            (c.foto ? '<img src="' + c.foto + '" style="width:70%;height:70%;object-fit:cover;border-radius:50%">' : '👤') +
+            '<div style="font-size:9px;margin-top:2px;max-width:90%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + c.nama + '</div>'
+            : '<div style="font-size:1.2rem;opacity:0.3">❋</div>'
+          ) + '</div>';
+      }).join('');
+    } else if (grid && status === 'waiting') {
+      grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:rgba(255,255,255,0.3);padding:3rem"><div style="font-size:3rem">🃏</div><p>Admin belum memulai game</p></div>';
     }
-    const sorted = [...scores].sort((a,b) => {
-      if (a.done && !b.done) return -1;
-      if (!a.done && b.done) return 1;
-      if (a.done && b.done) return new Date(a.played_at) - new Date(b.played_at);
-      return b.score - a.score;
-    });
-    grid.innerHTML = sorted.map((s, i) =>
-      '<div class="leaderboard-card">' +
-      '<div class="leaderboard-rank">' + (i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1)) + '</div>' +
-      '<div class="leaderboard-avatar">' + (s.photo_url || s.photo_b64 ? '<img src="' + (s.photo_url || s.photo_b64) + '">' : '👤') + '</div>' +
-      '<div class="leaderboard-info"><div class="leaderboard-name">' + s.player_name + '</div>' +
-      '<div class="leaderboard-score">' + (s.done ? '✓ Selesai' : s.score + ' pasang') + '</div></div></div>'
-    ).join('');
-  } catch(e) {}
+
+    // Leaderboard
+    const lb = document.getElementById('g1ProjLeaderboard');
+    if (lb) {
+      if (teams.length === 0) {
+        lb.innerHTML = '<div style="color:rgba(255,255,255,0.3);font-size:13px;text-align:center;padding:1rem">Belum ada tim</div>';
+      } else {
+        const scoreArr = teams.map((t,i) => ({name:t, score:scores[i]||0})).sort((a,b)=>b.score-a.score);
+        lb.innerHTML = scoreArr.map((t,i) =>
+          '<div class="leaderboard-card" style="' + (i===0&&t.score>0?'border-color:rgba(201,168,76,0.5);':'') + '">' +
+          '<div class="leaderboard-rank">' + (i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1)) + '</div>' +
+          '<div class="leaderboard-info">' +
+          '<div class="leaderboard-name">' + t.name + (teams.indexOf(t.name)===curTeam&&status==='playing'?' 🎯':'') + '</div>' +
+          '<div class="leaderboard-score">' + t.score + ' poin</div></div></div>'
+        ).join('');
+      }
+    }
+
+    // Final leaderboard saat done
+    if (status === 'done') {
+      const scoresDb = await sbGet('ras_g1_scores');
+      if (scoresDb && scoresDb.length > 0 && lb) {
+        const sorted = [...scoresDb].sort((a,b) => b.score - a.score);
+        lb.innerHTML = sorted.map((s,i) =>
+          '<div class="leaderboard-card">' +
+          '<div class="leaderboard-rank">' + (i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1)) + '</div>' +
+          '<div class="leaderboard-avatar">' + (s.photo_url||s.photo_b64 ? '<img src="'+(s.photo_url||s.photo_b64)+'">' : '👤') + '</div>' +
+          '<div class="leaderboard-info"><div class="leaderboard-name">' + s.player_name + '</div>' +
+          '<div class="leaderboard-score">✓ ' + s.score + ' poin</div></div></div>'
+        ).join('');
+      }
+    }
+  } catch(e) { console.warn('renderG1 error', e); }
 }
 
 // ── SCREEN: GAME 4 ──

@@ -679,34 +679,46 @@
 
         <!-- Tab: Game 1 Memory Match -->
         <div class="tab-panel" id="photos-tab-g1">
-          <div class="alert alert-info"><strong>Game 1 — Memory Match:</strong> Menampilkan pasangan kartu dari foto keluarga. Minimal 8 foto agar kartu tidak berulang terlalu cepat.</div>
-          <div class="instr-box">Foto yang sudah diupload di tab <strong>Semua Foto</strong> otomatis dipakai di sini. Game mengambil foto secara acak untuk membuat pasangan kartu.</div>
-          <div class="photo-grid" id="g1PhotoPreview"></div>
-          <button class="btn btn-gold" onclick="switchTab('photos','semua');setTimeout(()=>document.getElementById('uploadGrid').scrollIntoView(),100)">📸 Upload / Kelola Foto →</button>
+          <div class="alert alert-info"><strong>Game 1 — Memory Match:</strong> Centang foto yang akan dipakai. Disarankan <strong>15 foto</strong> untuk 15 pasang kartu.</div>
+          <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+            <button class="btn btn-outline btn-sm" onclick="assignAllToGame('g1')">✅ Pilih Semua</button>
+            <button class="btn btn-outline btn-sm" onclick="unassignAllFromGame('g1')">☐ Kosongkan</button>
+            <button class="btn btn-gold btn-sm" onclick="saveGameAssignment('g1')">💾 Simpan Pilihan Game 1</button>
+          </div>
+          <div class="photo-grid" id="g1AssignGrid"></div>
         </div>
 
         <!-- Tab: Game 2 Tebak Siapa -->
         <div class="tab-panel" id="photos-tab-g2">
-          <div class="alert alert-info"><strong>Game 2 — Tebak Siapa:</strong> Foto ditampilkan blur/terpotong, peserta menebak siapa orangnya. Semakin banyak foto = semakin seru!</div>
-          <div class="instr-box">Foto yang sudah diupload di tab <strong>Semua Foto</strong> otomatis dipakai di sini. Pastikan foto wajah jelas dan tidak terlalu gelap.</div>
-          <div class="photo-grid" id="g2PhotoPreview"></div>
-          <button class="btn btn-gold" onclick="switchTab('photos','semua');setTimeout(()=>document.getElementById('uploadGrid').scrollIntoView(),100)">📸 Upload / Kelola Foto →</button>
+          <div class="alert alert-info"><strong>Game 2 — Tebak Siapa:</strong> Centang foto yang akan dipakai. Disarankan <strong>5–10 foto</strong>.</div>
+          <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+            <button class="btn btn-outline btn-sm" onclick="assignAllToGame('g2')">✅ Pilih Semua</button>
+            <button class="btn btn-outline btn-sm" onclick="unassignAllFromGame('g2')">☐ Kosongkan</button>
+            <button class="btn btn-gold btn-sm" onclick="saveGameAssignment('g2')">💾 Simpan Pilihan Game 2</button>
+          </div>
+          <div class="photo-grid" id="g2AssignGrid"></div>
         </div>
 
         <!-- Tab: Game 3 Siapa Paling -->
         <div class="tab-panel" id="photos-tab-g3">
-          <div class="alert alert-info"><strong>Game 3 — Siapa Paling:</strong> Foto anggota keluarga ditampilkan sebagai pilihan voting. Pastikan semua anggota yang ikut sudah ada fotonya.</div>
-          <div class="instr-box">Foto yang sudah diupload di tab <strong>Semua Foto</strong> otomatis muncul sebagai kandidat di game voting.</div>
-          <div class="photo-grid" id="g3PhotoPreview"></div>
-          <button class="btn btn-gold" onclick="switchTab('photos','semua');setTimeout(()=>document.getElementById('uploadGrid').scrollIntoView(),100)">📸 Upload / Kelola Foto →</button>
+          <div class="alert alert-info"><strong>Game 3 — Siapa Paling:</strong> Centang foto kandidat voting. Disarankan <strong>20 foto</strong>.</div>
+          <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+            <button class="btn btn-outline btn-sm" onclick="assignAllToGame('g3')">✅ Pilih Semua</button>
+            <button class="btn btn-outline btn-sm" onclick="unassignAllFromGame('g3')">☐ Kosongkan</button>
+            <button class="btn btn-gold btn-sm" onclick="saveGameAssignment('g3')">💾 Simpan Pilihan Game 3</button>
+          </div>
+          <div class="photo-grid" id="g3AssignGrid"></div>
         </div>
 
         <!-- Tab: Game 4 Timeline -->
         <div class="tab-panel" id="photos-tab-g4">
-          <div class="alert alert-info"><strong>Game 4 — Timeline:</strong> Foto disusun dari termuda ke tertua. Upload minimal <strong>15 foto</strong> agar 3 ronde tidak ada foto berulang.</div>
-          <div class="instr-box">Pastikan nama anggota keluarga sudah diisi dengan benar. Urutan ID digunakan sebagai proxy usia dalam game.</div>
-          <div class="photo-grid" id="g4PhotoPreview"></div>
-          <button class="btn btn-gold" onclick="switchTab('photos','semua');setTimeout(()=>document.getElementById('uploadGrid').scrollIntoView(),100)">📸 Upload / Kelola Foto →</button>
+          <div class="alert alert-info"><strong>Game 4 — Timeline:</strong> Centang foto yang akan dipakai. Jumlah foto menentukan jumlah ronde (5 foto = 1 ronde).</div>
+          <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+            <button class="btn btn-outline btn-sm" onclick="assignAllToGame('g4')">✅ Pilih Semua</button>
+            <button class="btn btn-outline btn-sm" onclick="unassignAllFromGame('g4')">☐ Kosongkan</button>
+            <button class="btn btn-gold btn-sm" onclick="saveGameAssignment('g4')">💾 Simpan Pilihan Game 4</button>
+          </div>
+          <div class="photo-grid" id="g4AssignGrid"></div>
         </div>
       </div>
     </div>
@@ -766,33 +778,70 @@
 
     <!-- ════════════════════════════════ GAME 1 ADMIN ════════════════════════════════ -->
     <div class="panel-page" id="panel-game1-admin">
+
+      <!-- STATUS CARD -->
+      <div class="card" style="background:linear-gradient(135deg,var(--green),#4A7C2A);color:white;border:none;">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+          <div>
+            <div style="font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--gold-light);margin-bottom:4px">🃏 Game 1 — Memory Match Foto</div>
+            <div style="font-size:13px;color:rgba(255,255,255,0.7)" id="g1AdminStatus">Status: Menunggu setup tim</div>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="btn" style="background:var(--gold);color:var(--brown);font-weight:700" onclick="g1AdminStart()">▶ Mulai Game!</button>
+            <button class="btn" style="background:rgba(255,255,255,0.15);color:white;border:1px solid rgba(255,255,255,0.3)" onclick="g1AdminReset()">↺ Reset</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;" class="g1-two-col">
+
+        <!-- Setup Tim -->
+        <div class="card">
+          <div class="card-title"><span>👥</span> Setup Tim (4–5 Tim)</div>
+          <div class="alert alert-info" style="margin-bottom:12px">
+            Tiap tim pegang 1 HP. Grid kartu <strong>sama</strong> di semua HP. Giliran berputar otomatis via Supabase.
+          </div>
+          <div id="g1TeamBuilder" style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px;"></div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-outline btn-sm" onclick="g1AddTeam()" id="g1AddTeamBtn">+ Tambah Tim</button>
+            <button class="btn btn-outline btn-sm" onclick="g1AutoFillTeams()">🔀 Auto-assign Peserta</button>
+          </div>
+          <div style="margin-top:12px;font-size:12px;color:var(--brown-light)">
+            <strong>Peserta online:</strong> <span id="g1OnlinePlayers">—</span>
+          </div>
+        </div>
+
+        <!-- Foto untuk Game 1 -->
+        <div class="card">
+          <div class="card-title"><span>📸</span> Foto yang Digunakan (15 foto)</div>
+          <div class="alert alert-info" style="margin-bottom:12px">
+            Centang foto yang akan dipakai di Game 1. Disarankan <strong>15 foto</strong> untuk 15 pasang kartu.
+          </div>
+          <div style="max-height:300px;overflow-y:auto;">
+            <div id="g1PhotoAssign" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:8px;"></div>
+          </div>
+          <div style="margin-top:10px;font-size:12px;color:var(--brown-light)">
+            Dipilih: <strong id="g1PhotoCount">0</strong> foto
+          </div>
+        </div>
+      </div>
+
+      <!-- Preview & Instruksi -->
       <div class="card">
-        <div class="card-title"><span>🃏</span> Game 1 — Memory Match Foto</div>
-        <div class="tab-bar">
-          <button class="tab-btn active" onclick="switchTab('g1','info')">ℹ️ Info</button>
-          <button class="tab-btn" onclick="switchTab('g1','aturan')">📋 Aturan</button>
-          <button class="tab-btn" onclick="switchTab('g1','tips')">💡 Tips MC</button>
-        </div>
-        <div class="tab-panel active" id="g1-tab-info">
-          <div class="stat-grid" style="grid-template-columns:repeat(3,1fr)">
-            <div class="stat-card"><div class="stat-label">Max Pemain</div><div class="stat-value">2–4</div></div>
-            <div class="stat-card"><div class="stat-label">Durasi</div><div class="stat-value gold">15 mnt</div></div>
-            <div class="stat-card"><div class="stat-label">Min Foto</div><div class="stat-value green">8</div></div>
+        <div class="card-title"><span>📋</span> Cara Bermain & Tips MC</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+          <div>
+            <div class="step-guide">
+              <div class="step-item"><div class="step-num">1</div><div class="step-body"><h4>Setup Tim di Sini</h4><p>Buat 4–5 tim, assign peserta. Klik <strong>▶ Mulai Game!</strong> di atas.</p></div></div>
+              <div class="step-item"><div class="step-num">2</div><div class="step-body"><h4>Tiap Tim Buka Game 1</h4><p>Semua HP otomatis tampilkan grid kartu yang <strong>sama persis</strong>.</p></div></div>
+              <div class="step-item"><div class="step-num">3</div><div class="step-body"><h4>Giliran Berputar Otomatis</h4><p>HP tim yang tidak giliran = <strong>dikunci + countdown</strong>. Tim yang giliran bisa flip kartu.</p></div></div>
+              <div class="step-item"><div class="step-num">4</div><div class="step-body"><h4>Proyektor Tampilkan Live</h4><p>Grid kartu + giliran + leaderboard tampil real-time di proyektor untuk semua nonton.</p></div></div>
+            </div>
           </div>
-          <div class="instr-box">Game ini membutuhkan <strong>foto anggota keluarga</strong>. Pastikan sudah upload minimal 8 foto di <strong>Foto Keluarga</strong>. Game membuat 8–15 pasang kartu dari foto yang ada.</div>
-          <button class="btn btn-gold" onclick="showPanel('photos')">📸 Upload Foto Keluarga →</button>
-        </div>
-        <div class="tab-panel" id="g1-tab-aturan">
-          <div class="step-guide">
-            <div class="step-item"><div class="step-num">1</div><div class="step-body"><h4>Mulai Giliran</h4><p>Satu pemain memegang HP. Tap kartu pertama → foto terbalik.</p></div></div>
-            <div class="step-item"><div class="step-num">2</div><div class="step-body"><h4>Tap Kartu Kedua</h4><p>Jika cocok → <strong>+10 poin</strong>, giliran berlanjut. Jika tidak cocok → kedua kartu tertutup, giliran berpindah.</p></div></div>
-            <div class="step-item"><div class="step-num">3</div><div class="step-body"><h4>Selesai</h4><p>Semua pasangan ditemukan. Pemain poin tertinggi = pemenang.</p></div></div>
+          <div>
+            <div class="instr-box"><strong>Script MC:</strong><br><em>"Tiap tim pegang 1 HP! Grid kartunya sama di semua HP. Kalau bukan giliran kamu — jangan flip, tapi perhatiin posisi kartu yang dibuka tim lain! Itu modal menang kamu nanti!"</em></div>
+            <div class="instr-box"><strong>Aturan:</strong><br>❌ Tidak boleh kasih tahu posisi kartu ke tim lain<br>❌ Tidak boleh foto layar<br>✅ Boleh berteriak saat dapat pasangan!<br>✅ Poin +10 per pasangan cocok<br>✅ Giliran berlanjut jika dapat pasangan</div>
           </div>
-          <div class="instr-box">❌ Tidak boleh menunjuk/memberi tahu posisi kartu ke pemain lain. ✅ Boleh berteriak kegirangan!</div>
-        </div>
-        <div class="tab-panel" id="g1-tab-tips">
-          <div class="instr-box"><strong>Script MC:</strong><br><em>"Ingat-ingat posisi kartu yang sudah dibuka sebelumnya! Itu kunci menang game ini. Yang ingatannya bagus, waktunya unjuk gigi! 4 orang bergantian ya — 1 HP dibagi bersama."</em></div>
-          <div class="instr-box"><strong>Setup:</strong> Kumpulkan 2–4 orang per meja/grup. Satu orang pegang HP, yang lain nonton dan ingat posisi kartu.</div>
         </div>
       </div>
     </div>
@@ -1129,6 +1178,8 @@ function showPanel(id) {
   if (panel) panel.classList.add('active');
   const nav = document.querySelector('.nav-item[onclick*="\'' + id + '\''  + '"]');
   if (nav) nav.classList.add('active');
+  if (id === 'game1-admin') setTimeout(initG1AdminPanel, 50);
+  if (id === 'photos') setTimeout(g1RenderPhotoAssign, 50);
   const titles = {
     'dashboard':'📊 Dashboard','players':'👥 Daftar Peserta','settings':'⚙️ Pengaturan Event',
     'projector':'📽️ Panduan Proyektor','photos':'📸 Foto Keluarga','komedian':'🎭 Komedian',
@@ -1388,6 +1439,275 @@ async function clearPlayers() {
   for (const p of players) { try { await sbDelete('ras_players', { name: p.name || p }); } catch(e) {} }
   players = []; renderPlayers(); renderDashboard();
 }
+
+
+// ══════════════════════════════════════════════════════════
+// GAME 1 ADMIN — Team Builder + Photo Assignment
+// ══════════════════════════════════════════════════════════
+let g1Teams = [
+  { name: 'Tim A', members: [] },
+  { name: 'Tim B', members: [] },
+  { name: 'Tim C', members: [] },
+  { name: 'Tim D', members: [] },
+];
+
+async function initG1AdminPanel() {
+  g1RenderTeamBuilder();
+  await g1RenderPhotoAssign();
+  await g1LoadOnlinePlayers();
+  // Load current state
+  try {
+    const rows = await sbGet('ras_g1_state', { id: 1 });
+    if (rows && rows.length > 0) {
+      const st = rows[0];
+      const teams = JSON.parse(st.teams_json || '[]');
+      if (teams.length > 0) {
+        g1Teams = teams.map(t => {
+          if (typeof t === 'object') return t;
+          return { name: t, members: [] };
+        });
+        g1RenderTeamBuilder();
+      }
+      const statusMap = { waiting: 'Menunggu setup tim', playing: '🔴 SEDANG BERLANGSUNG', done: '✅ Selesai' };
+      document.getElementById('g1AdminStatus').textContent = 'Status: ' + (statusMap[st.status] || st.status);
+    }
+  } catch(e) {}
+}
+
+function g1RenderTeamBuilder() {
+  const el = document.getElementById('g1TeamBuilder');
+  if (!el) return;
+  el.innerHTML = g1Teams.map((t, i) => `
+    <div style="background:var(--cream);border:1.5px solid rgba(201,168,76,0.25);border-radius:10px;padding:12px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <input type="text" value="${t.name}" onchange="g1Teams[${i}].name=this.value"
+          style="flex:1;padding:6px 10px;border:1.5px solid rgba(201,168,76,0.3);border-radius:6px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;background:var(--white);color:var(--brown)">
+        <button onclick="g1RemoveTeam(${i})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:1rem">✕</button>
+      </div>
+      <div style="font-size:11px;color:var(--brown-light);margin-bottom:6px">Anggota Tim:</div>
+      <div id="g1team-members-${i}" style="display:flex;flex-wrap:wrap;gap:6px;min-height:28px;"></div>
+      <div id="g1team-add-${i}" style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;"></div>
+    </div>`).join('');
+  // Render add buttons (peserta yang belum di tim)
+  const allInTeam = g1Teams.flatMap(t => t.members || []);
+  g1Teams.forEach((t, i) => {
+    const membersEl = document.getElementById('g1team-members-' + i);
+    if (membersEl) membersEl.innerHTML = (t.members||[]).map(m =>
+      '<span style="background:var(--green);color:var(--gold-light);border-radius:20px;padding:3px 10px;font-size:12px;font-weight:700;">' + m +
+      ' <button onclick="g1RemoveMember(' + i + ','' + m + '')" style="background:none;border:none;color:rgba(255,255,255,0.7);cursor:pointer;font-size:10px;padding:0 2px">✕</button></span>'
+    ).join('') || '<span style="font-size:11px;color:var(--brown-light)">Belum ada anggota</span>';
+    const addEl = document.getElementById('g1team-add-' + i);
+    if (addEl) {
+      const available = players.filter(p => !allInTeam.includes(p));
+      addEl.innerHTML = available.length > 0 ?
+        '<span style="font-size:11px;color:var(--brown-light)">+ </span>' +
+        available.map(p => '<button onclick="g1AddMember(' + i + ','' + p + '')" style="background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.3);border-radius:20px;padding:2px 10px;font-size:11px;cursor:pointer;color:var(--brown)">' + p + '</button>').join('')
+        : '';
+    }
+  });
+}
+
+function g1AddTeam() {
+  if (g1Teams.length >= 5) { showNotif('Maksimal 5 tim!'); return; }
+  const letters = ['A','B','C','D','E'];
+  g1Teams.push({ name: 'Tim ' + letters[g1Teams.length], members: [] });
+  g1RenderTeamBuilder();
+  document.getElementById('g1AddTeamBtn').disabled = g1Teams.length >= 5;
+}
+
+function g1RemoveTeam(idx) {
+  if (g1Teams.length <= 2) { showNotif('Minimal 2 tim!'); return; }
+  g1Teams.splice(idx, 1);
+  g1RenderTeamBuilder();
+}
+
+function g1AddMember(teamIdx, name) {
+  // Hapus dari tim lain dulu
+  g1Teams.forEach(t => { t.members = (t.members||[]).filter(m => m !== name); });
+  g1Teams[teamIdx].members.push(name);
+  g1RenderTeamBuilder();
+}
+
+function g1RemoveMember(teamIdx, name) {
+  g1Teams[teamIdx].members = (g1Teams[teamIdx].members||[]).filter(m => m !== name);
+  g1RenderTeamBuilder();
+}
+
+async function g1AutoFillTeams() {
+  // Distribute players evenly
+  const all = [...players];
+  g1Teams.forEach(t => t.members = []);
+  all.forEach((p, i) => {
+    g1Teams[i % g1Teams.length].members.push(p);
+  });
+  g1RenderTeamBuilder();
+  showNotif('Peserta dibagi otomatis ke ' + g1Teams.length + ' tim');
+}
+
+async function g1LoadOnlinePlayers() {
+  try {
+    const playerRows = await sbGet('ras_players');
+    if (playerRows && playerRows.length > 0) {
+      players = playerRows.map(p => p.name);
+      document.getElementById('g1OnlinePlayers').textContent = players.join(', ') || '—';
+    }
+  } catch(e) {}
+}
+
+async function g1AdminStart() {
+  // Validate
+  if (g1Teams.length < 2) { showNotif('Minimal 2 tim!'); return; }
+  const photos = getAssignedPhotos('g1');
+  if (photos.length < 4) { showNotif('Minimal 4 foto untuk Game 1!'); return; }
+
+  // Buat kartu (pasang foto)
+  const usePhotos = photos.slice(0, 15);
+  let cards = [...usePhotos, ...usePhotos].map((m, i) => ({...m, cardId: i}));
+  // Shuffle
+  for (let i = cards.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [cards[i], cards[j]] = [cards[j], cards[i]];
+  }
+
+  const sessionId = Date.now().toString(36);
+  const teamsJson = JSON.stringify(g1Teams.map(t => t.name + ' (' + (t.members||[]).join(', ') + ')'));
+
+  try {
+    await sbUpsert('ras_g1_state', {
+      id: 1,
+      status: 'playing',
+      cards_json: JSON.stringify(cards),
+      flipped_json: '[]',
+      matched_json: '[]',
+      teams_json: teamsJson,
+      current_team: 0,
+      scores_json: JSON.stringify(new Array(g1Teams.length).fill(0)),
+      countdown: 30,
+      session_id: sessionId,
+      updated_at: new Date().toISOString()
+    });
+    document.getElementById('g1AdminStatus').textContent = 'Status: 🔴 SEDANG BERLANGSUNG — ' + g1Teams.length + ' tim, ' + cards.length/2 + ' pasang kartu';
+    showNotif('✅ Game 1 dimulai! ' + g1Teams.length + ' tim, ' + cards.length/2 + ' pasang kartu.');
+  } catch(e) {
+    showNotif('❌ Gagal mulai: ' + e.message);
+  }
+}
+
+async function g1AdminReset() {
+  if (!confirm('Reset Game 1? Semua skor akan dihapus.')) return;
+  try {
+    await sbUpsert('ras_g1_state', {
+      id: 1,
+      status: 'waiting',
+      cards_json: '[]',
+      flipped_json: '[]',
+      matched_json: '[]',
+      teams_json: '[]',
+      current_team: 0,
+      scores_json: '[0,0,0,0,0]',
+      countdown: 0,
+      session_id: '',
+      updated_at: new Date().toISOString()
+    });
+    document.getElementById('g1AdminStatus').textContent = 'Status: Menunggu setup tim';
+    showNotif('Game 1 direset.');
+  } catch(e) {}
+}
+
+// ── PHOTO ASSIGNMENT PER GAME ──────────────────────────────
+
+function getAssignedPhotos(gameTag) {
+  return FAMILY_MEMBERS.filter(m => m.foto && Array.isArray(m.game_tags) && m.game_tags.includes(gameTag));
+}
+
+async function g1RenderPhotoAssign() {
+  const grids = { g1:'g1AssignGrid', g2:'g2AssignGrid', g3:'g3AssignGrid', g4:'g4AssignGrid' };
+  const counts = { g1:'g1PhotoCount' };
+  for (const [tag, gridId] of Object.entries(grids)) {
+    const el = document.getElementById(gridId);
+    if (!el) continue;
+    el.innerHTML = FAMILY_MEMBERS.filter(m => m.foto).map(m => {
+      const assigned = Array.isArray(m.game_tags) && m.game_tags.includes(tag);
+      return `<div onclick="togglePhotoAssign(${m.id},'${tag}',this)"
+        style="position:relative;cursor:pointer;border-radius:10px;overflow:hidden;border:2.5px solid ${assigned?'var(--gold)':'rgba(201,168,76,0.15)'};transition:all 0.2s;">
+        <img src="${m.foto}" style="width:100%;aspect-ratio:1;object-fit:cover;display:block;">
+        <div style="position:absolute;inset:0;background:${assigned?'rgba(201,168,76,0.12)':'rgba(0,0,0,0.35)'};display:flex;align-items:center;justify-content:center;">
+          <div style="font-size:1.4rem">${assigned?'✅':'☐'}</div>
+        </div>
+        <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.6);padding:3px 6px;font-size:9px;color:white;text-align:center;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${m.nama}</div>
+      </div>`;
+    }).join('');
+  }
+  updateG1PhotoCount();
+  // Also render in Game 1 admin
+  const g1El = document.getElementById('g1PhotoAssign');
+  if (g1El) {
+    g1El.innerHTML = FAMILY_MEMBERS.filter(m => m.foto).map(m => {
+      const assigned = Array.isArray(m.game_tags) && m.game_tags.includes('g1');
+      return `<div onclick="togglePhotoAssign(${m.id},'g1',this)"
+        style="position:relative;cursor:pointer;border-radius:8px;overflow:hidden;border:2px solid ${assigned?'var(--gold)':'rgba(255,255,255,0.2)'};transition:all 0.2s;">
+        <img src="${m.foto}" style="width:100%;aspect-ratio:1;object-fit:cover;display:block;">
+        <div style="position:absolute;top:2px;right:2px;font-size:1rem">${assigned?'✅':''}</div>
+        <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.5);padding:2px 4px;font-size:9px;color:white;text-align:center">${m.nama}</div>
+      </div>`;
+    }).join('');
+  }
+}
+
+function togglePhotoAssign(memberId, tag, el) {
+  const m = FAMILY_MEMBERS.find(m => m.id === memberId);
+  if (!m) return;
+  if (!Array.isArray(m.game_tags)) m.game_tags = ['g1','g2','g3','g4'];
+  const idx = m.game_tags.indexOf(tag);
+  if (idx >= 0) m.game_tags.splice(idx, 1);
+  else m.game_tags.push(tag);
+  const assigned = m.game_tags.includes(tag);
+  el.style.borderColor = assigned ? 'var(--gold)' : 'rgba(201,168,76,0.15)';
+  el.querySelector('div').style.background = assigned ? 'rgba(201,168,76,0.12)' : 'rgba(0,0,0,0.35)';
+  el.querySelectorAll('div')[0].querySelector('div').textContent = assigned ? '✅' : '☐';
+  updateG1PhotoCount();
+}
+
+function updateG1PhotoCount() {
+  const el = document.getElementById('g1PhotoCount');
+  if (el) el.textContent = getAssignedPhotos('g1').length;
+}
+
+function assignAllToGame(tag) {
+  FAMILY_MEMBERS.filter(m=>m.foto).forEach(m => {
+    if (!Array.isArray(m.game_tags)) m.game_tags = [];
+    if (!m.game_tags.includes(tag)) m.game_tags.push(tag);
+  });
+  g1RenderPhotoAssign();
+  showNotif('Semua foto dipilih untuk game ' + tag);
+}
+
+function unassignAllFromGame(tag) {
+  FAMILY_MEMBERS.forEach(m => {
+    if (Array.isArray(m.game_tags)) m.game_tags = m.game_tags.filter(t => t !== tag);
+  });
+  g1RenderPhotoAssign();
+  showNotif('Pilihan game ' + tag + ' dikosongkan');
+}
+
+async function saveGameAssignment(tag) {
+  try {
+    for (const m of FAMILY_MEMBERS) {
+      if (!m.foto) continue;
+      await sbUpsert('ras_members', {
+        member_id: m.id,
+        nama: m.nama,
+        foto_url: m.foto || '',
+        game_tags: m.game_tags || ['g1','g2','g3','g4']
+      });
+    }
+    showNotif('✅ Pilihan foto Game ' + tag + ' disimpan!');
+    updateG1PhotoCount();
+  } catch(e) {
+    showNotif('❌ Gagal simpan: ' + e.message);
+  }
+}
+
 
 // ── RESET ──
 async function resetPhotos() {

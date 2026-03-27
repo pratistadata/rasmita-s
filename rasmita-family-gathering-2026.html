@@ -1429,22 +1429,42 @@
       <div class="game-number">Game 01</div>
       <div class="game-header-title">Memory Match Foto</div>
     </div>
+    <div id="g1LiveBadge" style="display:none;margin-left:auto;background:var(--green);color:var(--gold-light);font-size:11px;font-weight:700;letter-spacing:1px;padding:4px 12px;border-radius:20px;">● LIVE</div>
   </div>
 
-  <!-- Player Selector (muncul sebelum mulai) -->
-  <div id="g1PlayerSelector" style="max-width:500px;margin:1rem auto;background:var(--white);border:1px solid rgba(201,168,76,0.3);border-radius:14px;padding:1.25rem;">
-    <div style="font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--brown);font-weight:700;margin-bottom:0.75rem;">👥 Pilih Pemain (maks. 4)</div>
-    <div id="g1PlayerList" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:1rem;"></div>
-    <button class="btn-gold" onclick="startG1WithPlayers()" style="width:100%;">▶ Mulai Game!</button>
+  <!-- LAYAR TUNGGU: Game belum dimulai admin -->
+  <div id="g1WaitScreen" style="text-align:center;padding:3rem 1rem;">
+    <div style="font-size:3rem;margin-bottom:1rem">🃏</div>
+    <div style="font-family:'Playfair Display',serif;font-size:1.4rem;color:var(--brown);margin-bottom:0.5rem">Menunggu Admin Memulai</div>
+    <div style="font-size:14px;color:var(--brown-light);margin-bottom:1.5rem">Admin sedang menyiapkan tim dan kartu...<br>Halaman ini akan update otomatis.</div>
+    <div class="room-code" style="font-size:1.2rem;padding:8px 20px;display:inline-block" id="g1WaitTeamInfo">Siap bergabung ✓</div>
   </div>
 
+  <!-- GAME AREA: aktif saat game berjalan -->
   <div id="g1GameArea" style="display:none;">
-    <div class="player-tabs" id="playerTabs"></div>
+    <!-- Score bar -->
     <div class="score-display" id="scoreDisplay"></div>
-    <div style="text-align:center;margin-bottom:1rem;">
-      <div id="turnAnnounce" style="font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--green);margin-bottom:8px;"></div>
+
+    <!-- Turn announce + countdown -->
+    <div style="text-align:center;margin-bottom:1rem;padding:0.75rem;background:var(--white);border-radius:12px;border:1px solid rgba(201,168,76,0.2);">
+      <div id="turnAnnounce" style="font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--green);margin-bottom:6px;font-weight:700;"></div>
+      <div id="g1CountdownWrap" style="display:none;">
+        <div style="font-size:12px;color:var(--brown-light);margin-bottom:4px">Giliran kamu dalam:</div>
+        <div id="g1Countdown" style="font-family:'Playfair Display',serif;font-size:2rem;color:var(--gold-dark);font-weight:700;line-height:1">—</div>
+      </div>
     </div>
+
+    <!-- LOCKED overlay saat bukan giliran -->
+    <div id="g1LockOverlay" style="display:none;position:relative;z-index:10;">
+      <div style="background:rgba(61,43,31,0.08);border:2px dashed rgba(201,168,76,0.4);border-radius:14px;padding:1.5rem;text-align:center;margin-bottom:1rem;">
+        <div style="font-size:2rem;margin-bottom:6px">🔒</div>
+        <div style="font-weight:700;color:var(--brown);margin-bottom:4px" id="g1LockMsg">Bukan giliran kamu</div>
+        <div style="font-size:13px;color:var(--brown-light)">Perhatikan posisi kartu yang dibuka!</div>
+      </div>
+    </div>
+
     <div class="memory-grid" id="memoryGrid"></div>
+
     <div class="center mt2" id="game1Result" style="display:none">
       <h3 style="font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--brown);margin-bottom:1rem;">🏆 Game Selesai!</h3>
       <div class="podium" id="g1Podium"></div>
@@ -1933,11 +1953,16 @@ const FAMILY_MEMBERS = [
 ];
 
 function getPhotosForGame(gameId) {
-  const all = FAMILY_MEMBERS;
-  if (gameId === 1) return all.slice(0, 8);
-  if (gameId === 2) return all.slice(8, 18);
-  if (gameId === 4) return all.slice(0, 15);
-  return all;
+  const tag = 'g' + gameId;
+  // Filter by game_tags if available, else fallback ke semua
+  const tagged = FAMILY_MEMBERS.filter(m => m.foto && Array.isArray(m.game_tags) && m.game_tags.includes(tag));
+  if (tagged.length > 0) return tagged;
+  // Fallback: foto yang ada, urut sesuai game
+  const withPhoto = FAMILY_MEMBERS.filter(m => m.foto);
+  if (gameId === 1) return withPhoto.slice(0, 15);
+  if (gameId === 2) return withPhoto.slice(0, 5);
+  if (gameId === 4) return withPhoto;
+  return withPhoto;
 }
 
 const PERTANYAAN_G3 = [
@@ -2268,135 +2293,263 @@ async function showG5ResultsModal() {
 }
 
 // ============================================================
-// GAME 1: MEMORY MATCH
 // ============================================================
+// GAME 1: MEMORY MATCH — MULTI-HP REALTIME (via Supabase)
+// ============================================================
+let g1Sub = null;       // realtime subscription
+let g1CountdownTimer = null;
+let g1MyTeam = -1;      // index tim player ini (-1 = penonton)
+
 function initGame1() {
   showPage('game1');
-  document.getElementById('g1PlayerSelector').style.display = 'block';
+  // Tampilkan wait screen, subscribe realtime
+  document.getElementById('g1WaitScreen').style.display = 'block';
   document.getElementById('g1GameArea').style.display = 'none';
-  renderG1PlayerSelector();
+  document.getElementById('g1LiveBadge').style.display = 'none';
+  // Deteksi tim kita
+  g1DetectMyTeam();
+  // Subscribe ke ras_g1_state
+  g1StartSync();
+  // Load state saat ini
+  g1LoadState();
 }
 
-function renderG1PlayerSelector() {
-  const list = document.getElementById('g1PlayerList');
-  if (!list) return;
-  let joined = [...state.players];
-  if (joined.length === 0) joined = ['Pemain 1','Pemain 2','Pemain 3','Pemain 4'];
-  if (!state.g1SelectedPlayers) state.g1SelectedPlayers = [];
-  if (state.g1SelectedPlayers.length === 0 && state.playerName) state.g1SelectedPlayers = [state.playerName];
-  list.innerHTML = joined.map(name => {
-    const selected = state.g1SelectedPlayers.includes(name);
-    return '<div onclick="toggleG1Player(\'' + name + '\')" style="cursor:pointer;padding:8px 16px;border-radius:20px;font-size:13px;font-weight:600;border:2px solid ' + (selected ? 'var(--green)' : 'rgba(201,168,76,0.3)') + ';background:' + (selected ? '#e8f5e9' : 'var(--cream)') + ';color:' + (selected ? 'var(--green)' : 'var(--brown)') + ';transition:all 0.2s;">' + (selected ? '✓ ' : '') + name + '</div>';
-  }).join('') + '<div onclick="addG1CustomPlayer()" style="cursor:pointer;padding:8px 16px;border-radius:20px;font-size:13px;font-weight:600;border:2px dashed rgba(201,168,76,0.4);background:transparent;color:var(--brown-light);">+ Tambah</div>';
+function g1DetectMyTeam() {
+  // Cek apakah nama player ada di salah satu tim
+  g1MyTeam = -1;
+  try {
+    const g1State = window._g1LastState;
+    if (!g1State) return;
+    const teams = JSON.parse(g1State.teams_json || '[]');
+    teams.forEach((teamName, idx) => {
+      // Tim name = "Tim A | Budi, Sari" atau array nama
+      if (typeof teamName === 'string' && teamName.includes(state.playerName)) {
+        g1MyTeam = idx;
+      }
+    });
+  } catch(e) {}
 }
 
-function toggleG1Player(name) {
-  if (!state.g1SelectedPlayers) state.g1SelectedPlayers = [];
-  const idx = state.g1SelectedPlayers.indexOf(name);
-  if (idx >= 0) state.g1SelectedPlayers.splice(idx, 1);
-  else {
-    if (state.g1SelectedPlayers.length >= 4) { showNotif('Maksimal 4 pemain!'); return; }
-    state.g1SelectedPlayers.push(name);
+function g1StartSync() {
+  if (g1Sub) { try { g1Sub.close(); } catch(e) {} }
+  g1Sub = sbSubscribe('ras_g1_state', () => {
+    g1LoadState();
+  });
+}
+
+async function g1LoadState() {
+  try {
+    const rows = await sbGet('ras_g1_state', { id: 1 });
+    if (!rows || rows.length === 0) return;
+    const st = rows[0];
+    window._g1LastState = st;
+    g1DetectMyTeam();
+    g1ApplyState(st);
+  } catch(e) { console.warn('g1LoadState error', e); }
+}
+
+function g1ApplyState(st) {
+  if (!st) return;
+  const status = st.status || 'waiting';
+
+  if (status === 'waiting') {
+    document.getElementById('g1WaitScreen').style.display = 'block';
+    document.getElementById('g1GameArea').style.display = 'none';
+    document.getElementById('g1LiveBadge').style.display = 'none';
+    const teams = JSON.parse(st.teams_json || '[]');
+    if (teams.length > 0) {
+      const myTeamName = g1MyTeam >= 0 ? teams[g1MyTeam] : null;
+      document.getElementById('g1WaitTeamInfo').textContent =
+        myTeamName ? '🎯 Kamu: ' + myTeamName : '👀 Mode penonton';
+    }
+    return;
   }
-  renderG1PlayerSelector();
-}
 
-function addG1CustomPlayer() {
-  const name = prompt('Nama pemain:');
-  if (!name || !name.trim()) return;
-  if (!state.g1SelectedPlayers) state.g1SelectedPlayers = [];
-  if (state.g1SelectedPlayers.length >= 4) { showNotif('Maksimal 4 pemain!'); return; }
-  state.g1SelectedPlayers.push(name.trim());
-  renderG1PlayerSelector();
-}
-
-function startG1WithPlayers() {
-  if (!state.g1SelectedPlayers || state.g1SelectedPlayers.length === 0) { showNotif('Pilih minimal 1 pemain!'); return; }
-  state.players = [...state.g1SelectedPlayers];
-  document.getElementById('g1PlayerSelector').style.display = 'none';
+  document.getElementById('g1WaitScreen').style.display = 'none';
   document.getElementById('g1GameArea').style.display = 'block';
-  const members = getPhotosForGame(1).slice(0, 8);
-  let cards = [...members, ...members].map((m, i) => ({...m, cardId: i, flipped: false, matched: false}));
-  for (let i = cards.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [cards[i], cards[j]] = [cards[j], cards[i]];
-  }
-  state.g1Cards = cards;
-  state.g1Flipped = [];
-  state.g1Matched = [];
-  state.g1CurrentPlayer = 0;
-  state.g1Scores = [0,0,0,0];
-  state.g1CanFlip = true;
-  document.getElementById('game1Result').style.display = 'none';
-  renderG1();
-}
+  document.getElementById('g1LiveBadge').style.display = 'block';
 
-function renderG1() {
-  const tabs = state.players.slice(0,4);
-  document.getElementById('playerTabs').innerHTML = tabs.map((p,i) => '<div class="player-tab ' + (i === state.g1CurrentPlayer ? 'active' : '') + '">' + p + '</div>').join('');
-  document.getElementById('scoreDisplay').innerHTML = tabs.map((p,i) => '<div class="score-box ' + (i === state.g1CurrentPlayer ? 'current' : '') + '"><div class="score-name">' + p + '</div><div class="score-val">' + state.g1Scores[i] + '</div></div>').join('');
-  document.getElementById('turnAnnounce').textContent = 'Giliran: ' + tabs[state.g1CurrentPlayer] + ' 🎯';
+  if (status === 'done') {
+    g1RenderDone(st);
+    return;
+  }
+
+  // status === 'playing'
+  const cards    = JSON.parse(st.cards_json    || '[]');
+  const flipped  = JSON.parse(st.flipped_json  || '[]');
+  const matched  = JSON.parse(st.matched_json  || '[]');
+  const teams    = JSON.parse(st.teams_json    || '[]');
+  const scores   = JSON.parse(st.scores_json   || '[0,0,0,0,0]');
+  const curTeam  = st.current_team || 0;
+  const isMyTurn = (g1MyTeam === curTeam);
+
+  // Update score bar
+  document.getElementById('scoreDisplay').innerHTML = teams.map((t,i) =>
+    '<div class="score-box ' + (i === curTeam ? 'current' : '') + '">' +
+    '<div class="score-name">' + t + '</div>' +
+    '<div class="score-val">' + (scores[i] || 0) + '</div></div>'
+  ).join('');
+
+  // Turn announce
+  const curName = teams[curTeam] || 'Tim ' + (curTeam+1);
+  document.getElementById('turnAnnounce').textContent =
+    isMyTurn ? '🎯 Giliran KAMU! Flip kartu sekarang!' : '⏳ Giliran: ' + curName;
+  document.getElementById('turnAnnounce').style.color = isMyTurn ? 'var(--green)' : 'var(--brown-light)';
+
+  // Countdown
+  if (!isMyTurn && st.countdown > 0) {
+    document.getElementById('g1CountdownWrap').style.display = 'block';
+    document.getElementById('g1Countdown').textContent = st.countdown + 's';
+  } else {
+    document.getElementById('g1CountdownWrap').style.display = 'none';
+  }
+
+  // Lock overlay
+  document.getElementById('g1LockOverlay').style.display = isMyTurn ? 'none' : 'block';
+  if (!isMyTurn) {
+    document.getElementById('g1LockMsg').textContent = 'Giliran ' + curName + ' — perhatikan kartu yang dibuka!';
+  }
+
+  // Render grid
+  document.getElementById('game1Result').style.display = 'none';
   const grid = document.getElementById('memoryGrid');
-  grid.innerHTML = state.g1Cards.map((c, idx) => {
-    const isFlipped = state.g1Flipped.includes(idx) || state.g1Matched.includes(c.id);
-    const isMatched = state.g1Matched.includes(c.id);
-    return '<div class="mem-card ' + (isFlipped ? 'flipped' : '') + ' ' + (isMatched ? 'matched' : '') + '" onclick="flipCard(' + idx + ')"><div class="mem-inner"><div class="mem-front"><div class="mem-front-pattern">❋</div></div><div class="mem-back">' +
-      (c.foto ? '<img src="' + c.foto + '" alt="' + c.nama + '">' : '<div style="width:100%;height:65%;background:var(--cream-dark);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;">👤</div>') +
+  grid.innerHTML = cards.map((c, idx) => {
+    const isFlipped  = flipped.includes(idx) || matched.includes(c.id);
+    const isMatched  = matched.includes(c.id);
+    const clickable  = isMyTurn && !isMatched && !isFlipped && flipped.length < 2;
+    return '<div class="mem-card ' + (isFlipped?'flipped':'') + ' ' + (isMatched?'matched':'') + '"' +
+      (clickable ? ' onclick="g1Flip(' + idx + ')"' : '') +
+      ' style="cursor:' + (clickable?'pointer':'default') + ';' + (!isMyTurn&&!isFlipped?'filter:brightness(0.85)':'') + '">' +
+      '<div class="mem-inner"><div class="mem-front"><div class="mem-front-pattern">❋</div></div>' +
+      '<div class="mem-back">' +
+      (c.foto ? '<img src="' + c.foto + '" alt="' + c.nama + '">' :
+        '<div style="width:100%;height:65%;background:var(--cream-dark);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;">👤</div>') +
       '<div class="mem-name">' + c.nama + '</div></div></div></div>';
   }).join('');
 }
 
-function flipCard(idx) {
-  if (!state.g1CanFlip) return;
-  if (state.g1Flipped.includes(idx)) return;
-  const card = state.g1Cards[idx];
-  if (state.g1Matched.includes(card.id)) return;
-  state.g1Flipped.push(idx);
-  renderG1();
-  if (state.g1Flipped.length === 2) {
-    state.g1CanFlip = false;
-    const [i1, i2] = state.g1Flipped;
-    const c1 = state.g1Cards[i1], c2 = state.g1Cards[i2];
-    setTimeout(() => {
-      if (c1.id === c2.id) {
-        state.g1Matched.push(c1.id);
-        state.g1Scores[state.g1CurrentPlayer] += 10;
-        state.g1Flipped = [];
-        state.g1CanFlip = true;
-        showNotif('Cocok! +10 poin 🎉');
-        renderG1();
-        if (state.g1Matched.length === getPhotosForGame(1).slice(0,8).length) showG1Result();
-      } else {
-        state.g1Flipped = [];
-        state.g1CurrentPlayer = (state.g1CurrentPlayer + 1) % Math.min(state.players.length, 4);
-        state.g1CanFlip = true;
-        renderG1();
+async function g1Flip(idx) {
+  // Validasi: giliran kita, belum 2 kartu
+  const st = window._g1LastState;
+  if (!st || st.status !== 'playing') return;
+  const flipped = JSON.parse(st.flipped_json || '[]');
+  const matched = JSON.parse(st.matched_json || '[]');
+  const cards   = JSON.parse(st.cards_json   || '[]');
+  if (flipped.length >= 2) return;
+  if (flipped.includes(idx)) return;
+  if (matched.includes(cards[idx]?.id)) return;
+  if (st.current_team !== g1MyTeam) return;
+
+  const newFlipped = [...flipped, idx];
+  const scores = JSON.parse(st.scores_json || '[0,0,0,0,0]');
+  const teams  = JSON.parse(st.teams_json  || '[]');
+  let   curTeam = st.current_team;
+  let   newMatched = [...matched];
+  let   newStatus = 'playing';
+
+  if (newFlipped.length === 2) {
+    const c1 = cards[newFlipped[0]];
+    const c2 = cards[newFlipped[1]];
+    const isMatch = c1.id === c2.id;
+
+    if (isMatch) {
+      newMatched.push(c1.id);
+      scores[curTeam] = (scores[curTeam] || 0) + 10;
+      showNotif('Cocok! +10 poin 🎉');
+      // Cek apakah semua matched
+      const totalPairs = cards.length / 2;
+      if (newMatched.length >= totalPairs) {
+        newStatus = 'done';
       }
-    }, 1000);
+      // Jika cocok, giliran tetap (tapi flipped dikosongkan)
+      await sbUpsert('ras_g1_state', {
+        id: 1,
+        flipped_json: '[]',
+        matched_json: JSON.stringify(newMatched),
+        scores_json: JSON.stringify(scores),
+        status: newStatus,
+        updated_at: new Date().toISOString()
+      });
+      if (newStatus === 'done') {
+        await g1SaveScores(teams, scores);
+      }
+    } else {
+      // Tidak cocok: tampilkan sebentar, lalu tutup & pindah giliran
+      await sbUpsert('ras_g1_state', {
+        id: 1,
+        flipped_json: JSON.stringify(newFlipped),
+        updated_at: new Date().toISOString()
+      });
+      setTimeout(async () => {
+        const nextTeam = (curTeam + 1) % teams.length;
+        await sbUpsert('ras_g1_state', {
+          id: 1,
+          flipped_json: '[]',
+          current_team: nextTeam,
+          countdown: 30,
+          updated_at: new Date().toISOString()
+        });
+        g1StartCountdown();
+      }, 1200);
+      return;
+    }
+  } else {
+    // Flip pertama
+    await sbUpsert('ras_g1_state', {
+      id: 1,
+      flipped_json: JSON.stringify(newFlipped),
+      updated_at: new Date().toISOString()
+    });
   }
 }
 
-async function showG1Result() {
-  document.getElementById('game1Result').style.display = 'block';
-  const scores = state.g1Scores.map((s, i) => ({ name: state.players[i] || 'P' + (i+1), score: s }));
-  scores.sort((a, b) => b.score - a.score);
-  document.getElementById('g1Podium').innerHTML = buildPodium(scores);
-  // Simpan ke Supabase
-  try {
-    const scoreData = state.g1Scores.map((s, i) => ({
-      player_name: state.players[i] || 'P' + (i+1),
-      photo_b64: state.playerPhotos[state.players[i]] || '',
-      score: s,
-      done: true,
-      played_at: new Date().toISOString()
-    })).filter(x => !x.player_name.startsWith('P'));
-    for (const entry of scoreData) {
-      await sbUpsert('ras_g1_scores', entry);
+function g1StartCountdown() {
+  if (g1CountdownTimer) clearInterval(g1CountdownTimer);
+  g1CountdownTimer = setInterval(async () => {
+    const st = window._g1LastState;
+    if (!st || st.countdown <= 0) { clearInterval(g1CountdownTimer); return; }
+    const newCd = st.countdown - 1;
+    window._g1LastState = { ...st, countdown: newCd };
+    document.getElementById('g1Countdown').textContent = newCd + 's';
+    if (newCd <= 0) {
+      clearInterval(g1CountdownTimer);
+      document.getElementById('g1CountdownWrap').style.display = 'none';
     }
-  } catch(e) { console.warn('G1 score save error:', e); }
+    // Update Supabase countdown setiap 5 detik agar proyektor sync
+    if (newCd % 5 === 0) {
+      await sbUpsert('ras_g1_state', { id:1, countdown: newCd, updated_at: new Date().toISOString() });
+    }
+  }, 1000);
 }
 
-function restartGame1() { state.g1SelectedPlayers = []; initGame1(); }
+function g1RenderDone(st) {
+  document.getElementById('memoryGrid').innerHTML = '';
+  document.getElementById('game1Result').style.display = 'block';
+  const scores = JSON.parse(st.scores_json || '[0,0,0,0,0]');
+  const teams  = JSON.parse(st.teams_json  || '[]');
+  const scoreArr = teams.map((t,i) => ({ name: t, score: scores[i]||0 }));
+  scoreArr.sort((a,b) => b.score - a.score);
+  document.getElementById('g1Podium').innerHTML = buildPodium(scoreArr);
+}
+
+async function g1SaveScores(teams, scores) {
+  try {
+    for (let i = 0; i < teams.length; i++) {
+      await sbUpsert('ras_g1_scores', {
+        player_name: teams[i],
+        score: scores[i] || 0,
+        done: true,
+        played_at: new Date().toISOString()
+      });
+    }
+  } catch(e) { console.warn('g1SaveScores error', e); }
+}
+
+function restartGame1() {
+  g1MyTeam = -1;
+  window._g1LastState = null;
+  initGame1();
+}
 
 // ============================================================
 // GAME 2: TEBAK SIAPA
