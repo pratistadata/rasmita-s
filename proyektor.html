@@ -594,8 +594,44 @@
 </div>
 
 <script>
+// ============================================================
+// SUPABASE CONFIG — ganti dengan credentials project Anda
+// ============================================================
+const SUPABASE_URL = 'https://XXXX.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.XXXXXX';
+
+async function sbGet(table) {
+  const r = await fetch(SUPABASE_URL + '/rest/v1/' + table + '?select=*', {
+    headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY }
+  });
+  if (!r.ok) return [];
+  return r.json();
+}
+
+function sbSubscribe(table, callback) {
+  const wsUrl = SUPABASE_URL.replace('https://','wss://') + '/realtime/v1/websocket?apikey=' + SUPABASE_ANON_KEY + '&vsn=1.0.0';
+  let ws;
+  function connect() {
+    ws = new WebSocket(wsUrl);
+    ws.onopen = () => {
+      ws.send(JSON.stringify({ topic: 'realtime:public:' + table, event: 'phx_join',
+        payload: { config: { postgres_changes: [{ event: '*', schema: 'public', table }] } }, ref: '1' }));
+    };
+    ws.onmessage = (e) => {
+      try {
+        const msg = JSON.parse(e.data);
+        if (msg.event === 'postgres_changes') callback(msg.payload);
+      } catch(_) {}
+    };
+    ws.onclose = () => setTimeout(connect, 3000);
+    ws.onerror = () => ws.close();
+  }
+  connect();
+  return { close: () => ws && ws.close() };
+}
+
 // ═══════════════════════════════════════════════════════
-// PROYEKTOR — Full Live Display
+// PROYEKTOR — Full Live Display (via Supabase)
 // ═══════════════════════════════════════════════════════
 
 const ALL_SCREENS = [
@@ -611,21 +647,17 @@ const ALL_SCREENS = [
 let currentScreen = 'screenWelcome';
 let lastPlayerCount = 0;
 let lastG5Count = 0;
-let lastG3State = '';
-let lastG6State = '';
-let lastG1State = '';
-let lastG4State = '';
+let cache = {};
 
-// ── Build nav tabs dinamis di semua screen ──
 function buildNavTabs() {
   ALL_SCREENS.forEach(s => {
     const navEl = document.getElementById('nav' + s.id.replace('screen',''));
     if (!navEl) return;
-    navEl.innerHTML = ALL_SCREENS.map(t => `
-      <button class="nav-tab ${t.id === s.id ? 'active' : ''}" onclick="showScreen('${t.id}')">${t.label}</button>
-    `).join('') +
-    `<button class="nav-tab" onclick="clearAllData()" style="margin-left:auto;border-color:rgba(200,50,50,0.4);color:rgba(255,100,100,0.7)">🗑️ Reset</button>
-     <button class="nav-tab" onclick="toggleFullscreen()">⛶ Full</button>`;
+    navEl.innerHTML = ALL_SCREENS.map(t =>
+      '<button class="nav-tab ' + (t.id === s.id ? 'active' : '') + '" onclick="showScreen('' + t.id + '')">' + t.label + '</button>'
+    ).join('') +
+    '<button class="nav-tab" onclick="clearAllData()" style="margin-left:auto;border-color:rgba(200,50,50,0.4);color:rgba(255,100,100,0.7)">🗑️ Reset</button>' +
+    '<button class="nav-tab" onclick="toggleFullscreen()">⛶ Full</button>';
   });
 }
 
@@ -642,210 +674,196 @@ function toggleFullscreen() {
 }
 
 function timeAgo(ts) {
-  const diff = Math.floor((Date.now() - ts) / 1000);
+  const diff = Math.floor((Date.now() - new Date(ts).getTime()) / 1000);
   if (diff < 60) return diff + 's lalu';
   if (diff < 3600) return Math.floor(diff/60) + 'm lalu';
   return Math.floor(diff/3600) + 'j lalu';
 }
 
 // ── SCREEN: PESERTA ──
-function renderPlayers() {
+async function renderPlayers() {
   try {
-    const players = JSON.parse(localStorage.getItem('ras_players') || '[]');
+    const players = await sbGet('ras_players');
     const grid = document.getElementById('playersGrid');
     const count = players.length;
     document.getElementById('playerCount').textContent = count;
     document.getElementById('statTotal').textContent = count;
     if (count === 0) {
-      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="icon">⏳</div><p>Menunggu peserta bergabung...</p><p style="font-size:0.8rem">Peserta buka game di HP masing-masing</p></div>`;
+      grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="icon">⏳</div><p>Menunggu peserta bergabung...</p></div>';
       document.getElementById('statLast').textContent = '—';
       document.getElementById('playerCountWelcome').textContent = 'Belum ada peserta bergabung...';
     } else {
-      const sorted = [...players].sort((a,b) => b.joinedAt - a.joinedAt);
-      document.getElementById('statLast').textContent = sorted[0].name + ' (' + timeAgo(sorted[0].joinedAt) + ')';
+      const sorted = [...players].sort((a,b) => new Date(b.joined_at) - new Date(a.joined_at));
+      document.getElementById('statLast').textContent = sorted[0].name + ' (' + timeAgo(sorted[0].joined_at) + ')';
       document.getElementById('playerCountWelcome').textContent = '🎉 ' + count + ' peserta sudah bergabung!';
-      grid.innerHTML = players.map(p => `
-        <div class="player-card">
-          <div class="player-avatar">${p.photo ? `<img src="${p.photo}" alt="${p.name}">` : '👤'}</div>
-          <div class="player-name">${p.name}</div>
-          <div class="player-time">${timeAgo(p.joinedAt)}</div>
-        </div>`).join('');
+      grid.innerHTML = players.map(p =>
+        '<div class="player-card">' +
+        '<div class="player-avatar">' + (p.photo_url || p.photo_b64 ? '<img src="' + (p.photo_url || p.photo_b64) + '" alt="' + p.name + '">' : '👤') + '</div>' +
+        '<div class="player-name">' + p.name + '</div>' +
+        '<div class="player-time">' + timeAgo(p.joined_at) + '</div></div>'
+      ).join('');
     }
     if (count > lastPlayerCount && lastPlayerCount > 0) {
-      const newest = [...players].sort((a,b) => b.joinedAt - a.joinedAt)[0];
+      const newest = [...players].sort((a,b) => new Date(b.joined_at) - new Date(a.joined_at))[0];
       showBanner('👋 ' + newest.name + ' baru bergabung!', '');
     }
     lastPlayerCount = count;
   } catch(e) {}
 }
 
-// ── SCREEN: GAME 5 MIRIP SIAPA ──
-function renderG5() {
+// ── SCREEN: GAME 5 ──
+async function renderG5() {
   try {
-    const results = JSON.parse(localStorage.getItem('ras_g5_results') || '[]');
+    const results = await sbGet('ras_g5_results');
     const grid = document.getElementById('g5Grid');
     const count = results.length;
     document.getElementById('g5Count').textContent = count;
     document.getElementById('statG5Count').textContent = count + ' peserta';
     if (count === 0) {
-      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="icon">🎭</div><p>Belum ada yang main Game 5</p><p style="font-size:0.8rem">Hasil akan muncul otomatis saat peserta selesai</p></div>`;
+      grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="icon">🎭</div><p>Belum ada yang main Game 5</p></div>';
       document.getElementById('statG5Last').textContent = '—';
       return;
     }
-    const sorted = [...results].sort((a,b) => b.timestamp - a.timestamp);
-    document.getElementById('statG5Last').textContent = sorted[0].player + ': ' + sorted[0].komedian;
-    grid.innerHTML = sorted.map(r => `
-      <div class="g5-card">
-        <div class="g5-player-photo">${r.photo ? `<img src="${r.photo}" alt="${r.player}">` : '👤'}</div>
-        <div class="g5-player-name">${r.player}</div>
-        <div class="g5-arrow">↓</div>
-        <div style="font-size:1.8rem;margin:4px 0">🎭</div>
-        <div class="g5-komedian-name">${r.komedian}</div>
-        <div class="g5-persen">${r.persen}% Mirip</div>
-      </div>`).join('');
+    const sorted = [...results].sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+    document.getElementById('statG5Last').textContent = sorted[0].player_name + ': ' + sorted[0].komedian;
+    grid.innerHTML = sorted.map(r =>
+      '<div class="g5-card">' +
+      '<div class="g5-player-photo">' + (r.photo_url || r.photo_b64 ? '<img src="' + (r.photo_url || r.photo_b64) + '" alt="' + r.player_name + '">' : '👤') + '</div>' +
+      '<div class="g5-player-name">' + r.player_name + '</div>' +
+      '<div class="g5-arrow">↓</div><div style="font-size:1.8rem;margin:4px 0">🎭</div>' +
+      '<div class="g5-komedian-name">' + r.komedian + '</div>' +
+      '<div class="g5-persen">' + r.persen + '% Mirip</div></div>'
+    ).join('');
     if (count > lastG5Count && lastG5Count >= 0) {
-      const newest = sorted[0];
-      showBanner('🎭 ' + newest.player, 'mirip ' + newest.komedian + ' (' + newest.persen + '%)');
+      showBanner('🎭 ' + sorted[0].player_name, 'mirip ' + sorted[0].komedian + ' (' + sorted[0].persen + '%)');
     }
     lastG5Count = count;
   } catch(e) {}
 }
 
-// ── SCREEN: GAME 3 SIAPA PALING (Voting Live) ──
-function renderG3() {
+// ── SCREEN: GAME 3 ──
+async function renderG3() {
   try {
-    const raw = localStorage.getItem('ras_g3_live');
-    if (!raw || raw === lastG3State) return;
-    lastG3State = raw;
-    const data = JSON.parse(raw);
-    if (!data) return;
+    const rows = await sbGet('ras_g3_live');
+    if (!rows || rows.length === 0) return;
+    const data = rows[0];
+    const key = data.updated_at;
+    if (cache.g3 === key) return;
+    cache.g3 = key;
 
-    const qEl = document.getElementById('g3ProjQuestion');
-    const qLabel = document.getElementById('g3ProjQ');
-    const voteCount = document.getElementById('g3ProjVoteCount');
-    const resultsEl = document.getElementById('g3ProjResults');
-
-    if (qEl) qEl.textContent = data.question || 'Menunggu game dimulai...';
-    if (qLabel) qLabel.textContent = data.questionNum ? `${data.questionNum} / ${data.totalQ}` : '—';
+    document.getElementById('g3ProjQuestion').textContent = data.question || 'Menunggu game dimulai...';
+    document.getElementById('g3ProjQ').textContent = data.question_num ? data.question_num + ' / ' + data.total_q : '—';
 
     const votes = data.votes || {};
-    const total = Object.values(votes).reduce((s, v) => s + v, 0);
-    if (voteCount) voteCount.textContent = total;
+    const total = Object.values(votes).reduce((s,v) => s + v, 0);
+    document.getElementById('g3ProjVoteCount').textContent = total;
 
+    const resultsEl = document.getElementById('g3ProjResults');
     if (!resultsEl) return;
     if (total === 0) {
-      resultsEl.innerHTML = `<div style="color:rgba(201,168,76,0.5);font-size:1rem;grid-column:1/-1;">Menunggu vote masuk...</div>`;
+      resultsEl.innerHTML = '<div style="color:rgba(201,168,76,0.5);font-size:1rem;grid-column:1/-1;">Menunggu vote masuk...</div>';
       return;
     }
 
-    const members = data.members || [];
+    let members = [];
+    try { members = JSON.parse(data.members_json || '[]'); } catch(e) {}
     const sorted = [...members].sort((a,b) => (votes[b.id]||0) - (votes[a.id]||0));
     const maxVote = Math.max(...sorted.map(m => votes[m.id]||0), 1);
 
     resultsEl.innerHTML = sorted.filter(m => (votes[m.id]||0) > 0).map(m => {
       const v = votes[m.id] || 0;
       const pct = Math.round(v / total * 100);
-      return `
-      <div class="vote-bar-wrap">
-        <div class="vote-bar-name">
-          <div class="vote-bar-photo">${m.foto ? `<img src="${m.foto}">` : '👤'}</div>
-          <span>${m.nama}</span>
-          <span style="margin-left:auto;font-size:1.1rem;font-weight:700;color:var(--gold)">${v} vote</span>
-        </div>
-        <div class="vote-bar-track">
-          <div class="vote-bar-fill" style="width:${Math.round(v/maxVote*100)}%"></div>
-        </div>
-        <div class="vote-bar-count">${pct}% dari total vote</div>
-      </div>`;
+      return '<div class="vote-bar-wrap">' +
+        '<div class="vote-bar-name"><div class="vote-bar-photo">' + (m.foto ? '<img src="' + m.foto + '">' : '👤') + '</div>' +
+        '<span>' + m.nama + '</span><span style="margin-left:auto;font-size:1.1rem;font-weight:700;color:var(--gold)">' + v + ' vote</span></div>' +
+        '<div class="vote-bar-track"><div class="vote-bar-fill" style="width:' + Math.round(v/maxVote*100) + '%"></div></div>' +
+        '<div class="vote-bar-count">' + pct + '% dari total vote</div></div>';
     }).join('');
   } catch(e) {}
 }
 
-// ── SCREEN: GAME 6 TEBAK LAGU / SING-ALONG ──
-function renderG6() {
+// ── SCREEN: GAME 6 ──
+async function renderG6() {
   try {
-    const raw = localStorage.getItem('ras_g6_singalong');
-    if (!raw || raw === lastG6State) return;
-    lastG6State = raw;
-    const data = JSON.parse(raw);
-    if (!data) return;
+    const rows = await sbGet('ras_g6_singalong');
+    if (!rows || rows.length === 0) return;
+    const data = rows[0];
+    const key = data.updated_at;
+    if (cache.g6 === key) return;
+    cache.g6 = key;
 
     const EMOJI_MAP = {1:'🌴',2:'🏡',3:'💃',4:'☕',5:'🕺'};
-
-    document.getElementById('g6ProjEmoji').textContent = EMOJI_MAP[data.laguId] || '🎵';
+    document.getElementById('g6ProjEmoji').textContent = EMOJI_MAP[data.lagu_id] || '🎵';
     document.getElementById('g6ProjTitle').textContent = data.judul || '—';
     document.getElementById('g6ProjArtis').textContent = data.artis || '—';
 
     const lirikBox = document.getElementById('g6ProjLirikBox');
     const lirikEl = document.getElementById('g6ProjLirik');
+    const statusEl = document.getElementById('g6ProjStatus');
 
     if (data.status === 'playing') {
-      document.getElementById('g6ProjStatus').textContent = '♪ NYANYIKAN BERSAMA! ♪';
-      document.getElementById('g6ProjStatus').style.color = 'var(--gold-light)';
+      statusEl.textContent = '♪ NYANYIKAN BERSAMA! ♪';
+      statusEl.style.color = 'var(--gold-light)';
       if (lirikBox) lirikBox.style.display = 'block';
       if (lirikEl) lirikEl.textContent = data.lirik || '';
     } else {
-      document.getElementById('g6ProjStatus').textContent = '⏳ Peserta sedang menebak...';
-      document.getElementById('g6ProjStatus').style.color = 'var(--gold)';
+      statusEl.textContent = '⏳ Peserta sedang menebak...';
+      statusEl.style.color = 'var(--gold)';
       if (lirikBox) lirikBox.style.display = 'none';
     }
   } catch(e) {}
 }
 
-// ── SCREEN: GAME 1 MEMORY MATCH Leaderboard ──
-function renderG1() {
+// ── SCREEN: GAME 1 ──
+async function renderG1() {
   try {
-    const raw = localStorage.getItem('ras_g1_scores');
-    if (!raw || raw === lastG1State) return;
-    lastG1State = raw;
-    const scores = JSON.parse(raw); // [{name, photo, score, time, done}]
+    const scores = await sbGet('ras_g1_scores');
+    const key = JSON.stringify(scores);
+    if (cache.g1 === key) return;
+    cache.g1 = key;
     const grid = document.getElementById('g1ProjGrid');
     if (!grid) return;
     if (!scores || scores.length === 0) {
-      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="icon">🃏</div><p>Belum ada yang main Memory Match</p></div>`;
+      grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="icon">🃏</div><p>Belum ada yang main Memory Match</p></div>';
       return;
     }
     const sorted = [...scores].sort((a,b) => {
       if (a.done && !b.done) return -1;
       if (!a.done && b.done) return 1;
-      if (a.done && b.done) return a.time - b.time;
+      if (a.done && b.done) return new Date(a.played_at) - new Date(b.played_at);
       return b.score - a.score;
     });
-    grid.innerHTML = sorted.map((s, i) => `
-      <div class="leaderboard-card">
-        <div class="leaderboard-rank">${i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1)}</div>
-        <div class="leaderboard-avatar">${s.photo ? `<img src="${s.photo}">` : '👤'}</div>
-        <div class="leaderboard-info">
-          <div class="leaderboard-name">${s.name}</div>
-          <div class="leaderboard-score">${s.done ? '✓ Selesai · '+Math.round(s.time/1000)+'s' : s.score+' pasang'}</div>
-        </div>
-      </div>`).join('');
+    grid.innerHTML = sorted.map((s, i) =>
+      '<div class="leaderboard-card">' +
+      '<div class="leaderboard-rank">' + (i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1)) + '</div>' +
+      '<div class="leaderboard-avatar">' + (s.photo_url || s.photo_b64 ? '<img src="' + (s.photo_url || s.photo_b64) + '">' : '👤') + '</div>' +
+      '<div class="leaderboard-info"><div class="leaderboard-name">' + s.player_name + '</div>' +
+      '<div class="leaderboard-score">' + (s.done ? '✓ Selesai' : s.score + ' pasang') + '</div></div></div>'
+    ).join('');
   } catch(e) {}
 }
 
-// ── SCREEN: GAME 4 TIMELINE Leaderboard ──
-function renderG4() {
+// ── SCREEN: GAME 4 ──
+async function renderG4() {
   try {
-    const raw = localStorage.getItem('ras_g4_scores');
-    if (!raw || raw === lastG4State) return;
-    lastG4State = raw;
-    const scores = JSON.parse(raw); // [{name, photo, score, ronde}]
+    const scores = await sbGet('ras_g4_scores');
+    const key = JSON.stringify(scores);
+    if (cache.g4 === key) return;
+    cache.g4 = key;
     const grid = document.getElementById('g4ProjGrid');
     if (!grid) return;
     if (!scores || scores.length === 0) {
-      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="icon">⏳</div><p>Belum ada yang main Timeline</p></div>`;
+      grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="icon">⏳</div><p>Belum ada yang main Timeline</p></div>';
       return;
     }
     const sorted = [...scores].sort((a,b) => b.score - a.score);
-    grid.innerHTML = sorted.map((s, i) => `
-      <div class="leaderboard-card">
-        <div class="leaderboard-rank">${i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1)}</div>
-        <div class="leaderboard-avatar">${s.photo ? `<img src="${s.photo}">` : '👤'}</div>
-        <div class="leaderboard-info">
-          <div class="leaderboard-name">${s.name}</div>
-          <div class="leaderboard-score">${s.score} poin · Ronde ${s.ronde||1}</div>
-        </div>
-      </div>`).join('');
+    grid.innerHTML = sorted.map((s, i) =>
+      '<div class="leaderboard-card">' +
+      '<div class="leaderboard-rank">' + (i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1)) + '</div>' +
+      '<div class="leaderboard-avatar">' + (s.photo_url || s.photo_b64 ? '<img src="' + (s.photo_url || s.photo_b64) + '">' : '👤') + '</div>' +
+      '<div class="leaderboard-info"><div class="leaderboard-name">' + s.player_name + '</div>' +
+      '<div class="leaderboard-score">' + s.score + ' poin · Ronde ' + (s.ronde||1) + '</div></div></div>'
+    ).join('');
   } catch(e) {}
 }
 
@@ -857,13 +875,21 @@ function showBanner(player, mirip) {
   setTimeout(() => banner.classList.remove('show'), 4000);
 }
 
-function clearAllData() {
-  if (!confirm('Reset semua data peserta dan hasil game? (Tidak bisa dibatalkan)')) return;
-  ['ras_players','ras_g5_results','ras_g3_live','ras_g6_singalong',
-   'ras_g6_play_cmd','ras_g1_scores','ras_g4_scores'].forEach(k => localStorage.removeItem(k));
-  lastPlayerCount = 0; lastG5Count = 0;
-  lastG3State = ''; lastG6State = ''; lastG1State = ''; lastG4State = '';
+async function clearAllData() {
+  if (!confirm('Reset semua data peserta dan hasil game?')) return;
+  // Reset via Supabase — hapus semua baris dari tabel realtime
+  const headers = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY };
+  const tables = ['ras_players','ras_g5_results','ras_g3_live','ras_g6_singalong','ras_g6_play_cmd','ras_g1_scores','ras_g4_scores'];
+  for (const t of tables) {
+    try {
+      await fetch(SUPABASE_URL + '/rest/v1/' + t + '?id=gte.0', { method: 'DELETE', headers });
+      // Untuk ras_players gunakan nama
+      await fetch(SUPABASE_URL + '/rest/v1/' + t + '?name=neq.XXXXXXX', { method: 'DELETE', headers });
+    } catch(e) {}
+  }
+  lastPlayerCount = 0; lastG5Count = 0; cache = {};
   tick();
+  showBanner('🗑️ Data direset', '');
 }
 
 function detectUrl() {
@@ -872,19 +898,31 @@ function detectUrl() {
   document.getElementById('displayUrl').textContent = display || 'buka file HTML di browser';
 }
 
-function tick() {
-  renderPlayers();
-  renderG5();
-  renderG3();
-  renderG6();
-  renderG1();
-  renderG4();
+async function tick() {
+  await renderPlayers();
+  await renderG5();
+  await renderG3();
+  await renderG6();
+  await renderG1();
+  await renderG4();
+}
+
+// Realtime subscriptions untuk update instan
+function startRealtime() {
+  const tables = ['ras_players','ras_g5_results','ras_g3_live','ras_g6_singalong','ras_g1_scores','ras_g4_scores'];
+  tables.forEach(t => {
+    sbSubscribe(t, () => {
+      cache = {}; // invalidate cache saat ada perubahan
+      tick();
+    });
+  });
 }
 
 buildNavTabs();
 detectUrl();
-tick();
-setInterval(tick, 2000);
+tick(); // initial load
+startRealtime(); // realtime updates
+setInterval(tick, 5000); // fallback polling
 </script>
 </body>
 </html>

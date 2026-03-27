@@ -1,7 +1,7 @@
 # 🏡 Rasmita's Family Gathering 2026
 ### Aplikasi Game Interaktif Reuni Keluarga — Gathering & Games
 
-> **Single-file web app** — tidak perlu server, tidak perlu install. Buka browser, langsung main!
+> **Single-file web app** — tidak perlu server backend, tidak perlu install. Buka browser, data tersimpan di Supabase cloud!
 
 ---
 
@@ -16,6 +16,15 @@
 ---
 
 ## Cara Cepat Mulai
+
+### Setup Supabase (Sekali Sebelum Event)
+```
+1. Buat project di supabase.com (gratis)
+2. Jalankan SUPABASE-SETUP.sql di SQL Editor
+3. Buat 2 Storage bucket: rasmita-photos, rasmita-audio (Public)
+4. Copy Project URL + anon key → paste ke 3 file HTML (ganti XXXX)
+5. Aktifkan Realtime untuk tabel di Dashboard → Database → Replication
+```
 
 ### Offline (Tanpa Internet)
 ```
@@ -150,24 +159,25 @@ Upload ke `admin.html` → **🎭 Komedian** → Upload Foto Massal
 
 ---
 
-## localStorage Keys (untuk Developer)
+## Supabase Tables (untuk Developer)
 
-| Key | Isi |
-|-----|-----|
-| `ras_event` | Setting event (nama, tanggal, venue, room code) |
-| `ras_members` | Data anggota keluarga + foto (base64) |
-| `ras_players` | Peserta yang sudah join |
-| `ras_open_games` | Game yang dibuka admin |
+| Tabel | Isi |
+|-------|-----|
+| `ras_event` | Setting event (nama, tanggal, venue, room_code) |
+| `ras_members` | Data anggota keluarga + foto_url (Supabase Storage) |
+| `ras_players` | Peserta yang sudah join + photo_url |
+| `ras_open_games` | Game yang dibuka admin (game_ids array) |
 | `ras_g3_questions` | Pertanyaan custom Game 3 |
-| `ras_lagu_storage` | MP3 + lirik custom per lagu |
-| `ras_lagu_lirik` | Lirik per lagu (sync ke HP peserta) |
-| `ras_g3_live` | Data voting live (→ proyektor) |
-| `ras_g6_singalong` | Status sing-along (→ proyektor + HP) |
-| `ras_g6_play_cmd` | Perintah play dari admin (→ HP peserta) |
-| `ras_g1_scores` | Skor Memory Match (→ proyektor) |
-| `ras_g4_scores` | Skor Timeline (→ proyektor) |
-| `ras_g5_results` | Hasil Mirip Siapa (→ proyektor) |
-| `ras_komedian_photos` | Foto komedian (base64) |
+| `ras_lagu_storage` | URL MP3 + lirik custom per lagu |
+| `ras_g3_live` | Data voting live (→ proyektor, realtime) |
+| `ras_g6_singalong` | Status sing-along (→ proyektor + HP, realtime) |
+| `ras_g6_play_cmd` | Perintah play dari admin (→ HP peserta, realtime) |
+| `ras_g1_scores` | Skor Memory Match (→ proyektor, realtime) |
+| `ras_g4_scores` | Skor Timeline (→ proyektor, realtime) |
+| `ras_g5_results` | Hasil Mirip Siapa (→ proyektor + lobby, realtime) |
+| `ras_komedian_photos` | Foto komedian (URL dari Supabase Storage) |
+
+Lihat detail petunjuk setup di **SUPABASE-MIGRATION.md** dan jalankan **SUPABASE-SETUP.sql**.
 
 ---
 
@@ -188,13 +198,14 @@ Upload ke `admin.html` → **🎭 Komedian** → Upload Foto Massal
 
 ## Catatan Penting
 
-- Semua data tersimpan di **localStorage browser** — jangan ganti browser atau device saat event
-- Foto disimpan sebagai base64 — ukuran ideal per foto < 500KB
-- Proyektor, admin, dan game **harus dibuka di domain/file yang sama** agar localStorage terbaca
-- Untuk hosting online: gunakan 1 URL yang sama untuk semua file
+- Semua data tersimpan di **Supabase cloud** — bisa ganti browser, ganti device kapan saja
+- Foto diupload ke Supabase Storage — URL publik, bisa diakses dari semua HP
+- Proyektor, admin, dan game dapat dibuka di device berbeda — semua sync otomatis
+- Untuk hosting: deploy ke Netlify/Vercel, lalu semua akses 1 URL yang sama
+- Sebelum event: pastikan credentials Supabase sudah diisi di ketiga file HTML
 
 ---
 
 *Dibuat dengan ❤️ untuk Reuni Keluarga Rasmita 2026*  
 *Gathering & Games · Bandung · Wisma Mandiri*  
-*Last updated: Maret 2026 — v3.0*
+*Last updated: Maret 2026 — v5.0 (Supabase Migration)*

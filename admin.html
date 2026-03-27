@@ -961,6 +961,51 @@
 </div><!-- /main-content -->
 
 <script>
+// ============================================================
+// SUPABASE CONFIG — ganti dengan credentials project Anda
+// ============================================================
+const SUPABASE_URL = 'https://XXXX.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.XXXXXX';
+
+// ── Low-level REST helpers ──
+async function sbGet(table, filters) {
+  let url = SUPABASE_URL + '/rest/v1/' + table + '?select=*';
+  if (filters) for (const [k,v] of Object.entries(filters)) url += '&' + k + '=eq.' + encodeURIComponent(v);
+  const r = await fetch(url, { headers: sbHeaders() });
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+async function sbUpsert(table, data) {
+  const r = await fetch(SUPABASE_URL + '/rest/v1/' + table, {
+    method: 'POST',
+    headers: { ...sbHeaders(), 'Prefer': 'resolution=merge-duplicates' },
+    body: JSON.stringify(data)
+  });
+  if (!r.ok) console.warn('sbUpsert', table, await r.text());
+}
+async function sbDelete(table, filters) {
+  let url = SUPABASE_URL + '/rest/v1/' + table + '?';
+  for (const [k,v] of Object.entries(filters)) url += k + '=eq.' + encodeURIComponent(v) + '&';
+  const r = await fetch(url, { method: 'DELETE', headers: sbHeaders() });
+  if (!r.ok) console.warn('sbDelete', await r.text());
+}
+function sbHeaders() {
+  return { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'Content-Type': 'application/json' };
+}
+async function sbUploadFile(bucket, path, dataUrl) {
+  const mime = dataUrl.split(';')[0].split(':')[1];
+  const blob = await fetch(dataUrl).then(r => r.blob());
+  let r = await fetch(SUPABASE_URL + '/storage/v1/object/' + bucket + '/' + path, {
+    method: 'POST', headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'Content-Type': mime }, body: blob
+  });
+  if (!r.ok) {
+    r = await fetch(SUPABASE_URL + '/storage/v1/object/' + bucket + '/' + path, {
+      method: 'PUT', headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'Content-Type': mime }, body: blob
+    });
+  }
+  return SUPABASE_URL + '/storage/v1/object/public/' + bucket + '/' + path;
+}
+
 // ── DATA ──
 const GAMES_INFO = [
   { id:1, title:"Memory Match Foto", icon:"🃏", desc:"Cocokkan pasangan foto keluarga" },
@@ -974,8 +1019,8 @@ const GAMES_INFO = [
 let FAMILY_MEMBERS = [];
 let openGames = [];
 let players = [];
-let eventSettings = { name:"Rasmita's Family Gathering 2026", date:"28 Maret 2026", venue:"Wisma Mandiri, Bandung", roomCode:"FAM2026" };
-let komedianPhotos = {}; // id -> base64
+let eventSettings = { name:"Rasmita\'s Family Gathering 2026", date:"28 Maret 2026", venue:"Wisma Mandiri, Bandung", room_code:"FAM2026" };
+let komedianPhotos = {};
 
 const LAGU_DATA = [
   { id:1, judul:"Tabola Bale", artis:"Silet Open Up feat. Jacson Zeran", file:"lagu1.mp3", ts:"0:00 – 0:30", tahun:2025, emoji:"🌴",
@@ -993,36 +1038,48 @@ const LAGU_DATA = [
 const KOMEDIAN_TOP = [
   {id:1,nama:"Sule",gender:"pria"},{id:2,nama:"Raditya Dika",gender:"pria"},{id:3,nama:"Ernest Prakasa",gender:"pria"},
   {id:4,nama:"Bintang Emon",gender:"pria"},{id:5,nama:"Pandji",gender:"pria"},{id:6,nama:"Ge Pamungkas",gender:"pria"},
-  {id:7,nama:"Mongol Stres",gender:"pria"},{id:8,nama:"Soleh Solihun",gender:"pria"},{id:9,nama:"Arie Kriting",gender:"pria"},
-  {id:10,nama:"Kemal Palevi",gender:"pria"},{id:11,nama:"Coki Pardede",gender:"pria"},{id:12,nama:"Dzawin Nur",gender:"pria"},
   {id:101,nama:"Nunung",gender:"wanita"},{id:102,nama:"Kiky Saputri",gender:"wanita"},{id:103,nama:"Soimah",gender:"wanita"},
-  {id:104,nama:"Arafah Rianti",gender:"wanita"},{id:105,nama:"Rina Nose",gender:"wanita"},{id:106,nama:"Tika Panggabean",gender:"wanita"},
+  {id:104,nama:"Arafah Rianti",gender:"wanita"},{id:105,nama:"Rina Nose",gender:"wanita"},
 ];
 
 // ── INIT ──
-loadAllFromStorage();
-renderAll();
+loadAllFromSupabase().then(renderAll);
 
-function loadAllFromStorage() {
+async function loadAllFromSupabase() {
   try {
-    const ev = JSON.parse(localStorage.getItem('ras_event')||'{}');
-    if (ev.name) eventSettings = {...eventSettings, ...ev};
-    const m = JSON.parse(localStorage.getItem('ras_members')||'[]');
-    if (m.length) FAMILY_MEMBERS = m;
-    else initDefaultMembers();
-    const p = JSON.parse(localStorage.getItem('ras_players')||'[]');
-    if (p.length) players = p;
-    const og = JSON.parse(localStorage.getItem('ras_open_games')||'[]');
-    openGames = og;
-    const kp = JSON.parse(localStorage.getItem('ras_komedian_photos')||'{}');
-    komedianPhotos = kp;
+    // Event settings
+    const evRows = await sbGet('ras_event');
+    if (evRows && evRows.length > 0) eventSettings = { ...eventSettings, ...evRows[0] };
+
+    // Members
+    const memberRows = await sbGet('ras_members');
+    if (memberRows && memberRows.length > 0) {
+      FAMILY_MEMBERS = memberRows.map(r => ({ id: r.member_id, nama: r.nama, foto: r.foto_url || '' }));
+      FAMILY_MEMBERS.sort((a, b) => a.id - b.id);
+    } else {
+      initDefaultMembers();
+    }
+
+    // Players
+    const playerRows = await sbGet('ras_players');
+    if (playerRows) players = playerRows;
+
+    // Open games
+    const ogRows = await sbGet('ras_open_games');
+    if (ogRows && ogRows.length > 0) openGames = ogRows[0].game_ids || [];
+
+    // Komedian photos
+    const kRows = await sbGet('ras_komedian_photos');
+    if (kRows) kRows.forEach(r => { komedianPhotos[r.komedian_id] = r.photo_url || ''; });
+
   } catch(e) {
+    console.warn('loadAllFromSupabase error:', e);
     initDefaultMembers();
   }
 }
 
 function initDefaultMembers() {
-  FAMILY_MEMBERS = Array.from({length:20},(_,i)=>({id:i+1,nama:`Anggota ${i+1}`,foto:''}));
+  FAMILY_MEMBERS = Array.from({length:20}, (_, i) => ({ id: i+1, nama: 'Anggota ' + (i+1), foto: '' }));
 }
 
 function renderAll() {
@@ -1031,22 +1088,7 @@ function renderAll() {
   renderPhotoGrid();
   renderGameControl();
   renderPlayers();
-  renderLaguTable();
-  renderKomedianGrid();
   renderSettings();
-}
-
-function saveAllToStorage() {
-  try {
-    localStorage.setItem('ras_event', JSON.stringify(eventSettings));
-    localStorage.setItem('ras_members', JSON.stringify(FAMILY_MEMBERS));
-    localStorage.setItem('ras_players', JSON.stringify(players));
-    localStorage.setItem('ras_open_games', JSON.stringify(openGames));
-    localStorage.setItem('ras_komedian_photos', JSON.stringify(komedianPhotos));
-    showNotif('✅ Semua data tersimpan!');
-  } catch(e) {
-    showNotif('⚠️ Gagal simpan — storage penuh?');
-  }
 }
 
 // ── NAVIGATION ──
@@ -1055,146 +1097,109 @@ function showPanel(id) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   const panel = document.getElementById('panel-' + id);
   if (panel) panel.classList.add('active');
-  const nav = document.querySelector(`.nav-item[onclick*="'${id}'"]`);
+  const nav = document.querySelector('.nav-item[onclick*="\'' + id + '\''  + '"]');
   if (nav) nav.classList.add('active');
   const titles = {
     'dashboard':'📊 Dashboard','players':'👥 Daftar Peserta','settings':'⚙️ Pengaturan Event',
     'projector':'📽️ Panduan Proyektor','photos':'📸 Foto Keluarga','komedian':'🎭 Komedian',
     'lagu':'🎵 Lagu Game 6','game-control':'🎮 Kontrol Game',
-    'game1-admin':'🃏 Game 1 — Memory Match','game2-admin':'🔍 Game 2 — Tebak Siapa',
-    'game3-admin':'🗳️ Game 3 — Siapa Paling','game4-admin':'⏳ Game 4 — Timeline',
-    'game5-admin':'🎭 Game 5 — Mirip Siapa','game6-admin':'🎵 Game 6 — Tebak Lagu',
+    'game1-admin':'🃏 Game 1','game2-admin':'🔍 Game 2','game3-admin':'🗳️ Game 3',
+    'game4-admin':'⏳ Game 4','game5-admin':'🎭 Game 5','game6-admin':'🎵 Game 6',
   };
   document.getElementById('topbarTitle').textContent = titles[id] || id;
-  window.scrollTo(0,0);
-  // Trigger renders for specific panels
+  window.scrollTo(0, 0);
   if (id === 'lagu') setTimeout(renderLaguCards, 50);
   if (id === 'game6-admin') setTimeout(renderSingAlongControls, 50);
   if (id === 'game3-admin') setTimeout(renderG3Questions, 50);
   if (id === 'photos') setTimeout(() => {
-    renderPhotoPreviewForGame('g1PhotoPreview');
-    renderPhotoPreviewForGame('g2PhotoPreview');
-    renderPhotoPreviewForGame('g3PhotoPreview');
-    renderPhotoPreviewForGame('g4PhotoPreview');
+    ['g1PhotoPreview','g2PhotoPreview','g3PhotoPreview','g4PhotoPreview'].forEach(renderPhotoPreviewForGame);
   }, 50);
+  if (id === 'komedian') setTimeout(renderKomedianGrid, 50);
 }
 
 function switchTab(game, tab) {
   const prefix = game + '-tab-';
-  document.querySelectorAll(`[id^="${prefix}"]`).forEach(p => p.classList.remove('active'));
-  const targetTab = document.getElementById(prefix + tab);
-  if (targetTab) targetTab.classList.add('active');
-  const card = document.getElementById(`panel-${game}-admin`) || document.getElementById(`panel-${game}`);
-  if (card) {
-    card.querySelectorAll('.tab-btn').forEach(b => {
-      if (b.getAttribute('onclick')) b.classList.toggle('active', b.getAttribute('onclick').includes(`'${tab}'`));
-    });
-  }
-  // Trigger renders
-  if (game === 'photos') setTimeout(() => {
-    renderPhotoPreviewForGame('g1PhotoPreview');
-    renderPhotoPreviewForGame('g2PhotoPreview');
-    renderPhotoPreviewForGame('g3PhotoPreview');
-    renderPhotoPreviewForGame('g4PhotoPreview');
-  }, 50);
+  document.querySelectorAll('[id^="' + prefix + '"]').forEach(p => p.classList.remove('active'));
+  const t = document.getElementById(prefix + tab);
+  if (t) t.classList.add('active');
+  const card = document.getElementById('panel-' + game + '-admin') || document.getElementById('panel-' + game);
+  if (card) card.querySelectorAll('.tab-btn').forEach(b => {
+    if (b.getAttribute('onclick')) b.classList.toggle('active', b.getAttribute('onclick').includes("'" + tab + "'"));
+  });
   if (game === 'g3' && tab === 'pertanyaan') setTimeout(renderG3Questions, 50);
   if (game === 'g6' && tab === 'singalong') setTimeout(renderSingAlongControls, 50);
 }
 
-// ── TOPBAR ──
 function updateTopbar() {
-  document.getElementById('topRoomCode').textContent = eventSettings.roomCode || 'FAM2026';
+  document.getElementById('topRoomCode').textContent = eventSettings.room_code || 'FAM2026';
   const ac = document.getElementById('announcedCode');
-  if (ac) ac.textContent = eventSettings.roomCode || 'FAM2026';
+  if (ac) ac.textContent = eventSettings.room_code || 'FAM2026';
 }
 
 // ── DASHBOARD ──
 function renderDashboard() {
-  const hasPhoto = FAMILY_MEMBERS.filter(m=>m.foto).length;
+  const hasPhoto = FAMILY_MEMBERS.filter(m => m.foto).length;
   document.getElementById('statPlayers').textContent = players.length;
   document.getElementById('statGames').textContent = openGames.length + ' / 6';
   document.getElementById('statPhotos').textContent = hasPhoto + ' / ' + FAMILY_MEMBERS.length;
-  document.getElementById('statRoom').textContent = eventSettings.roomCode || 'FAM2026';
-
+  document.getElementById('statRoom').textContent = eventSettings.room_code || 'FAM2026';
   const grid = document.getElementById('dashGameStatus');
-  if (!grid) return;
-  grid.innerHTML = GAMES_INFO.map(g => {
+  if (grid) grid.innerHTML = GAMES_INFO.map(g => {
     const isOpen = openGames.includes(g.id);
-    return `<div class="game-toggle-card">
-      <div class="game-toggle-icon">${g.icon}</div>
-      <div class="game-toggle-info"><h4>${g.title}</h4><p>${g.desc}</p></div>
-      <label class="toggle-switch">
-        <input type="checkbox" ${isOpen?'checked':''} onchange="toggleGame(${g.id})">
-        <span class="toggle-slider"></span>
-      </label>
-    </div>`;
+    return '<div class="game-toggle-card"><div class="game-toggle-icon">' + g.icon + '</div><div class="game-toggle-info"><h4>' + g.title + '</h4><p>' + g.desc + '</p></div>' +
+      '<label class="toggle-switch"><input type="checkbox" ' + (isOpen ? 'checked' : '') + ' onchange="toggleGame(' + g.id + ')"><span class="toggle-slider"></span></label></div>';
   }).join('');
 }
 
-// ── GAME CONTROL ──
 function renderGameControl() {
   const grid = document.getElementById('gameControlGrid');
   if (!grid) return;
   grid.innerHTML = GAMES_INFO.map(g => {
     const isOpen = openGames.includes(g.id);
-    return `<div class="game-toggle-card">
-      <div class="game-toggle-icon">${g.icon}</div>
-      <div class="game-toggle-info"><h4>${g.title}</h4><p>${g.desc}</p></div>
-      <label class="toggle-switch">
-        <input type="checkbox" ${isOpen?'checked':''} onchange="toggleGame(${g.id})">
-        <span class="toggle-slider"></span>
-      </label>
-    </div>`;
+    return '<div class="game-toggle-card"><div class="game-toggle-icon">' + g.icon + '</div><div class="game-toggle-info"><h4>' + g.title + '</h4><p>' + g.desc + '</p></div>' +
+      '<label class="toggle-switch"><input type="checkbox" ' + (isOpen ? 'checked' : '') + ' onchange="toggleGame(' + g.id + ')"><span class="toggle-slider"></span></label></div>';
   }).join('');
 }
 
-function toggleGame(id) {
-  if (openGames.includes(id)) openGames = openGames.filter(g=>g!==id);
+async function toggleGame(id) {
+  if (openGames.includes(id)) openGames = openGames.filter(g => g !== id);
   else openGames.push(id);
-  localStorage.setItem('ras_open_games', JSON.stringify(openGames));
-  renderDashboard();
-  renderGameControl();
-  showNotif(`Game ${id} ${openGames.includes(id)?'dibuka ✅':'ditutup'}`);
-}
-
-function openAllGames() {
-  openGames = GAMES_INFO.map(g=>g.id);
-  localStorage.setItem('ras_open_games', JSON.stringify(openGames));
+  try {
+    await sbUpsert('ras_open_games', { id: 1, game_ids: openGames, updated_at: new Date().toISOString() });
+  } catch(e) {}
   renderDashboard(); renderGameControl();
-  showNotif('🎮 Semua game dibuka!');
+  showNotif('Game ' + id + ' ' + (openGames.includes(id) ? 'dibuka ✅' : 'ditutup'));
 }
 
-function closeAllGames() {
+async function openAllGames() {
+  openGames = GAMES_INFO.map(g => g.id);
+  await sbUpsert('ras_open_games', { id: 1, game_ids: openGames, updated_at: new Date().toISOString() });
+  renderDashboard(); renderGameControl(); showNotif('🎮 Semua game dibuka!');
+}
+
+async function closeAllGames() {
   openGames = [];
-  localStorage.setItem('ras_open_games', JSON.stringify(openGames));
-  renderDashboard(); renderGameControl();
-  showNotif('Semua game ditutup.');
+  await sbUpsert('ras_open_games', { id: 1, game_ids: [], updated_at: new Date().toISOString() });
+  renderDashboard(); renderGameControl(); showNotif('Semua game ditutup.');
 }
 
 // ── SETTINGS ──
 function renderSettings() {
-  ['inputEventName','inputEventDate','inputEventVenue','inputRoomCode'].forEach(id => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    const key = id.replace('input','').replace('Event','').toLowerCase();
-    const map = {eventname:'name',eventdate:'date',eventvenue:'venue',roomcode:'roomCode'};
-    el.value = eventSettings[map[key.replace('input','')] || key] || '';
-  });
   document.getElementById('inputEventName').value = eventSettings.name || '';
   document.getElementById('inputEventDate').value = eventSettings.date || '';
   document.getElementById('inputEventVenue').value = eventSettings.venue || '';
-  document.getElementById('inputRoomCode').value = eventSettings.roomCode || 'FAM2026';
+  document.getElementById('inputRoomCode').value = eventSettings.room_code || 'FAM2026';
 }
 
-function saveEventSettings() {
+async function saveEventSettings() {
   eventSettings.name = document.getElementById('inputEventName').value.trim() || eventSettings.name;
   eventSettings.date = document.getElementById('inputEventDate').value.trim() || eventSettings.date;
   eventSettings.venue = document.getElementById('inputEventVenue').value.trim() || eventSettings.venue;
-  eventSettings.roomCode = (document.getElementById('inputRoomCode').value.trim() || 'FAM2026').toUpperCase();
-  localStorage.setItem('ras_event', JSON.stringify(eventSettings));
-  updateTopbar();
-  renderDashboard();
-  showNotif('✅ Pengaturan event disimpan!');
+  eventSettings.room_code = (document.getElementById('inputRoomCode').value.trim() || 'FAM2026').toUpperCase();
+  try {
+    await sbUpsert('ras_event', { id: 1, name: eventSettings.name, date: eventSettings.date, venue: eventSettings.venue, room_code: eventSettings.room_code, updated_at: new Date().toISOString() });
+    updateTopbar(); renderDashboard(); showNotif('✅ Pengaturan event disimpan!');
+  } catch(e) { showNotif('❌ Gagal simpan: ' + e.message); }
 }
 
 // ── PHOTOS ──
@@ -1203,17 +1208,13 @@ let currentUploadId = null;
 function renderPhotoGrid() {
   const grid = document.getElementById('uploadGrid');
   if (!grid) return;
-  grid.innerHTML = FAMILY_MEMBERS.map(m => `
-    <div class="photo-item" onclick="triggerPhotoUpload(${m.id})">
-      <button class="photo-del" onclick="deleteMemberPhoto(event,${m.id})">✕</button>
-      ${m.foto
-        ? `<img src="${m.foto}" alt="${m.nama}">`
-        : `<div class="photo-placeholder">📷</div>`}
-      <div class="photo-name" contenteditable="true"
-        onblur="renameMember(${m.id},this.textContent)"
-        onclick="event.stopPropagation()">${m.nama}</div>
-      <div class="photo-status ${m.foto?'has-photo':''}">${m.foto?'✓ Ada foto':'Tap untuk upload'}</div>
-    </div>`).join('');
+  grid.innerHTML = FAMILY_MEMBERS.map(m =>
+    '<div class="photo-item" onclick="triggerPhotoUpload(' + m.id + ')">' +
+    '<button class="photo-del" onclick="deleteMemberPhoto(event,' + m.id + ')">✕</button>' +
+    (m.foto ? '<img src="' + m.foto + '" alt="' + m.nama + '">' : '<div class="photo-placeholder">📷</div>') +
+    '<div class="photo-name" contenteditable="true" onblur="renameMember(' + m.id + ',this.textContent)" onclick="event.stopPropagation()">' + m.nama + '</div>' +
+    '<div class="photo-status ' + (m.foto ? 'has-photo' : '') + '">' + (m.foto ? '✓ Ada foto' : 'Tap untuk upload') + '</div></div>'
+  ).join('');
 }
 
 function triggerPhotoUpload(id) {
@@ -1221,171 +1222,415 @@ function triggerPhotoUpload(id) {
   document.getElementById('photoFileInput').click();
 }
 
-function handlePhotoUpload(event) {
+async function handlePhotoUpload(event) {
   const file = event.target.files[0];
   if (!file || !currentUploadId) return;
   const reader = new FileReader();
-  reader.onload = e => {
+  reader.onload = async e => {
     const img = new Image();
-    img.onload = () => {
+    img.onload = async () => {
       const canvas = document.createElement('canvas');
-      const MAX = 300;
-      let w=img.width, h=img.height;
-      if(w>h){h=Math.round(h*MAX/w);w=MAX;}else{w=Math.round(w*MAX/h);h=MAX;}
-      canvas.width=w; canvas.height=h;
-      canvas.getContext('2d').drawImage(img,0,0,w,h);
-      const dataUrl = canvas.toDataURL('image/jpeg',0.8);
-      const m = FAMILY_MEMBERS.find(m=>m.id===currentUploadId);
-      if(m){ m.foto=dataUrl; saveMembersToStorage(); renderPhotoGrid(); renderDashboard(); showNotif('✅ Foto '+m.nama+' disimpan!'); }
+      const MAX = 300; let w = img.width, h = img.height;
+      if (w > h) { h = Math.round(h * MAX / w); w = MAX; } else { w = Math.round(w * MAX / h); h = MAX; }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+      const m = FAMILY_MEMBERS.find(m => m.id === currentUploadId);
+      if (m) {
+        showNotif('⏳ Mengupload foto...');
+        try {
+          const storageUrl = await sbUploadFile('rasmita-photos', 'members/' + m.id + '.jpg', dataUrl);
+          m.foto = storageUrl;
+          await sbUpsert('ras_members', { member_id: m.id, nama: m.nama, foto_url: storageUrl });
+        } catch(err) {
+          m.foto = dataUrl;
+          await sbUpsert('ras_members', { member_id: m.id, nama: m.nama, foto_url: dataUrl });
+        }
+        renderPhotoGrid(); renderDashboard(); showNotif('✅ Foto ' + m.nama + ' disimpan!');
+      }
     };
     img.src = e.target.result;
   };
   reader.readAsDataURL(file);
-  event.target.value='';
+  event.target.value = '';
 }
 
-function renameMember(id, name) {
-  const m = FAMILY_MEMBERS.find(m=>m.id===id);
-  if(m && name.trim()){ m.nama=name.trim(); saveMembersToStorage(); }
+async function renameMember(id, name) {
+  const m = FAMILY_MEMBERS.find(m => m.id === id);
+  if (m && name.trim()) {
+    m.nama = name.trim();
+    await sbUpsert('ras_members', { member_id: id, nama: m.nama, foto_url: m.foto || '' });
+  }
 }
 
-function deleteMemberPhoto(event, id) {
+async function deleteMemberPhoto(event, id) {
   event.stopPropagation();
-  const m = FAMILY_MEMBERS.find(m=>m.id===id);
-  if(m && confirm('Hapus foto '+m.nama+'?')){ m.foto=''; saveMembersToStorage(); renderPhotoGrid(); renderDashboard(); }
+  const m = FAMILY_MEMBERS.find(m => m.id === id);
+  if (m && confirm('Hapus foto ' + m.nama + '?')) {
+    m.foto = '';
+    await sbUpsert('ras_members', { member_id: id, nama: m.nama, foto_url: '' });
+    renderPhotoGrid(); renderDashboard();
+  }
 }
 
-function addMember() {
-  const newId = Math.max(...FAMILY_MEMBERS.map(m=>m.id),0)+1;
-  FAMILY_MEMBERS.push({id:newId,nama:'Anggota '+newId,foto:''});
-  saveMembersToStorage(); renderPhotoGrid(); renderDashboard();
-  showNotif('Anggota baru ditambahkan');
+async function addMember() {
+  const newId = Math.max(...FAMILY_MEMBERS.map(m => m.id), 0) + 1;
+  const nm = { id: newId, nama: 'Anggota ' + newId, foto: '' };
+  FAMILY_MEMBERS.push(nm);
+  await sbUpsert('ras_members', { member_id: newId, nama: nm.nama, foto_url: '' });
+  renderPhotoGrid(); renderDashboard(); showNotif('Anggota baru ditambahkan');
 }
 
-function clearAllPhotos() {
-  if(!confirm('Hapus semua foto?')) return;
-  FAMILY_MEMBERS.forEach(m=>m.foto='');
-  saveMembersToStorage(); renderPhotoGrid(); renderDashboard();
-  showNotif('Semua foto dihapus');
-}
-
-function saveMembersToStorage() {
-  try { localStorage.setItem('ras_members', JSON.stringify(FAMILY_MEMBERS)); }
-  catch(e) { showNotif('⚠️ Storage penuh! Kurangi ukuran foto.'); }
+async function clearAllPhotos() {
+  if (!confirm('Hapus semua foto?')) return;
+  for (const m of FAMILY_MEMBERS) {
+    m.foto = '';
+    await sbUpsert('ras_members', { member_id: m.id, nama: m.nama, foto_url: '' });
+  }
+  renderPhotoGrid(); renderDashboard(); showNotif('Semua foto dihapus');
 }
 
 function exportMemberData() {
-  const data = FAMILY_MEMBERS.map(m=>({id:m.id,nama:m.nama,hasFoto:!!m.foto}));
-  const blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'anggota-keluarga.json';
-  a.click();
+  const data = FAMILY_MEMBERS.map(m => ({ id: m.id, nama: m.nama, hasFoto: !!m.foto }));
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'anggota-keluarga.json'; a.click();
 }
 
 function importPhotosJSON() { document.getElementById('importJsonInput').click(); }
 
-function handleImportJSON(event) {
+async function handleImportJSON(event) {
   const file = event.target.files[0];
-  if(!file) return;
+  if (!file) return;
   const reader = new FileReader();
-  reader.onload = e => {
+  reader.onload = async e => {
     try {
       const data = JSON.parse(e.target.result);
-      data.forEach(d => {
-        const m = FAMILY_MEMBERS.find(m=>m.id===d.id);
-        if(m){ if(d.nama) m.nama=d.nama; if(d.foto) m.foto=d.foto; }
-      });
-      saveMembersToStorage(); renderPhotoGrid(); renderDashboard();
-      showNotif('✅ Data diimport!');
+      for (const d of data) {
+        const m = FAMILY_MEMBERS.find(m => m.id === d.id);
+        if (m) {
+          if (d.nama) m.nama = d.nama;
+          if (d.foto) m.foto = d.foto;
+          await sbUpsert('ras_members', { member_id: m.id, nama: m.nama, foto_url: m.foto || '' });
+        }
+      }
+      renderPhotoGrid(); renderDashboard(); showNotif('✅ Data diimport!');
     } catch(err) { showNotif('❌ File JSON tidak valid'); }
   };
   reader.readAsText(file);
-  event.target.value='';
+  event.target.value = '';
 }
 
 // ── PLAYERS ──
 function renderPlayers() {
   const tbody = document.getElementById('playersTableBody');
-  if(!tbody) return;
-  tbody.innerHTML = players.length ? players.map((p,i) => `
-    <tr>
-      <td style="color:var(--brown-light)">${i+1}</td>
-      <td><div class="player-avatar-sm">${p[0].toUpperCase()}</div></td>
-      <td style="font-weight:600">${p}</td>
-      <td><span class="dot-online"></span><span style="font-size:12px;color:#4CAF50">Online</span></td>
-      <td><button class="btn btn-danger btn-sm" onclick="removePlayer('${p}')">Hapus</button></td>
-    </tr>`).join('')
-  : '<tr><td colspan="5" style="color:var(--brown-light);font-size:13px;text-align:center;padding:24px">Belum ada pemain. Peserta yang masuk room akan muncul di sini.</td></tr>';
+  if (!tbody) return;
+  tbody.innerHTML = players.length ? players.map((p, i) => {
+    const name = p.name || p;
+    return '<tr><td style="color:var(--brown-light)">' + (i+1) + '</td>' +
+      '<td><div class="player-avatar-sm">' + (p.photo_url ? '<img src="' + p.photo_url + '">' : name[0].toUpperCase()) + '</div></td>' +
+      '<td style="font-weight:600">' + name + '</td>' +
+      '<td><span class="dot-online"></span><span style="font-size:12px;color:#4CAF50">Online</span></td>' +
+      '<td><button class="btn btn-danger btn-sm" onclick="removePlayer('' + name + '')">Hapus</button></td></tr>';
+  }).join('') :
+  '<tr><td colspan="5" style="color:var(--brown-light);font-size:13px;text-align:center;padding:24px">Belum ada pemain.</td></tr>';
 }
 
-function addDemoPlayers() {
-  const demos = ['Budi Santoso','Sari Dewi','Rudi Hartono','Rina Kusuma','Ahmad Fauzi','Maya Putri'];
-  demos.forEach(d=>{ if(!players.includes(d)) players.push(d); });
-  localStorage.setItem('ras_players', JSON.stringify(players));
-  renderPlayers(); renderDashboard();
-  showNotif('Demo pemain ditambahkan');
+async function addDemoPlayers() {
+  const demos = ['Budi Santoso','Sari Dewi','Rudi Hartono','Rina Kusuma'];
+  for (const d of demos) {
+    if (!players.find(p => (p.name || p) === d)) {
+      const p = { name: d, photo_url: '', joined_at: new Date().toISOString() };
+      players.push(p);
+      await sbUpsert('ras_players', p);
+    }
+  }
+  renderPlayers(); renderDashboard(); showNotif('Demo pemain ditambahkan');
 }
 
-function removePlayer(name) {
-  players = players.filter(p=>p!==name);
-  localStorage.setItem('ras_players', JSON.stringify(players));
-  renderPlayers(); renderDashboard();
-}
-
-function clearPlayers() {
-  if(!confirm('Hapus semua pemain dari daftar?')) return;
-  players = [];
-  localStorage.setItem('ras_players', JSON.stringify(players));
+async function removePlayer(name) {
+  players = players.filter(p => (p.name || p) !== name);
+  try { await sbDelete('ras_players', { name }); } catch(e) {}
   renderPlayers(); renderDashboard();
 }
 
-// ── LAGU ──
-function renderLaguTable() {
-  const tbody = document.getElementById('laguTableBody');
-  if(!tbody) return;
-  tbody.innerHTML = LAGU_DATA.map(l => `
-    <tr>
-      <td><strong>${l.id}</strong></td>
-      <td>${l.judul}</td>
-      <td style="color:var(--brown-light)">${l.artis}</td>
-      <td><span class="timestamp-badge">${l.ts}</span></td>
-      <td><span class="status-badge synth" id="lagu-status-${l.id}">🔊 Sintetis</span></td>
-      <td>
-        <button class="btn btn-outline btn-sm" onclick="uploadLagu(${l.id})">Upload ${l.file}</button>
-        <input type="file" id="lagu-input-${l.id}" accept="audio/mp3,audio/mpeg" style="display:none" onchange="handleLaguUpload(event,${l.id})">
-      </td>
-    </tr>`).join('');
+async function clearPlayers() {
+  if (!confirm('Hapus semua pemain dari daftar?')) return;
+  for (const p of players) { try { await sbDelete('ras_players', { name: p.name || p }); } catch(e) {} }
+  players = []; renderPlayers(); renderDashboard();
 }
 
-function uploadLagu(id) {
-  document.getElementById('lagu-input-'+id).click();
+// ── RESET ──
+async function resetPhotos() {
+  if (!confirm('Reset semua foto keluarga?')) return;
+  for (const m of FAMILY_MEMBERS) { m.foto = ''; await sbUpsert('ras_members', { member_id: m.id, nama: m.nama, foto_url: '' }); }
+  renderPhotoGrid(); renderDashboard(); showNotif('Foto keluarga direset');
+}
+async function resetPlayers() {
+  if (!confirm('Hapus daftar pemain?')) return;
+  for (const p of players) { try { await sbDelete('ras_players', { name: p.name || p }); } catch(e) {} }
+  players = []; renderPlayers(); renderDashboard();
+}
+async function resetAll() {
+  if (!confirm('RESET SEMUA DATA? Tidak bisa dikembalikan!')) return;
+  const tables = ['ras_event','ras_members','ras_players','ras_open_games','ras_komedian_photos','ras_g3_live','ras_g5_results','ras_g1_scores','ras_g4_scores'];
+  showNotif('⏳ Mereset data...');
+  location.reload();
 }
 
-function handleLaguUpload(event, id) {
+// ── EXPORT ──
+async function exportAllData() {
+  const all = {
+    event: eventSettings,
+    members: FAMILY_MEMBERS.map(m => ({ id: m.id, nama: m.nama, hasFoto: !!m.foto })),
+    players: players.map(p => p.name || p),
+    openGames,
+    exported: new Date().toISOString()
+  };
+  const blob = new Blob([JSON.stringify(all, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'rasmita-data-export.json'; a.click();
+  showNotif('✅ Data diekspor!');
+}
+
+// ── SAVE ALL ──
+async function saveAllToStorage() {
+  try {
+    await sbUpsert('ras_event', { id: 1, ...eventSettings, updated_at: new Date().toISOString() });
+    for (const m of FAMILY_MEMBERS) await sbUpsert('ras_members', { member_id: m.id, nama: m.nama, foto_url: m.foto || '' });
+    await sbUpsert('ras_open_games', { id: 1, game_ids: openGames, updated_at: new Date().toISOString() });
+    showNotif('✅ Semua data tersimpan ke Supabase!');
+  } catch(e) { showNotif('⚠️ Gagal simpan: ' + e.message); }
+}
+
+// ── NOTIF ──
+function showNotif(msg) {
+  const n = document.getElementById('notifBar');
+  n.textContent = msg; n.classList.add('show');
+  setTimeout(() => n.classList.remove('show'), 3000);
+}
+
+// ── LAGU STORAGE ──
+let laguStorage = {};
+
+async function loadLaguStorage() {
+  try {
+    const rows = await sbGet('ras_lagu_storage');
+    laguStorage = {};
+    if (rows) rows.forEach(r => { laguStorage[r.lagu_id] = { mp3: r.mp3_url || '', lirik: r.lirik || '' }; });
+  } catch(e) { laguStorage = {}; }
+}
+
+async function saveLaguStorageItem(laguId, data) {
+  try {
+    await sbUpsert('ras_lagu_storage', { lagu_id: laguId, mp3_url: data.mp3 || '', lirik: data.lirik || '', updated_at: new Date().toISOString() });
+  } catch(e) { showNotif('⚠️ Gagal simpan lagu: ' + e.message); }
+}
+
+async function renderLaguCards() {
+  await loadLaguStorage();
+  const container = document.getElementById('laguCardsAdmin');
+  if (!container) return;
+  container.innerHTML = LAGU_DATA.map(l => {
+    const stored = laguStorage[l.id] || {};
+    const hasMP3 = !!stored.mp3;
+    const lirik = stored.lirik !== undefined && stored.lirik !== '' ? stored.lirik : l.lirik_default;
+    return '<div style="border:1px solid rgba(201,168,76,0.3);border-radius:14px;padding:1.25rem;margin-bottom:1rem;background:var(--white);">' +
+      '<div style="display:flex;align-items:center;gap:12px;margin-bottom:1rem;">' +
+      '<div style="font-size:2rem;">' + l.emoji + '</div>' +
+      '<div><div style="font-weight:700;color:var(--brown);font-size:1rem;">' + l.judul + '</div>' +
+      '<div style="font-size:12px;color:var(--brown-light);">' + l.artis + ' · ' + l.tahun + '</div></div>' +
+      '<div style="margin-left:auto;"><span style="background:' + (hasMP3 ? '#e8f5e9' : '#fff3e0') + ';color:' + (hasMP3 ? '#2d5016' : '#8B6914') + ';border-radius:20px;padding:4px 12px;font-size:11px;font-weight:600;">' +
+      (hasMP3 ? '✓ MP3 Uploaded' : '○ Sintetis') + '</span></div></div>' +
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem;">' +
+      '<label style="background:var(--green);color:white;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;">📁 ' + (hasMP3 ? 'Ganti MP3' : 'Upload MP3') +
+      '<input type="file" accept="audio/mp3,audio/*" style="display:none" onchange="handleLaguMP3Upload(event,' + l.id + ')"></label>' +
+      (hasMP3 ? '<button onclick="deleteLaguMP3(' + l.id + ')" style="background:#fff0f0;color:#c62828;border:1px solid #ffcdd2;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;">🗑️ Hapus MP3</button>' : '') +
+      '</div><div style="margin-bottom:0.75rem;"><div style="font-size:12px;font-weight:600;color:var(--brown);margin-bottom:6px;">✏️ Lirik Sing-Along:</div>' +
+      '<textarea id="lirik_' + l.id + '" rows="4" style="width:100%;border:1px solid rgba(201,168,76,0.4);border-radius:8px;padding:10px;font-size:13px;font-family:inherit;color:var(--brown);background:var(--cream);resize:vertical;">' + lirik + '</textarea></div>' +
+      '<button onclick="saveLirik(' + l.id + ')" style="background:var(--gold);color:var(--brown);border:none;border-radius:8px;padding:7px 18px;font-size:12px;font-weight:700;cursor:pointer;">💾 Simpan Lirik</button></div>';
+  }).join('');
+}
+
+async function handleLaguMP3Upload(event, laguId) {
   const file = event.target.files[0];
-  if(!file) return;
-  const badge = document.getElementById('lagu-status-'+id);
-  if(badge){ badge.className='status-badge mp3'; badge.textContent='🎵 MP3 Siap'; }
-  showNotif(`✅ ${file.name} siap! Taruh file ini di folder yang sama dengan HTML game.`);
-  event.target.value='';
+  if (!file) return;
+  if (file.size > 8 * 1024 * 1024) { showNotif('⚠️ File terlalu besar (maks 8MB)'); return; }
+  showNotif('⏳ Mengupload MP3...');
+  const reader = new FileReader();
+  reader.onload = async e => {
+    try {
+      const storageUrl = await sbUploadFile('rasmita-audio', 'lagu/' + laguId + '.mp3', e.target.result);
+      if (!laguStorage[laguId]) laguStorage[laguId] = {};
+      laguStorage[laguId].mp3 = storageUrl;
+      await saveLaguStorageItem(laguId, laguStorage[laguId]);
+      showNotif('✅ MP3 Lagu ' + laguId + ' berhasil diupload!');
+      renderLaguCards(); renderSingAlongControls();
+    } catch(err) { showNotif('❌ Upload gagal: ' + err.message); }
+  };
+  reader.readAsDataURL(file);
+}
+
+async function deleteLaguMP3(laguId) {
+  if (!confirm('Hapus MP3 lagu ini?')) return;
+  if (laguStorage[laguId]) laguStorage[laguId].mp3 = '';
+  await saveLaguStorageItem(laguId, laguStorage[laguId] || {});
+  renderLaguCards(); renderSingAlongControls(); showNotif('🗑️ MP3 dihapus.');
+}
+
+async function saveLirik(laguId) {
+  await loadLaguStorage();
+  if (!laguStorage[laguId]) laguStorage[laguId] = {};
+  const ta = document.getElementById('lirik_' + laguId);
+  if (ta) laguStorage[laguId].lirik = ta.value;
+  await saveLaguStorageItem(laguId, laguStorage[laguId]);
+  showNotif('✅ Lirik lagu ' + laguId + ' disimpan!');
+}
+
+// ── SING-ALONG CONTROLS ──
+let singAlongAudio = null;
+
+async function renderSingAlongControls() {
+  await loadLaguStorage();
+  const container = document.getElementById('g6SingAlongControls');
+  if (!container) return;
+  let waitingLagu = null;
+  try {
+    const rows = await sbGet('ras_g6_singalong');
+    if (rows && rows.length > 0) waitingLagu = rows[0];
+  } catch(e) {}
+  container.innerHTML = LAGU_DATA.map(l => {
+    const stored = laguStorage[l.id] || {};
+    const hasMP3 = !!stored.mp3;
+    const isWaiting = waitingLagu && waitingLagu.lagu_id === l.id && waitingLagu.status === 'waiting';
+    return '<div style="border:1px solid ' + (isWaiting ? 'var(--gold)' : 'rgba(201,168,76,0.2)') + ';border-radius:14px;padding:1rem 1.25rem;margin-bottom:0.75rem;background:' + (isWaiting ? '#fffbf0' : 'var(--white)') + ';">' +
+      '<div style="display:flex;align-items:center;gap:12px;">' +
+      '<div style="font-size:1.8rem;">' + l.emoji + '</div>' +
+      '<div style="flex:1;"><div style="font-weight:700;color:var(--brown);font-size:0.95rem;">' + l.judul + '</div>' +
+      '<div style="font-size:11px;color:var(--brown-light);">' + l.artis + ' · ' + (hasMP3 ? '<span style="color:var(--green);font-weight:600;">MP3 Ready</span>' : 'Sintetis') + '</div>' +
+      (isWaiting ? '<div style="font-size:11px;color:var(--gold-dark);font-weight:600;margin-top:2px;">⏳ Peserta sedang menunggu play...</div>' : '') +
+      '</div><div style="display:flex;gap:6px;">' +
+      '<button onclick="playSingAlong(' + l.id + ')" style="background:var(--green);color:white;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;">▶ Play</button>' +
+      '<button onclick="nextLaguCmd(' + l.id + ')" style="background:var(--gold);color:var(--brown);border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer;">⏭ Next</button>' +
+      '</div></div></div>';
+  }).join('');
+}
+
+async function playSingAlong(laguId) {
+  await loadLaguStorage();
+  const stored = laguStorage[laguId] || {};
+  const mp3Url = stored.mp3 || null;
+  try {
+    await sbUpsert('ras_g6_play_cmd', { id: 1, lagu_id: laguId, action: 'play', mp3_url: mp3Url, updated_at: new Date().toISOString() });
+    // Update status singalong
+    const rows = await sbGet('ras_g6_singalong');
+    if (rows && rows.length > 0 && rows[0].lagu_id === laguId) {
+      await sbUpsert('ras_g6_singalong', { ...rows[0], status: 'playing', updated_at: new Date().toISOString() });
+    }
+  } catch(e) {}
+  if (singAlongAudio) { singAlongAudio.pause(); singAlongAudio = null; }
+  if (mp3Url) {
+    singAlongAudio = new Audio(mp3Url);
+    singAlongAudio.play().catch(() => {});
+  }
+  showNotif('▶ Play Sing-Along Lagu ' + laguId + ' dikirim ke semua HP!');
+  renderSingAlongControls();
+}
+
+async function nextLaguCmd(laguId) {
+  await sbUpsert('ras_g6_play_cmd', { id: 1, lagu_id: laguId, action: 'next', mp3_url: null, updated_at: new Date().toISOString() });
+  if (singAlongAudio) { singAlongAudio.pause(); singAlongAudio = null; }
+  showNotif('⏭ Lanjut ke lagu berikutnya!');
+}
+
+setInterval(async () => {
+  const ctrl = document.getElementById('g6SingAlongControls');
+  if (ctrl && ctrl.closest('.tab-panel.active')) renderSingAlongControls();
+}, 5000);
+
+// ── GAME 3 PERTANYAAN ──
+const DEFAULT_PERTANYAAN_G3 = [
+  "Siapa yang paling suka tidur?","Siapa yang paling cerewet?",
+  "Siapa yang paling sering telat?","Siapa yang paling pelit?",
+  "Siapa yang paling lebay kalau sakit?","Siapa yang paling suka drama?",
+  "Siapa yang paling susah bangun pagi?","Siapa yang paling boros?",
+  "Siapa yang paling banyak makan?","Siapa yang paling sering lupa?",
+  "Siapa yang paling gampang nangis?","Siapa yang paling keras kepala?",
+  "Siapa yang paling suka selfie?","Siapa yang paling suka gosip?","Siapa yang paling gampang marah?",
+];
+
+let g3Questions = [];
+
+async function renderG3Questions() {
+  try {
+    const rows = await sbGet('ras_g3_questions');
+    g3Questions = rows && rows.length >= 3 ? rows.sort((a,b) => a.urutan - b.urutan).map(r => r.pertanyaan) : [...DEFAULT_PERTANYAAN_G3];
+  } catch(e) { g3Questions = [...DEFAULT_PERTANYAAN_G3]; }
+  const list = document.getElementById('g3QuestionList');
+  if (!list) return;
+  const count = document.getElementById('g3QuestionCount');
+  if (count) count.textContent = g3Questions.length;
+  list.innerHTML = g3Questions.map((q, i) =>
+    '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">' +
+    '<span style="min-width:24px;text-align:center;font-size:12px;color:var(--brown-light);font-weight:600;">' + (i+1) + '</span>' +
+    '<input type="text" value="' + q.replace(/"/g,'&quot;') + '" id="g3q_' + i + '" style="flex:1;border:1px solid rgba(201,168,76,0.4);border-radius:8px;padding:8px 12px;font-size:13px;color:var(--brown);background:var(--cream);font-family:inherit;">' +
+    '<button onclick="deleteG3Question(' + i + ')" style="background:#fff0f0;color:#c62828;border:1px solid #ffcdd2;border-radius:8px;padding:6px 10px;cursor:pointer;font-size:12px;">✕</button></div>'
+  ).join('');
+}
+
+async function addG3Question() {
+  g3Questions.push("Siapa yang paling ...?");
+  await saveG3Questions();
+  renderG3Questions();
+  setTimeout(() => {
+    const inputs = document.querySelectorAll('[id^="g3q_"]');
+    const last = inputs[inputs.length - 1];
+    if (last) { last.focus(); last.select(); last.scrollIntoView({ behavior: 'smooth' }); }
+  }, 100);
+}
+
+async function deleteG3Question(idx) {
+  if (g3Questions.length <= 3) { showNotif('⚠️ Minimal 3 pertanyaan!'); return; }
+  g3Questions.splice(idx, 1);
+  await saveG3Questions();
+  renderG3Questions();
+}
+
+async function saveG3Questions() {
+  const inputs = document.querySelectorAll('[id^="g3q_"]');
+  if (inputs.length > 0) g3Questions = Array.from(inputs).map(inp => inp.value.trim()).filter(q => q.length > 0);
+  try {
+    // Delete existing
+    const existing = await sbGet('ras_g3_questions');
+    if (existing) for (const r of existing) await sbDelete('ras_g3_questions', { id: r.id });
+    // Insert new
+    for (let i = 0; i < g3Questions.length; i++) {
+      await sbUpsert('ras_g3_questions', { urutan: i, pertanyaan: g3Questions[i] });
+    }
+  } catch(e) {}
+  const count = document.getElementById('g3QuestionCount');
+  if (count) count.textContent = g3Questions.length;
+  showNotif('✅ ' + g3Questions.length + ' pertanyaan tersimpan!');
+}
+
+async function resetG3Questions() {
+  if (!confirm('Reset ke pertanyaan default?')) return;
+  g3Questions = [...DEFAULT_PERTANYAAN_G3];
+  await saveG3Questions();
+  renderG3Questions();
+  showNotif('↺ Pertanyaan direset ke default.');
 }
 
 // ── KOMEDIAN ──
-function renderKomedianGrid() {
+async function renderKomedianGrid() {
+  const rows = await sbGet('ras_komedian_photos');
+  if (rows) rows.forEach(r => { komedianPhotos[r.komedian_id] = r.photo_url || ''; });
   const grid = document.getElementById('komedianGrid');
-  if(!grid) return;
+  if (!grid) return;
   grid.innerHTML = KOMEDIAN_TOP.map(k => {
     const photo = komedianPhotos[k.id];
-    return `<div class="komedian-card">
-      <div class="komedian-photo" onclick="uploadKomedianPhoto(${k.id})">
-        ${photo ? `<img src="${photo}" alt="${k.nama}">` : k.nama[0].toUpperCase()}
-      </div>
-      <div class="komedian-info">
-        <div class="k-name">${k.nama}</div>
-        <div class="k-sub">${photo?'✓ Ada foto':'Klik upload'} · ID ${k.id}</div>
-      </div>
-    </div>`;
+    return '<div class="komedian-card"><div class="komedian-photo" onclick="uploadKomedianPhoto(' + k.id + ')">' +
+      (photo ? '<img src="' + photo + '" alt="' + k.nama + '">' : k.nama[0].toUpperCase()) +
+      '</div><div class="komedian-info"><div class="k-name">' + k.nama + '</div>' +
+      '<div class="k-sub">' + (photo ? '✓ Ada foto' : 'Klik upload') + ' · ID ' + k.id + '</div></div></div>';
   }).join('');
 }
 
@@ -1395,349 +1640,46 @@ function uploadKomedianPhoto(id) {
   document.getElementById('komedianBulkInput').click();
 }
 
-function handleKomedianBulkUpload(event) {
+async function handleKomedianBulkUpload(event) {
   const files = Array.from(event.target.files);
   let processed = 0;
-  files.forEach(file => {
-    const reader = new FileReader();
-    reader.onload = e => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const MAX = 200; let w=img.width,h=img.height;
-        if(w>h){h=Math.round(h*MAX/w);w=MAX;}else{w=Math.round(w*MAX/h);h=MAX;}
-        canvas.width=w; canvas.height=h;
-        canvas.getContext('2d').drawImage(img,0,0,w,h);
-        const dataUrl = canvas.toDataURL('image/jpeg',0.8);
-        // Parse ID from filename: 01-sule.jpg -> 1
-        const match = file.name.match(/^(\d+)/);
-        const id = match ? parseInt(match[1]) : currentKomedianId;
-        if(id) komedianPhotos[id] = dataUrl;
-        processed++;
-        if(processed === files.length) {
-          localStorage.setItem('ras_komedian_photos', JSON.stringify(komedianPhotos));
-          renderKomedianGrid();
-          showNotif(`✅ ${processed} foto komedian diupload!`);
-        }
+  for (const file of files) {
+    await new Promise(resolve => {
+      const reader = new FileReader();
+      reader.onload = async e => {
+        const img = new Image();
+        img.onload = async () => {
+          const canvas = document.createElement('canvas');
+          const MAX = 200; let w = img.width, h = img.height;
+          if (w > h) { h = Math.round(h * MAX / w); w = MAX; } else { w = Math.round(w * MAX / h); h = MAX; }
+          canvas.width = w; canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+          const match = file.name.match(/^(\d+)/);
+          const id = match ? parseInt(match[1]) : currentKomedianId;
+          if (id) {
+            try {
+              const url = await sbUploadFile('rasmita-photos', 'komedian/' + id + '.jpg', dataUrl);
+              komedianPhotos[id] = url;
+              await sbUpsert('ras_komedian_photos', { komedian_id: id, photo_url: url });
+            } catch(err) {
+              komedianPhotos[id] = dataUrl;
+              await sbUpsert('ras_komedian_photos', { komedian_id: id, photo_url: dataUrl });
+            }
+          }
+          processed++; resolve();
+        };
+        img.src = e.target.result;
       };
-      img.src = e.target.result;
-    };
-    reader.readAsDataURL(file);
-  });
-  event.target.value='';
-}
-
-function exportKomedianConfig() {
-  const config = Object.entries(komedianPhotos).map(([id,foto])=>({id:parseInt(id),hasFoto:true}));
-  const blob = new Blob([JSON.stringify(config,null,2)],{type:'application/json'});
-  const a = document.createElement('a'); a.href=URL.createObjectURL(blob);
-  a.download='komedian-config.json'; a.click();
-}
-
-// ── RESET ──
-function resetPhotos() {
-  if(!confirm('Reset semua foto keluarga?')) return;
-  FAMILY_MEMBERS.forEach(m=>m.foto='');
-  saveMembersToStorage(); renderPhotoGrid(); renderDashboard();
-  showNotif('Foto keluarga direset');
-}
-function resetPlayers() {
-  if(!confirm('Hapus daftar pemain?')) return;
-  players=[]; localStorage.setItem('ras_players','[]');
-  renderPlayers(); renderDashboard();
-}
-function resetAll() {
-  if(!confirm('RESET SEMUA DATA? Tidak bisa dikembalikan!')) return;
-  ['ras_event','ras_members','ras_players','ras_open_games','ras_komedian_photos'].forEach(k=>localStorage.removeItem(k));
-  location.reload();
-}
-
-// ── EXPORT ──
-function exportAllData() {
-  const all = {
-    event: eventSettings,
-    members: FAMILY_MEMBERS.map(m=>({id:m.id,nama:m.nama,hasFoto:!!m.foto})),
-    players,
-    openGames,
-    exported: new Date().toISOString()
-  };
-  const blob = new Blob([JSON.stringify(all,null,2)],{type:'application/json'});
-  const a = document.createElement('a'); a.href=URL.createObjectURL(blob);
-  a.download='rasmita-data-export.json'; a.click();
-  showNotif('✅ Data diekspor!');
-}
-
-// ── NOTIF ──
-function showNotif(msg) {
-  const n = document.getElementById('notifBar');
-  n.textContent = msg;
-  n.classList.add('show');
-  setTimeout(()=>n.classList.remove('show'),3000);
-}
-
-// ════════════════════════════════════════════════════
-// LAGU STORAGE & RENDER
-// ════════════════════════════════════════════════════
-// Storage untuk MP3 & lirik per lagu
-let laguStorage = {};
-
-function loadLaguStorage() {
-  try { laguStorage = JSON.parse(localStorage.getItem('ras_lagu_storage') || '{}'); } catch(e) { laguStorage = {}; }
-}
-function saveLaguStorage() {
-  try { localStorage.setItem('ras_lagu_storage', JSON.stringify(laguStorage)); } catch(e) {
-    showNotif('⚠️ File MP3 terlalu besar untuk disimpan. Coba kompres dulu.');
-  }
-}
-
-// ════════════════════════════════════════════════════
-// RENDER LAGU CARDS (panel-lagu)
-// ════════════════════════════════════════════════════
-function renderLaguCards() {
-  loadLaguStorage();
-  const container = document.getElementById('laguCardsAdmin');
-  if (!container) return;
-  container.innerHTML = LAGU_DATA.map(l => {
-    const stored = laguStorage[l.id] || {};
-    const hasMP3 = !!stored.mp3;
-    const lirik = stored.lirik !== undefined ? stored.lirik : l.lirik_default;
-    return `
-    <div style="border:1px solid rgba(201,168,76,0.3);border-radius:14px;padding:1.25rem;margin-bottom:1rem;background:var(--white);">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:1rem;">
-        <div style="font-size:2rem;">${l.emoji}</div>
-        <div>
-          <div style="font-weight:700;color:var(--brown);font-size:1rem;">${l.judul}</div>
-          <div style="font-size:12px;color:var(--brown-light);">${l.artis} · ${l.tahun}</div>
-        </div>
-        <div style="margin-left:auto;">
-          <span style="background:${hasMP3?'#e8f5e9':'#fff3e0'};color:${hasMP3?'#2d5016':'#8B6914'};border-radius:20px;padding:4px 12px;font-size:11px;font-weight:600;">
-            ${hasMP3 ? '✓ MP3 Uploaded' : '○ Sintetis'}
-          </span>
-        </div>
-      </div>
-
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem;">
-        <label style="background:var(--green);color:white;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;">
-          📁 ${hasMP3 ? 'Ganti MP3' : 'Upload MP3'}
-          <input type="file" accept="audio/mp3,audio/*" style="display:none" onchange="handleLaguMP3Upload(event,${l.id})">
-        </label>
-        ${hasMP3 ? `<button onclick="deleteLaguMP3(${l.id})" style="background:#fff0f0;color:#c62828;border:1px solid #ffcdd2;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;">🗑️ Hapus MP3</button>` : ''}
-      </div>
-
-      <div style="margin-bottom:0.75rem;">
-        <div style="font-size:12px;font-weight:600;color:var(--brown);margin-bottom:6px;">✏️ Lirik Sing-Along (bisa diedit):</div>
-        <textarea id="lirik_${l.id}" rows="4" style="width:100%;border:1px solid rgba(201,168,76,0.4);border-radius:8px;padding:10px;font-size:13px;font-family:inherit;color:var(--brown);background:var(--cream);resize:vertical;" onchange="saveLirik(${l.id})">${lirik}</textarea>
-      </div>
-      <button onclick="saveLirik(${l.id})" style="background:var(--gold);color:var(--brown);border:none;border-radius:8px;padding:7px 18px;font-size:12px;font-weight:700;cursor:pointer;">💾 Simpan Lirik</button>
-    </div>`;
-  }).join('');
-}
-
-function handleLaguMP3Upload(event, laguId) {
-  const file = event.target.files[0];
-  if (!file) return;
-  if (file.size > 8 * 1024 * 1024) { showNotif('⚠️ File terlalu besar (maks 8MB). Potong dulu ya!'); return; }
-  const reader = new FileReader();
-  reader.onload = e => {
-    loadLaguStorage();
-    if (!laguStorage[laguId]) laguStorage[laguId] = {};
-    laguStorage[laguId].mp3 = e.target.result;
-    saveLaguStorage();
-    showNotif('✅ MP3 Lagu ' + laguId + ' berhasil diupload!');
-    renderLaguCards();
-    renderSingAlongControls();
-  };
-  reader.readAsDataURL(file);
-}
-
-function deleteLaguMP3(laguId) {
-  if (!confirm('Hapus MP3 lagu ini?')) return;
-  loadLaguStorage();
-  if (laguStorage[laguId]) delete laguStorage[laguId].mp3;
-  saveLaguStorage();
-  renderLaguCards();
-  renderSingAlongControls();
-  showNotif('🗑️ MP3 dihapus, akan pakai sintetis.');
-}
-
-function saveLirik(laguId) {
-  loadLaguStorage();
-  if (!laguStorage[laguId]) laguStorage[laguId] = {};
-  const ta = document.getElementById('lirik_' + laguId);
-  if (ta) laguStorage[laguId].lirik = ta.value;
-  saveLaguStorage();
-  // Sync ke game via localStorage
-  try {
-    const allLirik = {};
-    LAGU_DATA.forEach(l => {
-      const stored = laguStorage[l.id] || {};
-      allLirik[l.id] = stored.lirik !== undefined ? stored.lirik : l.lirik_default;
+      reader.readAsDataURL(file);
     });
-    localStorage.setItem('ras_lagu_lirik', JSON.stringify(allLirik));
-  } catch(e) {}
-  showNotif('✅ Lirik lagu ' + laguId + ' disimpan!');
-}
-
-// ════════════════════════════════════════════════════
-// SING-ALONG CONTROLS (panel game6-admin)
-// ════════════════════════════════════════════════════
-let singAlongAudio = null;
-
-function renderSingAlongControls() {
-  loadLaguStorage();
-  const container = document.getElementById('g6SingAlongControls');
-  if (!container) return;
-
-  // Check current waiting lagu from game
-  let waitingLagu = null;
-  try { waitingLagu = JSON.parse(localStorage.getItem('ras_g6_singalong') || 'null'); } catch(e) {}
-
-  container.innerHTML = LAGU_DATA.map(l => {
-    const stored = laguStorage[l.id] || {};
-    const hasMP3 = !!stored.mp3;
-    const isWaiting = waitingLagu && waitingLagu.laguId === l.id && waitingLagu.status === 'waiting';
-    return `
-    <div style="border:1px solid ${isWaiting ? 'var(--gold)' : 'rgba(201,168,76,0.2)'};border-radius:14px;padding:1rem 1.25rem;margin-bottom:0.75rem;background:${isWaiting ? '#fffbf0' : 'var(--white)'};transition:all 0.3s;">
-      <div style="display:flex;align-items:center;gap:12px;">
-        <div style="font-size:1.8rem;">${l.emoji}</div>
-        <div style="flex:1;">
-          <div style="font-weight:700;color:var(--brown);font-size:0.95rem;">${l.judul}</div>
-          <div style="font-size:11px;color:var(--brown-light);">${l.artis} · ${hasMP3 ? '<span style="color:var(--green);font-weight:600;">MP3 Ready</span>' : 'Sintetis'}</div>
-          ${isWaiting ? '<div style="font-size:11px;color:var(--gold-dark);font-weight:600;margin-top:2px;">⏳ Peserta sedang menunggu play...</div>' : ''}
-        </div>
-        <div style="display:flex;gap:6px;">
-          <button onclick="playSingAlong(${l.id})" style="background:var(--green);color:white;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;${isWaiting ? 'animation:pulse 1.5s infinite;' : ''}">▶ Play</button>
-          <button onclick="nextLaguCmd(${l.id})" style="background:var(--gold);color:var(--brown);border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer;" title="Skip ke lagu berikutnya">⏭ Next</button>
-        </div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function playSingAlong(laguId) {
-  loadLaguStorage();
-  const stored = laguStorage[laguId] || {};
-  const mp3 = stored.mp3 || null;
-
-  // Kirim perintah ke game via localStorage
-  try {
-    localStorage.setItem('ras_g6_play_cmd', JSON.stringify({
-      laguId, action: 'play', mp3DataUrl: mp3, ts: Date.now()
-    }));
-    // Update singalong status
-    const sa = JSON.parse(localStorage.getItem('ras_g6_singalong') || '{}');
-    if (sa.laguId === laguId) { sa.status = 'playing'; localStorage.setItem('ras_g6_singalong', JSON.stringify(sa)); }
-  } catch(e) {}
-
-  // Play di admin juga (sebagai monitor)
-  if (singAlongAudio) { singAlongAudio.pause(); singAlongAudio = null; }
-  if (mp3) {
-    singAlongAudio = new Audio(mp3);
-    singAlongAudio.play().catch(()=>{});
   }
-  showNotif('▶ Play Sing-Along Lagu ' + laguId + ' dikirim ke semua HP!');
-  renderSingAlongControls();
+  renderKomedianGrid();
+  showNotif('✅ ' + processed + ' foto komedian diupload!');
+  event.target.value = '';
 }
 
-function nextLaguCmd(laguId) {
-  try {
-    localStorage.setItem('ras_g6_play_cmd', JSON.stringify({ laguId, action: 'next', ts: Date.now() }));
-  } catch(e) {}
-  if (singAlongAudio) { singAlongAudio.pause(); singAlongAudio = null; }
-  showNotif('⏭ Lanjut ke lagu berikutnya!');
-}
-
-// Poll status dari game setiap 2 detik
-setInterval(() => {
-  const ctrl = document.getElementById('g6SingAlongControls');
-  if (ctrl && ctrl.closest('.tab-panel.active')) renderSingAlongControls();
-}, 2000);
-
-// ════════════════════════════════════════════════════
-// GAME 3 — EDIT PERTANYAAN
-// ════════════════════════════════════════════════════
-const DEFAULT_PERTANYAAN_G3 = [
-  "Siapa yang paling suka tidur?","Siapa yang paling cerewet?",
-  "Siapa yang paling sering telat?","Siapa yang paling pelit?",
-  "Siapa yang paling lebay kalau sakit?","Siapa yang paling suka drama?",
-  "Siapa yang paling susah bangun pagi?","Siapa yang paling boros?",
-  "Siapa yang paling banyak makan?","Siapa yang paling sering lupa?",
-  "Siapa yang paling gampang nangis?","Siapa yang paling keras kepala?",
-  "Siapa yang paling suka selfie?","Siapa yang paling suka gosip?",
-  "Siapa yang paling gampang marah?",
-];
-
-let g3Questions = [];
-
-function loadG3Questions() {
-  try {
-    const saved = localStorage.getItem('ras_g3_questions');
-    g3Questions = saved ? JSON.parse(saved) : [...DEFAULT_PERTANYAAN_G3];
-  } catch(e) { g3Questions = [...DEFAULT_PERTANYAAN_G3]; }
-}
-
-function renderG3Questions() {
-  loadG3Questions();
-  const list = document.getElementById('g3QuestionList');
-  if (!list) return;
-  const count = document.getElementById('g3QuestionCount');
-  if (count) count.textContent = g3Questions.length;
-
-  list.innerHTML = g3Questions.map((q, i) => `
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-      <span style="min-width:24px;text-align:center;font-size:12px;color:var(--brown-light);font-weight:600;">${i+1}</span>
-      <input type="text" value="${q.replace(/"/g,'&quot;')}" id="g3q_${i}"
-        style="flex:1;border:1px solid rgba(201,168,76,0.4);border-radius:8px;padding:8px 12px;font-size:13px;color:var(--brown);background:var(--cream);font-family:inherit;">
-      <button onclick="deleteG3Question(${i})" style="background:#fff0f0;color:#c62828;border:1px solid #ffcdd2;border-radius:8px;padding:6px 10px;cursor:pointer;font-size:12px;" title="Hapus">✕</button>
-    </div>`).join('');
-}
-
-function addG3Question() {
-  loadG3Questions();
-  g3Questions.push("Siapa yang paling ...?");
-  saveG3Questions();
-  renderG3Questions();
-  // Scroll to bottom & focus last input
-  setTimeout(() => {
-    const inputs = document.querySelectorAll('[id^="g3q_"]');
-    const last = inputs[inputs.length - 1];
-    if (last) { last.focus(); last.select(); last.scrollIntoView({behavior:'smooth'}); }
-  }, 100);
-}
-
-function deleteG3Question(idx) {
-  loadG3Questions();
-  if (g3Questions.length <= 3) { showNotif('⚠️ Minimal 3 pertanyaan!'); return; }
-  g3Questions.splice(idx, 1);
-  saveG3Questions();
-  renderG3Questions();
-}
-
-function saveG3Questions() {
-  // Baca dari input fields dulu
-  const inputs = document.querySelectorAll('[id^="g3q_"]');
-  if (inputs.length > 0) {
-    g3Questions = Array.from(inputs).map(inp => inp.value.trim()).filter(q => q.length > 0);
-  }
-  try {
-    localStorage.setItem('ras_g3_questions', JSON.stringify(g3Questions));
-  } catch(e) {}
-  const count = document.getElementById('g3QuestionCount');
-  if (count) count.textContent = g3Questions.length;
-  showNotif('✅ ' + g3Questions.length + ' pertanyaan tersimpan!');
-}
-
-function resetG3Questions() {
-  if (!confirm('Reset ke pertanyaan default?')) return;
-  g3Questions = [...DEFAULT_PERTANYAAN_G3];
-  localStorage.setItem('ras_g3_questions', JSON.stringify(g3Questions));
-  renderG3Questions();
-  showNotif('↺ Pertanyaan direset ke default.');
-}
-
-// ════════════════════════════════════════════════════
-// PHOTO PREVIEW PER GAME
-// ════════════════════════════════════════════════════
+// ── PHOTO PREVIEW ──
 function renderPhotoPreviewForGame(containerId) {
   const container = document.getElementById(containerId);
   if (!container) return;
@@ -1746,12 +1688,10 @@ function renderPhotoPreviewForGame(containerId) {
     container.innerHTML = '<p style="color:var(--brown-light);font-size:13px;padding:1rem 0;">Belum ada foto. Upload dulu di tab Semua Foto.</p>';
     return;
   }
-  container.innerHTML = members.map(m => `
-    <div class="photo-item" style="cursor:default;">
-      <img src="${m.foto}" alt="${m.nama}">
-      <div class="photo-name">${m.nama}</div>
-      <div class="photo-status has-photo">✓ Ada foto</div>
-    </div>`).join('');
+  container.innerHTML = members.map(m =>
+    '<div class="photo-item" style="cursor:default;"><img src="' + m.foto + '" alt="' + m.nama + '">' +
+    '<div class="photo-name">' + m.nama + '</div><div class="photo-status has-photo">✓ Ada foto</div></div>'
+  ).join('');
 }
 </script>
 </body>

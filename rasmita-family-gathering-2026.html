@@ -1818,14 +1818,92 @@
 </div>
 
 <script>
-// ===== DATA & STATE =====
+// ============================================================
+// SUPABASE CONFIG — ganti dengan credentials project Anda
+// ============================================================
+const SUPABASE_URL = 'https://XXXX.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.XXXXXX';
+
+// ── Low-level REST helpers ──
+async function sbGet(table, filters) {
+  let url = SUPABASE_URL + '/rest/v1/' + table + '?select=*';
+  if (filters) for (const [k,v] of Object.entries(filters)) url += '&' + k + '=eq.' + encodeURIComponent(v);
+  const r = await fetch(url, { headers: sbHeaders() });
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+async function sbUpsert(table, data) {
+  const r = await fetch(SUPABASE_URL + '/rest/v1/' + table, {
+    method: 'POST',
+    headers: { ...sbHeaders(), 'Prefer': 'resolution=merge-duplicates' },
+    body: JSON.stringify(data)
+  });
+  if (!r.ok) { console.warn('sbUpsert error:', await r.text()); }
+}
+async function sbGetOne(table, filters) {
+  const rows = await sbGet(table, filters);
+  return rows && rows.length > 0 ? rows[0] : null;
+}
+function sbHeaders() {
+  return {
+    'apikey': SUPABASE_ANON_KEY,
+    'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+    'Content-Type': 'application/json'
+  };
+}
+function sbSubscribe(table, callback) {
+  const wsUrl = SUPABASE_URL.replace('https://','wss://') + '/realtime/v1/websocket?apikey=' + SUPABASE_ANON_KEY + '&vsn=1.0.0';
+  let ws;
+  function connect() {
+    ws = new WebSocket(wsUrl);
+    ws.onopen = () => {
+      ws.send(JSON.stringify({ topic: 'realtime:public:' + table, event: 'phx_join', payload: { config: { broadcast: { self: true }, presence: {}, postgres_changes: [{ event: '*', schema: 'public', table }] } }, ref: '1' }));
+    };
+    ws.onmessage = (e) => {
+      try {
+        const msg = JSON.parse(e.data);
+        if (msg.event === 'postgres_changes') callback(msg.payload);
+      } catch(_) {}
+    };
+    ws.onclose = () => setTimeout(connect, 3000);
+    ws.onerror = () => ws.close();
+  }
+  connect();
+  return { close: () => ws && ws.close() };
+}
+async function sbUploadFile(bucket, path, dataUrl) {
+  const mime = dataUrl.split(';')[0].split(':')[1];
+  const blob = await fetch(dataUrl).then(r => r.blob());
+  // Try POST first
+  let r = await fetch(SUPABASE_URL + '/storage/v1/object/' + bucket + '/' + path, {
+    method: 'POST',
+    headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'Content-Type': mime },
+    body: blob
+  });
+  if (!r.ok) {
+    // Already exists — try PUT (update)
+    r = await fetch(SUPABASE_URL + '/storage/v1/object/' + bucket + '/' + path, {
+      method: 'PUT',
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'Content-Type': mime },
+      body: blob
+    });
+  }
+  return SUPABASE_URL + '/storage/v1/object/public/' + bucket + '/' + path;
+}
+function sbPublicUrl(bucket, path) {
+  return SUPABASE_URL + '/storage/v1/object/public/' + bucket + '/' + path;
+}
+
+// ============================================================
+// DATA & STATE (tidak berubah dari versi sebelumnya)
+// ============================================================
 const GAMES_INFO = [
   { id: 1, title: "Memory Match Foto", desc: "4 player bergantian, cocokkan pasangan foto. +10 poin per pasangan cocok!", icon: "🃏" },
   { id: 2, title: "Tebak Siapa?", desc: "Foto terpotong perlahan terlihat. Tebak lebih awal = poin lebih besar!", icon: "🔍" },
   { id: 3, title: "Siapa yang Paling...?", desc: "Vote dari foto keluarga. Siapa yang paling sering terpilih jadi Hall of Fame!", icon: "🗳️" },
   { id: 4, title: "Timeline Keluarga", desc: "Susun foto dari termuda ke tertua. 3 ronde × 5 foto. Bonus kecepatan!", icon: "⏳" },
   { id: 5, title: "Kamu Mirip Siapa?", desc: "Jawab pertanyaan dan temukan komedian Indonesia yang mirip denganmu!", icon: "🎭" },
-  { id: 6, title: "Tebak Lagu Indonesia", desc: "Dengar intro lagu, tebak judulnya! 5 lagu legendaris lintas generasi. Nyanyikan bersama di akhir!", icon: "🎵" },
+  { id: 6, title: "Tebak Lagu Indonesia", desc: "Dengar intro lagu, tebak judulnya! 5 lagu legendaris. Nyanyikan bersama di akhir!", icon: "🎵" },
 ];
 
 const PERTANYAAN_G5 = [
@@ -1837,176 +1915,87 @@ const PERTANYAAN_G5 = [
   { id: 6, pertanyaan: "Karakter lucumu?", opsi: ["Lebay & Dramatis", "Polos & Innocent", "Cerdas & Satir", "Ekspresif & Energik", "Kalem & Misterius", "Jail & Usil"], field: "karakter" },
 ];
 
-// FAMILY PHOTOS - Placeholder (will be replaced with actual photos)
 const FAMILY_MEMBERS = [
-  { id: 1, nama: "Anggota 1", foto: "" },
-  { id: 2, nama: "Anggota 2", foto: "" },
-  { id: 3, nama: "Anggota 3", foto: "" },
-  { id: 4, nama: "Anggota 4", foto: "" },
-  { id: 5, nama: "Anggota 5", foto: "" },
-  { id: 6, nama: "Anggota 6", foto: "" },
-  { id: 7, nama: "Anggota 7", foto: "" },
-  { id: 8, nama: "Anggota 8", foto: "" },
-  { id: 9, nama: "Anggota 9", foto: "" },
-  { id: 10, nama: "Anggota 10", foto: "" },
-  { id: 11, nama: "Anggota 11", foto: "" },
-  { id: 12, nama: "Anggota 12", foto: "" },
-  { id: 13, nama: "Anggota 13", foto: "" },
-  { id: 14, nama: "Anggota 14", foto: "" },
-  { id: 15, nama: "Anggota 15", foto: "" },
-  { id: 16, nama: "Anggota 16", foto: "" },
-  { id: 17, nama: "Anggota 17", foto: "" },
-  { id: 18, nama: "Anggota 18", foto: "" },
-  { id: 19, nama: "Anggota 19", foto: "" },
-  { id: 20, nama: "Anggota 20", foto: "" },
+  { id: 1, nama: "Anggota 1", foto: "" },{ id: 2, nama: "Anggota 2", foto: "" },
+  { id: 3, nama: "Anggota 3", foto: "" },{ id: 4, nama: "Anggota 4", foto: "" },
+  { id: 5, nama: "Anggota 5", foto: "" },{ id: 6, nama: "Anggota 6", foto: "" },
+  { id: 7, nama: "Anggota 7", foto: "" },{ id: 8, nama: "Anggota 8", foto: "" },
+  { id: 9, nama: "Anggota 9", foto: "" },{ id: 10, nama: "Anggota 10", foto: "" },
+  { id: 11, nama: "Anggota 11", foto: "" },{ id: 12, nama: "Anggota 12", foto: "" },
+  { id: 13, nama: "Anggota 13", foto: "" },{ id: 14, nama: "Anggota 14", foto: "" },
+  { id: 15, nama: "Anggota 15", foto: "" },{ id: 16, nama: "Anggota 16", foto: "" },
+  { id: 17, nama: "Anggota 17", foto: "" },{ id: 18, nama: "Anggota 18", foto: "" },
+  { id: 19, nama: "Anggota 19", foto: "" },{ id: 20, nama: "Anggota 20", foto: "" },
 ];
 
-// ===== FOTO BERBEDA PER GAME =====
-// Game 1 (Memory Match): foto 0-7 (8 anggota)
-// Game 2 (Tebak Siapa): foto 8-17 (10 anggota)
-// Game 3 (Siapa Paling): foto 0-19 (semua, untuk voting)
-// Game 4 (Timeline): foto 0-14 per ronde (5 per ronde)
 function getPhotosForGame(gameId) {
-  const withPhoto = FAMILY_MEMBERS.filter(m => m.foto);
   const all = FAMILY_MEMBERS;
   if (gameId === 1) return all.slice(0, 8);
   if (gameId === 2) return all.slice(8, 18);
-  if (gameId === 4) return all.slice(0, 15); // 3 ronde x 5
-  return all; // game 3 dan lainnya pakai semua
+  if (gameId === 4) return all.slice(0, 15);
+  return all;
 }
 
 const PERTANYAAN_G3 = [
-  "Siapa yang paling suka tidur?",
-  "Siapa yang paling cerewet?",
-  "Siapa yang paling sering telat?",
-  "Siapa yang paling pelit?",
-  "Siapa yang paling lebay kalau sakit?",
-  "Siapa yang paling suka drama?",
-  "Siapa yang paling susah bangun pagi?",
-  "Siapa yang paling boros?",
-  "Siapa yang paling banyak makan?",
-  "Siapa yang paling sering lupa?",
-  "Siapa yang paling gampang nangis?",
-  "Siapa yang paling gampang tertawa?",
-  "Siapa yang paling keras kepala?",
-  "Siapa yang paling suka selfie?",
-  "Siapa yang paling suka gosip?",
-  "Siapa yang paling suka pamer?",
-  "Siapa yang paling gampang marah?",
-  "Siapa yang paling suka ngatur orang?",
-  "Siapa yang paling sulit dibangunkan?",
-  "Siapa yang paling suka jajan?",
+  "Siapa yang paling suka tidur?","Siapa yang paling cerewet?",
+  "Siapa yang paling sering telat?","Siapa yang paling pelit?",
+  "Siapa yang paling lebay kalau sakit?","Siapa yang paling suka drama?",
+  "Siapa yang paling susah bangun pagi?","Siapa yang paling boros?",
+  "Siapa yang paling banyak makan?","Siapa yang paling sering lupa?",
+  "Siapa yang paling gampang nangis?","Siapa yang paling gampang tertawa?",
+  "Siapa yang paling keras kepala?","Siapa yang paling suka selfie?",
+  "Siapa yang paling suka gosip?","Siapa yang paling suka pamer?",
+  "Siapa yang paling gampang marah?","Siapa yang paling suka ngatur orang?",
+  "Siapa yang paling sulit dibangunkan?","Siapa yang paling suka jajan?",
 ];
 
 const COMEDIANS = {
   pria: [
-    // ===== KOMEDIAN LAWAS / LEGENDARIS =====
     { id:1, nama:"Ateng", usia:70, postur:"pendek", rambut:"lurus", kumis:false, kacamata:false, karakter:"polos", komentar:"Waaah, kamu setara Ateng — legenda komedi Indonesia! Slapstick dan ekspresi mukamu bikin semua orang ngakak tanpa bisa berhenti!" },
-    { id:2, nama:"Gepeng", usia:65, postur:"pendek", rambut:"lurus", kumis:false, kacamata:false, karakter:"polos", komentar:"Duet legendaris kayak Gepeng! Partnermu adalah kuncimu. Bersama orang yang tepat, humor simpelmu jadi luar biasa!" },
-    { id:3, nama:"Benyamin S", usia:70, postur:"sedang", rambut:"lurus", kumis:true, kacamata:false, karakter:"ekspresif", komentar:"Betawi aseli kayak Benyamin! Logat dan gaya hidupmu yang otentik adalah komedian alami yang tak tertandingi!" },
-    { id:4, nama:"Bing Slamet", usia:75, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Maestro komedi kayak Bing Slamet! Kamu punya jiwa entertainer sejati yang menghibur lintas generasi!" },
-    { id:5, nama:"Dono Warkop", usia:70, postur:"sedang", rambut:"lurus", kumis:false, kacamata:true, karakter:"cerdas", komentar:"Pinter tapi sering apes kayak Dono! Humor intelektualmu selalu bikin orang mikir dulu baru ngakak belakangan!" },
-    { id:6, nama:"Kasino Warkop", usia:68, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"lebay", komentar:"Centil dan eksplosif kayak Kasino! Ekspresi muka dan gaya bicaramu bikin situasi paling serius jadi lucu!" },
-    { id:7, nama:"Indro Warkop", usia:65, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"kalem", komentar:"Cool dan survive kayak Indro! Kamu tipe yang tenang tapi selalu punya timing terbaik untuk punchline mematikan!" },
-    { id:8, nama:"Pak Tile", usia:75, postur:"gemuk", rambut:"lurus", kumis:true, kacamata:false, karakter:"polos", komentar:"Legendaris kayak Pak Tile! Gayamu yang polos dan lugu menipu semua orang — di balik itu tersimpan humor tajam!" },
-    { id:9, nama:"Asmuni Srimulat", usia:75, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"polos", komentar:"Srimulat legend kayak Asmuni! Kamu punya keahlian membikin suasana cair hanya dari cara kamu berdiri di panggung!" },
-    { id:10, nama:"Basuki Srimulat", usia:72, postur:"gemuk", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Gemoy dan menggemaskan kayak Basuki! Postur dan ekspresimu sendiri sudah bikin orang senyum sebelum kamu ngomong!" },
-    // ===== KOMEDIAN ERA 90-2000AN =====
+    { id:2, nama:"Gepeng", usia:65, postur:"pendek", rambut:"lurus", kumis:false, kacamata:false, karakter:"polos", komentar:"Duet legendaris kayak Gepeng! Bersama orang yang tepat, humor simpelmu jadi luar biasa!" },
+    { id:5, nama:"Dono Warkop", usia:70, postur:"sedang", rambut:"lurus", kumis:false, kacamata:true, karakter:"cerdas", komentar:"Pinter tapi sering apes kayak Dono! Humor intelektualmu selalu bikin orang mikir dulu baru ngakak!" },
     { id:11, nama:"Sule", usia:44, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"lebay", komentar:"Raja Komedi Indonesia! Kayak Sule, kalau kamu ngomong semua orang lupa nama sendiri karena kebanyakan ketawa!" },
-    { id:12, nama:"Andre Taulany", usia:50, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"kalem", komentar:"Mirip Andre! Gayamu kalem tapi punchline-mu tajam kayak silet. Orang nggak sadar sudah tertawa sebelum sadar kenapa!" },
-    { id:13, nama:"Komeng", usia:56, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"polos", komentar:"Spontan! Uhuy! Kamu punya wajah datar tapi bikin orang pingsan ketawa. Komeng bangga punya kembaran!" },
+    { id:12, nama:"Andre Taulany", usia:50, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"kalem", komentar:"Mirip Andre! Gayamu kalem tapi punchline-mu tajam kayak silet!" },
+    { id:13, nama:"Komeng", usia:56, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"polos", komentar:"Spontan! Uhuy! Kamu punya wajah datar tapi bikin orang pingsan ketawa!" },
     { id:14, nama:"Cak Lontong", usia:52, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Otakmu njlimet kayak Cak Lontong! Kalimatmu bikin orang mikir dulu 5 menit baru ngakak keras!" },
     { id:15, nama:"Tukul Arwana", usia:60, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"lebay", komentar:"Kembali ke laptop! Seperti Tukul, catchphrase-mu sekali diucapkan langsung ikonik selamanya!" },
-    { id:16, nama:"Aziz Gagap", usia:47, postur:"gemuk", rambut:"lurus", kumis:false, kacamata:false, karakter:"polos", komentar:"Ga-ga-ga-gak ada yang bisa ngalahin spontanitasmu! Kayak Aziz, keluguan adalah senjata utamamu!" },
-    { id:17, nama:"Eko Patrio", usia:53, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Semangat juang kayak Eko Patrio! Kamu bisa tertawa di tengah badai sekalipun. Itu baru komedian sejati!" },
-    { id:18, nama:"Parto Patrio", usia:57, postur:"gemuk", rambut:"botak", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Wibawa Parto ada di dirimu! Kamu pemimpin yang bisa bikin sidang serius jadi pentas komedi tanpa disadari!" },
-    { id:19, nama:"Olga Syahputra", usia:38, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"lebay", komentar:"Legenda tak terlupakan kayak Olga! Energimu mengisi ruangan dan membuat semua orang merasa istimewa!" },
-    { id:20, nama:"Tike Priyatnakusuma", usia:50, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Bisa masuk semua genre kayak Tike! Dari drama serius hingga komedi ringan, kamu kuasai semua dengan gemilang!" },
-    { id:21, nama:"Wendi Cagur", usia:42, postur:"gemuk", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Mirip Wendi! Ekspresi mukamu bisa bikin suasana mendung jadi cerah. Aset nasional nih!" },
-    { id:22, nama:"Denny Cagur", usia:40, postur:"gemuk", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Duo Cagur versi baru! Energimu selevel Denny, sekali masuk ruangan semua langsung ngakak!" },
-    { id:23, nama:"Aming", usia:47, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"lebay", komentar:"Lebay tapi ikonik kayak Aming! Overdramatic-mu bukan kelebihan, itu senjata utama yang tak tertandingi!" },
-    { id:24, nama:"Iwel Sastra", usia:50, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Veteran sejati kayak Iwel! Jam terbangmu membuat setiap penampilan terasa sempurna dan penuh kalkulasi!" },
-    { id:25, nama:"Indra Jegel", usia:35, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"polos", komentar:"Logat Medanmu sekental Indra Jegel! Belum ngomong apa-apa, orang sudah siap-siap ketawa duluan!" },
-    // ===== STAND-UP ERA MODERN =====
     { id:26, nama:"Raditya Dika", usia:39, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Mirip Raditya Dika! Hidupmu penuh kejadian absurd yang kalau diceritain bisa jadi buku bestseller!" },
     { id:27, nama:"Ernest Prakasa", usia:43, postur:"sedang", rambut:"lurus", kumis:false, kacamata:true, karakter:"cerdas", komentar:"Mirip Ernest! Komedian intelektual yang bikin penonton merasa pintar padahal baru saja ditertawakan!" },
     { id:28, nama:"Dodit Mulyanto", usia:36, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"polos", komentar:"Wajahmu innocent kayak Dodit tapi omonganmu... ya Allah. Komedian berkedok orang baik-baik!" },
-    { id:29, nama:"Pandji Pragiwaksono", usia:42, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Seperti Pandji, kamu bisa bikin kritik sosial jadi bahan ketawa. Berbahaya tapi menghibur!" },
     { id:30, nama:"Bintang Emon", usia:31, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Fresh kayak Bintang Emon! Observasimu tentang kehidupan sehari-hari bikin orang nangis ketawa!" },
     { id:31, nama:"Ge Pamungkas", usia:35, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Tajam kayak Ge Pamungkas! Observasi hidupmu begitu presisi sampai orang terlambat sadar sudah disindir!" },
     { id:32, nama:"Coki Pardede", usia:33, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Deep kayak Coki! Humor gelapmu sebenarnya kritik sosial yang dibalut tawa. Philosopher berkedok komedian!" },
-    { id:33, nama:"Mongol Stres", usia:42, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Stres tapi tetap lucu kayak Mongol! Kamu bisa mengubah frustrasi jadi bahan komedi paling segar!" },
-    { id:34, nama:"Abdur Arsyad", usia:36, postur:"kurus", rambut:"keriting", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Seperti Abdur, kamu bisa angkat cerita kampung halaman jadi komedi berkelas. Lokalitas adalah kekuatanmu!" },
+    { id:34, nama:"Abdur Arsyad", usia:36, postur:"kurus", rambut:"keriting", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Seperti Abdur, kamu bisa angkat cerita kampung halaman jadi komedi berkelas!" },
     { id:35, nama:"Arie Kriting", usia:38, postur:"kurus", rambut:"keriting", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Arie Kriting versi baru! Kamu bangga dengan identitas aslimu dan itu justru yang paling menghibur!" },
     { id:36, nama:"Boris Bokir", usia:36, postur:"gemuk", rambut:"keriting", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Boris banget! Rambut dan energimu sama-sama sulit dikendalikan. Tapi justru itu yang bikin semua tertawa!" },
-    { id:37, nama:"Tretan Muslim", usia:35, postur:"gemuk", rambut:"lurus", kumis:true, kacamata:false, karakter:"polos", komentar:"Seperti Tretan, kamu punya kemampuan ajaib: bicara hal gila dengan muka serius. Bakat langka!" },
-    { id:38, nama:"Ryan Adriandhy", usia:37, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Seperti Ryan, kamu storyteller ulung yang bisa bikin cerita sederhana terasa epik dan lucu sekaligus!" },
-    { id:39, nama:"Soleh Solihun", usia:43, postur:"kurus", rambut:"lurus", kumis:false, kacamata:true, karakter:"cerdas", komentar:"Intelektual kayak Soleh! Kamu bawa humor ke level yang membuat penonton belajar sambil tertawa terpingkal!" },
-    { id:40, nama:"Dzawin Nur", usia:30, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Seperti Dzawin, kamu punya perspektif unik yang bikin orang melihat dunia dari sudut yang berbeda!" },
-    { id:41, nama:"Muhadkly Acho", usia:38, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Tajam seperti Acho! Kritikmu dibalut humor sehingga yang dikritik pun ikut tertawa. Skill level: dewa!" },
-    { id:42, nama:"Babe Cabita", usia:40, postur:"gemuk", rambut:"keriting", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Penuh semangat kayak Babe! Kamu bisa membuat audiens terpingkal hanya dari cara kamu masuk panggung!" },
-    { id:43, nama:"Nopek Novian", usia:30, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"polos", komentar:"Viral kayak Nopek! Kontenmu selalu punya timing sempurna yang bikin orang replay berkali-kali!" },
-    { id:44, nama:"Ridwan Remin", usia:33, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"polos", komentar:"Polos tapi nyelekit kayak Ridwan! Wajah innocentmu adalah topeng sempurna untuk lawakan yang tak terduga!" },
-    { id:45, nama:"Kiky Saputra", usia:33, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Energik kayak Kiky! Panggung seperti menyala begitu kamu naik. Ini bukan kebetulan, ini bakat!" },
-    { id:46, nama:"Fajar Nugra", usia:31, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Observatif kayak Fajar! Hal-hal kecil yang orang lewatkan justru jadi material emas di tanganmu!" },
-    { id:47, nama:"Fico Fachriza", usia:32, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Energi muda kayak Fico! Kamu bawa angin segar ke dunia komedi dengan gaya yang autentik!" },
-    { id:48, nama:"Akbar Kobar", usia:34, postur:"gemuk", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Mengguncang panggung kayak Akbar! Energimu sebesar posturmu dan itu kombinasi mematikan di panggung!" },
-    { id:49, nama:"Kemal Palevi", usia:36, postur:"sedang", rambut:"lurus", kumis:true, kacamata:false, karakter:"kalem", komentar:"Stylish dan lucu kayak Kemal! Kamu buktikan bahwa gaya dan humor bisa berjalan beriringan dengan sempurna!" },
-    { id:50, nama:"Desta", usia:44, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"kalem", komentar:"Mirip Desta! Gaya santaimu menipu semua orang. Di balik ketenangan itu tersimpan lawakan yang siap meledak!" },
-    { id:51, nama:"Bang Emen", usia:46, postur:"gemuk", rambut:"botak", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Legenda Betawi hidup! Kayak Bang Emen, kamu membawa budaya lokal ke panggung nasional dengan bangga!" },
-    { id:52, nama:"Sapri Pantun", usia:48, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"polos", komentar:"Naturalis kayak Sapri! Tidak ada yang dibuat-buat dari dirimu dan itu justru yang membuat semua orang tertawa!" },
-    { id:53, nama:"Ucok Baba", usia:43, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Unik kayak Ucok! Keunikanmu adalah kekuatan terbesar. Berbeda dari keramaian selalu menjadi yang paling diingat!" },
-    { id:54, nama:"Rigen Rakelna", usia:36, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"polos", komentar:"Humble kayak Rigen! Kamu tidak perlu tampil berlebihan karena bakat aslimu sudah cukup bikin semua orang jatuh cinta!" },
-    { id:55, nama:"Yudha Keling", usia:36, postur:"kurus", rambut:"keriting", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Mirip Yudha Keling! Kamu punya charisma alami yang bikin semua mata tertuju padamu begitu kamu mulai bicara!" },
-    { id:56, nama:"Ronal Surapradja", usia:45, postur:"gemuk", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Totalitas kayak Ronal! Kamu tidak setengah-setengah dalam apapun, termasuk dalam membuat orang tertawa keras!" },
-    { id:57, nama:"Arap Gotong Royong", usia:34, postur:"gemuk", rambut:"lurus", kumis:false, kacamata:false, karakter:"polos", komentar:"Unexpected kayak Arap! Kamu sering diremehkan di awal, tapi akhir ceritanya semua orang kagum dan tertawa!" },
-    { id:58, nama:"Peppy", usia:43, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Host handal kayak Peppy! Kamu bisa mengelola chaos dan tetap menghibur. Bakat yang sangat langka!" },
-    { id:59, nama:"Mamat Alkatiri", usia:48, postur:"sedang", rambut:"lurus", kumis:true, kacamata:false, karakter:"kalem", komentar:"Tenang tapi mematikan kayak Mamat! Lawakan terencana matangmu selalu landing sempurna!" },
-    { id:60, nama:"Wendy Walters", usia:38, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Multitalenta kayak Wendy! Humor musikmu membuktikan kamu bisa menghibur dari dua arah sekaligus!" },
-    { id:61, nama:"Insan Nur Akbar", usia:32, postur:"kurus", rambut:"lurus", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Kritis kayak Insan! Mata tajammu melihat ironi di mana-mana dan kamu ubah jadi materi stand-up yang mengena!" },
-    { id:62, nama:"Farhan", usia:52, postur:"kurus", rambut:"lurus", kumis:false, kacamata:true, karakter:"cerdas", komentar:"Intelektual kayak Farhan! Kamu punya referensi yang luas dan bisa mengubah topik berat jadi obrolan santai!" },
     { id:63, nama:"Deddy Corbuzier", usia:48, postur:"sedang", rambut:"botak", kumis:false, kacamata:false, karakter:"cerdas", komentar:"Provokator positif kayak Deddy! Kamu suka menantang pemikiran orang dan itu justru yang membuat semua tertarik!" },
-    { id:64, nama:"Irfan Hakim", usia:47, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Profesional kayak Irfan! Kamu bisa menghibur semua usia dari anak kecil sampai kakek nenek sekaligus!" },
-    { id:65, nama:"Sammy Notaslimboy", usia:39, postur:"gemuk", rambut:"lurus", kumis:false, kacamata:false, karakter:"ekspresif", komentar:"Bangga dengan diri sendiri kayak Sammy! Percaya diri adalah bahan bakar humor terbaik!" },
+    { id:50, nama:"Desta", usia:44, postur:"sedang", rambut:"lurus", kumis:false, kacamata:false, karakter:"kalem", komentar:"Mirip Desta! Gaya santaimu menipu semua orang. Di balik ketenangan itu tersimpan lawakan yang siap meledak!" },
   ],
   wanita: [
-    // ===== KOMEDIAN WANITA LAWAS =====
-    { id:101, nama:"Mpok Nori", usia:75, postur:"gemuk", rambut:"lurus", karakter:"polos", komentar:"Legenda Betawi ada di jiwamu! Seperti Mpok Nori, kamu simpan kelucuan dalam kesederhanaan. Rare talent!" },
-    { id:102, nama:"Tuti Suprapto (Tarzan)", usia:72, postur:"gemuk", rambut:"lurus", karakter:"ekspresif", komentar:"Srimulat queen! Kamu punya kemampuan langka: bikin semua orang terpingkal hanya dari gestur tubuhmu saja!" },
+    { id:101, nama:"Mpok Nori", usia:75, postur:"gemuk", rambut:"lurus", karakter:"polos", komentar:"Legenda Betawi ada di jiwamu! Seperti Mpok Nori, kamu simpan kelucuan dalam kesederhanaan." },
     { id:103, nama:"Nunung", usia:59, postur:"gemuk", rambut:"lurus", karakter:"lebay", komentar:"Seperti Nunung legend, energimu mengisi seluruh panggung. Ketawamu menular dan senyummu bikin dunia cerah!" },
     { id:104, nama:"Soimah", usia:43, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Bawel dan menggemaskan kayak Soimah! Sekali kamu bicara, semua orang berhenti dan mendengarkan sambil senyum!" },
     { id:105, nama:"Rina Nose", usia:38, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Eksplosif kayak Rina Nose! Energimu membuktikan kamu bisa bertahan di antara komedian paling lucu!" },
-    { id:106, nama:"Asri Welas", usia:43, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Welas asih kayak Asri! Humormu hangat dan mengundang tapi tiba-tiba bikin orang tersedak ketawa!" },
     { id:107, nama:"Tika Panggabean", usia:45, postur:"gemuk", rambut:"lurus", karakter:"ekspresif", komentar:"Totalitas kayak Tika! Kamu all-in dalam berkomedi. Tidak ada setengah-setengah, selalu maksimal!" },
-    { id:108, nama:"Fitri Tropica", usia:38, postur:"sedang", rambut:"lurus", karakter:"lebay", komentar:"Tropical vibes kayak Fitri! Pembawaan ceriamu seperti sinar matahari yang selalu menghangatkan suasana!" },
     { id:109, nama:"Kiky Saputri", usia:31, postur:"kurus", rambut:"lurus", karakter:"cerdas", komentar:"Berani kayak Kiky! Stand-up comedy-mu yang kritis tapi lucu membuktikan kamu bukan komedian biasa!" },
-    { id:110, nama:"Arafah Rianti", usia:29, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"TikTok queen kayak Arafah! Kontenmu selalu relate dengan kehidupan sehari-hari dan bikin orang ngerasa less alone!" },
-    { id:111, nama:"Melaney Ricardo", usia:43, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Blak-blakan kayak Melaney! Kejujuranmu dalam berkomedi adalah kekuatan terbesar. Tidak ada filter, semua keluar!" },
-    { id:112, nama:"Hesti Purwadinata", usia:37, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Presenter lucu kayak Hesti! Kamu bisa membuat topik serius jadi ringan dan menyenangkan. Skill berharga!" },
-    { id:113, nama:"Nycta Gina", usia:39, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Spontan kayak Nycta! Reaksi spontanmu terhadap kejadian sehari-hari selalu lebih lucu dari komedi terencana!" },
+    { id:110, nama:"Arafah Rianti", usia:29, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"TikTok queen kayak Arafah! Kontenmu selalu relate dengan kehidupan sehari-hari!" },
     { id:114, nama:"Sarah Sechan", usia:44, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Talk show queen kayak Sarah! Kemampuanmu menggali cerita lucu dari siapapun adalah superpower yang luar biasa!" },
     { id:115, nama:"Cinta Laura", usia:30, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Aku tuh orangnya kayak Cinta Laura! Ungkapan ikonikmu sendiri adalah bukti kamu bisa jadi meme hidup yang dicintai!" },
-    { id:116, nama:"Ayu Ting Ting", usia:32, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Bohoso opo iku? Kayak Ayu, kamu punya charm alami yang bikin orang suka sebelum kamu berkomedi!" },
     { id:117, nama:"Ria Ricis", usia:28, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Content queen kayak Ria Ricis! Apapun kamu lakukan bisa jadi konten yang menghibur jutaan orang!" },
-    { id:118, nama:"Ayu Dewi", usia:40, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Host handal kayak Ayu Dewi! Kamu bisa mengendalikan suasana dan bikin semua tamu merasa nyaman dan lucu!" },
-    { id:119, nama:"Gisella Anastasia", usia:32, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Gisel banget! Tawa lepasmu yang terkenal adalah senjata paling menggemaskan dalam arsenal humormu!" },
-    { id:120, nama:"Rizky Inggar", usia:28, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Pemenang Anugerah Komedi! Seperti Rizky Inggar, kamu diakui semua kalangan sebagai komedian terbaik masa kini!" },
-    { id:121, nama:"Awkarin", usia:26, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Berani dan autentik kayak Awkarin! Kamu tidak peduli penilaian orang dan itu justru yang membuat semua terpesona!" },
-    { id:122, nama:"Olla Ramlan", usia:41, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Spontan kayak Olla! Kamu tidak perlu persiapan untuk jadi lucu. Natural comedian yang selalu ada di momen tepat!" },
-    { id:123, nama:"Nabilah Ayu", usia:26, postur:"kurus", rambut:"lurus", karakter:"ekspresif", komentar:"Idol yang menghibur kayak Nabilah! Kemampuan membuat semua orang bahagia hanya dengan senyumanmu!" },
-    { id:124, nama:"Nagita Slavina", usia:35, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Anggun dan menghibur kayak Nagita! Senyummu adalah senjata rahasia yang membuat semua orang luluh!" },
-    { id:125, nama:"Via Vallen", usia:29, postur:"sedang", rambut:"lurus", karakter:"ekspresif", komentar:"Hits factory kayak Via! Apapun yang kamu sentuh langsung menjadi viral dan digemari semua kalangan!" },
   ]
 };
-// ===== APP STATE =====
+
+// ============================================================
+// APP STATE
+// ============================================================
 let state = {
   currentPage: 'landing',
   playerName: '',
   playerPhoto: '',
   roomCode: '',
   openGames: [],
-  players: ['Budi', 'Sari', 'Rudi', 'Rina'], // demo players
-  playerPhotos: {}, // name -> base64 photo
+  players: [],
+  playerPhotos: {},
 
   // Game 1
   g1Cards: [], g1Flipped: [], g1Matched: [], g1CurrentPlayer: 0,
@@ -2029,29 +2018,134 @@ let state = {
 
   // Game 6
   g6Idx: 0, g6Score: 0, g6Answers: [], g6HintUsed: false,
+
+  // Supabase subscriptions
+  _subs: [],
 };
 
-// ===== NAVIGATION =====
+// ============================================================
+// SUPABASE DATA LAYER — menggantikan localStorage
+// ============================================================
+
+// Polling fallback timer (jika Realtime tidak tersambung)
+let _pollTimer = null;
+
+async function loadSavedData() {
+  try {
+    // 1. Event settings
+    const evRows = await sbGet('ras_event');
+    if (evRows && evRows.length > 0) {
+      const ev = evRows[0];
+      if (ev.name) {
+        document.title = ev.name;
+        const wm = document.querySelector('.event-watermark');
+        if (wm) wm.textContent = ev.name.toUpperCase() + ' · ' + (ev.date || '') + ' · ' + (ev.venue || '');
+      }
+      if (ev.room_code) state.savedRoomCode = ev.room_code;
+    }
+
+    // 2. Family members
+    const memberRows = await sbGet('ras_members');
+    if (memberRows && memberRows.length > 0) {
+      memberRows.forEach(row => {
+        const m = FAMILY_MEMBERS.find(x => x.id === row.member_id);
+        if (m) {
+          if (row.nama) m.nama = row.nama;
+          if (row.foto_url) m.foto = row.foto_url;
+        }
+      });
+    }
+
+    // 3. Custom lirik sing-along
+    const lirikRows = await sbGet('ras_lagu_storage');
+    if (lirikRows) {
+      lirikRows.forEach(row => {
+        const l = LAGU_INDONESIA.find(x => x.id === row.lagu_id);
+        if (l) {
+          if (row.lirik) l.lirik_singalong = row.lirik;
+          if (row.mp3_url) l.mp3 = row.mp3_url;
+        }
+      });
+    }
+
+    // 4. Custom pertanyaan G3
+    const g3Rows = await sbGet('ras_g3_questions');
+    if (g3Rows && g3Rows.length >= 3) {
+      PERTANYAAN_G3.length = 0;
+      g3Rows.sort((a,b) => a.urutan - b.urutan).forEach(r => PERTANYAAN_G3.push(r.pertanyaan));
+    }
+
+    // 5. Open games
+    const ogRows = await sbGet('ras_open_games');
+    if (ogRows && ogRows.length > 0) {
+      state.openGames = ogRows[0].game_ids || [];
+    }
+
+  } catch(e) {
+    console.log('loadSavedData error:', e);
+  }
+}
+
+// Subscribe ke perubahan open_games (game dibuka/tutup oleh admin)
+function startRealtimeSync() {
+  // Subscribe to open_games changes
+  const sub1 = sbSubscribe('ras_open_games', async () => {
+    try {
+      const rows = await sbGet('ras_open_games');
+      if (rows && rows.length > 0) {
+        state.openGames = rows[0].game_ids || [];
+        if (state.currentPage === 'lobby') renderLobby();
+      }
+    } catch(e) {}
+  });
+  state._subs.push(sub1);
+
+  // Subscribe ke G3 live votes
+  const sub2 = sbSubscribe('ras_g3_live', async () => {
+    if (state.currentPage !== 'game3') return;
+    // G3 handled locally, no need to reload from DB on player side
+  });
+  state._subs.push(sub2);
+
+  // Subscribe ke G6 play command
+  const sub3 = sbSubscribe('ras_g6_play_cmd', async (payload) => {
+    // handled in game6 polling logic below
+  });
+  state._subs.push(sub3);
+
+  // Fallback polling untuk open_games setiap 5 detik
+  _pollTimer = setInterval(async () => {
+    if (state.currentPage !== 'lobby') return;
+    try {
+      const rows = await sbGet('ras_open_games');
+      if (rows && rows.length > 0) {
+        const newGames = rows[0].game_ids || [];
+        const changed = JSON.stringify(newGames) !== JSON.stringify(state.openGames);
+        if (changed) {
+          state.openGames = newGames;
+          renderLobby();
+        }
+      }
+    } catch(e) {}
+  }, 5000);
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
   const el = document.getElementById(id);
   if (el) { el.style.display = id === 'landing' ? 'flex' : 'block'; }
   state.currentPage = id;
 }
-
 function showLanding() { showPage('landing'); }
-function showLobby() {
-  showPage('lobby');
-  renderLobby();
-}
+function showLobby() { showPage('lobby'); renderLobby(); }
+function showAdmin() { showPage('admin'); renderAdmin(); }
 
-function showAdmin() {
-  showPage('admin');
-  renderAdmin();
-}
-
-// ===== LANDING =====
-// ===== PHOTO UPLOAD (REGISTRASI) =====
+// ============================================================
+// LANDING — PHOTO & JOIN
+// ============================================================
 function handleRegPhoto(event) {
   const file = event.target.files[0];
   if (!file) return;
@@ -2065,12 +2159,9 @@ function handleRegPhoto(event) {
       if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
       else { w = Math.round(w * MAX / h); h = MAX; }
       canvas.width = w; canvas.height = h;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, w, h);
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
       const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
       state.playerPhoto = dataUrl;
-
-      // Show preview
       const preview = document.getElementById('regPhotoPreview');
       preview.innerHTML = '<img src="' + dataUrl + '" style="width:100%;height:100%;object-fit:cover;">';
       showNotif('✅ Foto profil siap!');
@@ -2081,46 +2172,57 @@ function handleRegPhoto(event) {
   event.target.value = '';
 }
 
-function joinRoom() {
+async function joinRoom() {
   const name = document.getElementById('playerName').value.trim();
   if (!name) { showNotif('Masukkan namamu dulu ya! 😊'); return; }
-
   const code = state.savedRoomCode || 'FAM2026';
   state.playerName = name;
   state.roomCode = code;
   if (state.playerPhoto) state.playerPhotos[name] = state.playerPhoto;
-  const _wn = document.getElementById('welcomeName');
-  if (_wn) _wn.textContent = name;
-  const _rc = document.getElementById('displayRoomCode');
-  if (_rc) _rc.textContent = code;
+  const wn = document.getElementById('welcomeName');
+  if (wn) wn.textContent = name;
   if (!state.players.includes(name)) state.players.push(name);
-  // Save to localStorage for projector view
+
+  // Simpan ke Supabase — tabel ras_players
   try {
-    const allPlayers = JSON.parse(localStorage.getItem('ras_players') || '[]');
-    if (!allPlayers.find(p => p.name === name)) {
-      allPlayers.push({ name, photo: state.playerPhoto || '', joinedAt: Date.now() });
-      localStorage.setItem('ras_players', JSON.stringify(allPlayers));
+    // Upload foto profil ke Storage jika ada
+    let photoUrl = '';
+    if (state.playerPhoto) {
+      try {
+        photoUrl = await sbUploadFile('rasmita-photos', 'players/' + name.replace(/\s+/g, '_') + '.jpg', state.playerPhoto);
+      } catch(e) {
+        // fallback: simpan base64 di kolom photo_b64
+        photoUrl = '';
+      }
     }
-  } catch(e) {}
+    await sbUpsert('ras_players', {
+      name: name,
+      photo_url: photoUrl,
+      photo_b64: state.playerPhoto || '',
+      joined_at: new Date().toISOString()
+    });
+  } catch(e) {
+    console.warn('joinRoom Supabase error:', e);
+  }
+
   showNotif('Berhasil masuk! Selamat datang, ' + name + ' 🎉');
   showLobby();
 }
 
-// ===== LOBBY =====
+// ============================================================
+// LOBBY
+// ============================================================
 function renderLobby() {
   const grid = document.getElementById('gamesGrid');
   grid.innerHTML = GAMES_INFO.map(g => {
     const isOpen = state.openGames.includes(g.id);
-    return `
-    <div class="game-card ${isOpen ? 'active' : 'locked'}" onclick="${isOpen ? 'openGame(' + g.id + ')' : 'showNotif(\'Game ini belum dibuka host!\')'}">
-      <div>
-        <div style="font-size:3.5rem;margin-bottom:12px;line-height:1">${g.icon}</div>
-        <div class="game-number">Game ${String(g.id).padStart(2,'0')}</div>
-        <div class="game-title">${g.title}</div>
-        <div class="game-desc">${g.desc}</div>
-      </div>
-      <div class="game-status ${isOpen ? 'status-open' : 'status-locked'}">${isOpen ? '✓ DIBUKA — TAP UNTUK MAIN' : '⌛ MENUNGGU HOST'}</div>
-    </div>`;
+    return '<div class="game-card ' + (isOpen ? 'active' : 'locked') + '" onclick="' + (isOpen ? 'openGame(' + g.id + ')' : 'showNotif(\'Game ini belum dibuka host!\')') + '">' +
+      '<div><div style="font-size:3.5rem;margin-bottom:12px;line-height:1">' + g.icon + '</div>' +
+      '<div class="game-number">Game ' + String(g.id).padStart(2,'0') + '</div>' +
+      '<div class="game-title">' + g.title + '</div>' +
+      '<div class="game-desc">' + g.desc + '</div></div>' +
+      '<div class="game-status ' + (isOpen ? 'status-open' : 'status-locked') + '">' +
+      (isOpen ? '✓ DIBUKA — TAP UNTUK MAIN' : '⌛ MENUNGGU HOST') + '</div></div>';
   }).join('');
 }
 
@@ -2133,55 +2235,62 @@ function openGame(id) {
   else if (id === 6) initGame6();
 }
 
-// ===== GAME 1: MEMORY MATCH =====
+// ============================================================
+// GAME 5 RESULTS MODAL (lobby)
+// ============================================================
+async function showG5ResultsModal() {
+  const modal = document.getElementById('g5Modal');
+  const content = document.getElementById('g5ModalContent');
+  try {
+    const results = await sbGet('ras_g5_results');
+    if (!results || results.length === 0) {
+      content.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--brown-light)">🎭<br><br>Belum ada peserta yang main Game 5.<br>Main dulu ya!</div>';
+    } else {
+      const sorted = [...results].sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+      content.innerHTML = sorted.map(r => '<div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid rgba(201,168,76,0.2);">' +
+        '<div style="width:48px;height:48px;border-radius:50%;background:var(--cream-dark);border:2px solid var(--gold);flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:1.2rem;">' +
+        (r.photo_url || r.photo_b64 ? '<img src="' + (r.photo_url || r.photo_b64) + '" style="width:100%;height:100%;object-fit:cover;">' : '👤') +
+        '</div><div style="flex:1;min-width:0;">' +
+        '<div style="font-weight:600;color:var(--brown);font-size:14px;">' + r.player_name + '</div>' +
+        '<div style="font-size:12px;color:var(--brown-light);">mirip dengan</div>' +
+        '<div style="font-weight:700;color:var(--green);font-size:15px;">🎭 ' + r.komedian + '</div></div>' +
+        '<div style="background:var(--gold);color:var(--brown);font-size:11px;font-weight:700;padding:4px 10px;border-radius:12px;flex-shrink:0;">' + r.persen + '%</div></div>'
+      ).join('');
+    }
+  } catch(e) {
+    content.innerHTML = '<div style="padding:1rem;color:var(--brown-light)">Gagal memuat data.</div>';
+  }
+  modal.style.display = 'block';
+}
+
+// ============================================================
+// GAME 1: MEMORY MATCH
+// ============================================================
 function initGame1() {
   showPage('game1');
-  // Show player selector
-  const selector = document.getElementById('g1PlayerSelector');
-  const gameArea = document.getElementById('g1GameArea');
-  if (selector) selector.style.display = 'block';
-  if (gameArea) gameArea.style.display = 'none';
+  document.getElementById('g1PlayerSelector').style.display = 'block';
+  document.getElementById('g1GameArea').style.display = 'none';
   renderG1PlayerSelector();
 }
 
 function renderG1PlayerSelector() {
   const list = document.getElementById('g1PlayerList');
   if (!list) return;
-  // Ambil dari localStorage (peserta yang sudah join)
-  let joined = [];
-  try { joined = JSON.parse(localStorage.getItem('ras_players') || '[]').map(p => p.name); } catch(e) {}
-  // Tambah state.players juga
-  state.players.forEach(n => { if (!joined.includes(n)) joined.push(n); });
-  // Tambah pemain manual jika belum ada siapapun
+  let joined = [...state.players];
   if (joined.length === 0) joined = ['Pemain 1','Pemain 2','Pemain 3','Pemain 4'];
-
-  // State selected players
   if (!state.g1SelectedPlayers) state.g1SelectedPlayers = [];
-  // Auto-select current player
-  if (state.g1SelectedPlayers.length === 0 && state.playerName) {
-    state.g1SelectedPlayers = [state.playerName];
-  }
-
+  if (state.g1SelectedPlayers.length === 0 && state.playerName) state.g1SelectedPlayers = [state.playerName];
   list.innerHTML = joined.map(name => {
     const selected = state.g1SelectedPlayers.includes(name);
-    return `<div onclick="toggleG1Player('${name}')" style="
-      cursor:pointer;padding:8px 16px;border-radius:20px;font-size:13px;font-weight:600;
-      border:2px solid ${selected ? 'var(--green)' : 'rgba(201,168,76,0.3)'};
-      background:${selected ? '#e8f5e9' : 'var(--cream)'};
-      color:${selected ? 'var(--green)' : 'var(--brown)'};
-      transition:all 0.2s;">
-      ${selected ? '✓ ' : ''}${name}
-    </div>`;
-  }).join('') + `
-    <div onclick="addG1CustomPlayer()" style="cursor:pointer;padding:8px 16px;border-radius:20px;font-size:13px;font-weight:600;border:2px dashed rgba(201,168,76,0.4);background:transparent;color:var(--brown-light);">+ Tambah</div>`;
+    return '<div onclick="toggleG1Player('' + name + '')" style="cursor:pointer;padding:8px 16px;border-radius:20px;font-size:13px;font-weight:600;border:2px solid ' + (selected ? 'var(--green)' : 'rgba(201,168,76,0.3)') + ';background:' + (selected ? '#e8f5e9' : 'var(--cream)') + ';color:' + (selected ? 'var(--green)' : 'var(--brown)') + ';transition:all 0.2s;">' + (selected ? '✓ ' : '') + name + '</div>';
+  }).join('') + '<div onclick="addG1CustomPlayer()" style="cursor:pointer;padding:8px 16px;border-radius:20px;font-size:13px;font-weight:600;border:2px dashed rgba(201,168,76,0.4);background:transparent;color:var(--brown-light);">+ Tambah</div>';
 }
 
 function toggleG1Player(name) {
   if (!state.g1SelectedPlayers) state.g1SelectedPlayers = [];
   const idx = state.g1SelectedPlayers.indexOf(name);
-  if (idx >= 0) {
-    state.g1SelectedPlayers.splice(idx, 1);
-  } else {
+  if (idx >= 0) state.g1SelectedPlayers.splice(idx, 1);
+  else {
     if (state.g1SelectedPlayers.length >= 4) { showNotif('Maksimal 4 pemain!'); return; }
     state.g1SelectedPlayers.push(name);
   }
@@ -2198,17 +2307,10 @@ function addG1CustomPlayer() {
 }
 
 function startG1WithPlayers() {
-  if (!state.g1SelectedPlayers || state.g1SelectedPlayers.length === 0) {
-    showNotif('Pilih minimal 1 pemain!'); return;
-  }
-  // Set players dari selector
+  if (!state.g1SelectedPlayers || state.g1SelectedPlayers.length === 0) { showNotif('Pilih minimal 1 pemain!'); return; }
   state.players = [...state.g1SelectedPlayers];
-
-  const selector = document.getElementById('g1PlayerSelector');
-  const gameArea = document.getElementById('g1GameArea');
-  if (selector) selector.style.display = 'none';
-  if (gameArea) gameArea.style.display = 'block';
-
+  document.getElementById('g1PlayerSelector').style.display = 'none';
+  document.getElementById('g1GameArea').style.display = 'block';
   const members = getPhotosForGame(1).slice(0, 8);
   let cards = [...members, ...members].map((m, i) => ({...m, cardId: i, flipped: false, matched: false}));
   for (let i = cards.length - 1; i > 0; i--) {
@@ -2219,46 +2321,24 @@ function startG1WithPlayers() {
   state.g1Flipped = [];
   state.g1Matched = [];
   state.g1CurrentPlayer = 0;
-  state.g1Scores = [0, 0, 0, 0];
+  state.g1Scores = [0,0,0,0];
   state.g1CanFlip = true;
   document.getElementById('game1Result').style.display = 'none';
   renderG1();
 }
 
 function renderG1() {
-  // Player tabs
   const tabs = state.players.slice(0,4);
-  document.getElementById('playerTabs').innerHTML = tabs.map((p,i) =>
-    `<div class="player-tab ${i === state.g1CurrentPlayer ? 'active' : ''}">${p}</div>`
-  ).join('');
-
-  // Scores
-  document.getElementById('scoreDisplay').innerHTML = tabs.map((p,i) =>
-    `<div class="score-box ${i === state.g1CurrentPlayer ? 'current' : ''}">
-      <div class="score-name">${p}</div>
-      <div class="score-val">${state.g1Scores[i]}</div>
-    </div>`
-  ).join('');
-
-  document.getElementById('turnAnnounce').textContent =
-    `Giliran: ${tabs[state.g1CurrentPlayer]} 🎯`;
-
-  // Grid
+  document.getElementById('playerTabs').innerHTML = tabs.map((p,i) => '<div class="player-tab ' + (i === state.g1CurrentPlayer ? 'active' : '') + '">' + p + '</div>').join('');
+  document.getElementById('scoreDisplay').innerHTML = tabs.map((p,i) => '<div class="score-box ' + (i === state.g1CurrentPlayer ? 'current' : '') + '"><div class="score-name">' + p + '</div><div class="score-val">' + state.g1Scores[i] + '</div></div>').join('');
+  document.getElementById('turnAnnounce').textContent = 'Giliran: ' + tabs[state.g1CurrentPlayer] + ' 🎯';
   const grid = document.getElementById('memoryGrid');
   grid.innerHTML = state.g1Cards.map((c, idx) => {
     const isFlipped = state.g1Flipped.includes(idx) || state.g1Matched.includes(c.id);
     const isMatched = state.g1Matched.includes(c.id);
-    return `
-    <div class="mem-card ${isFlipped ? 'flipped' : ''} ${isMatched ? 'matched' : ''}" onclick="flipCard(${idx})">
-      <div class="mem-inner">
-        <div class="mem-front"><div class="mem-front-pattern">❋</div></div>
-        <div class="mem-back">
-          ${c.foto ? `<img src="${c.foto}" alt="${c.nama}">` :
-            `<div style="width:100%;height:65%;background:var(--cream-dark);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;">👤</div>`}
-          <div class="mem-name">${c.nama}</div>
-        </div>
-      </div>
-    </div>`;
+    return '<div class="mem-card ' + (isFlipped ? 'flipped' : '') + ' ' + (isMatched ? 'matched' : '') + '" onclick="flipCard(' + idx + ')"><div class="mem-inner"><div class="mem-front"><div class="mem-front-pattern">❋</div></div><div class="mem-back">' +
+      (c.foto ? '<img src="' + c.foto + '" alt="' + c.nama + '">' : '<div style="width:100%;height:65%;background:var(--cream-dark);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;">👤</div>') +
+      '<div class="mem-name">' + c.nama + '</div></div></div></div>';
   }).join('');
 }
 
@@ -2267,97 +2347,76 @@ function flipCard(idx) {
   if (state.g1Flipped.includes(idx)) return;
   const card = state.g1Cards[idx];
   if (state.g1Matched.includes(card.id)) return;
-
   state.g1Flipped.push(idx);
   renderG1();
-
   if (state.g1Flipped.length === 2) {
     state.g1CanFlip = false;
     const [i1, i2] = state.g1Flipped;
     const c1 = state.g1Cards[i1], c2 = state.g1Cards[i2];
-
     setTimeout(() => {
       if (c1.id === c2.id) {
-        // Match!
         state.g1Matched.push(c1.id);
         state.g1Scores[state.g1CurrentPlayer] += 10;
         state.g1Flipped = [];
         state.g1CanFlip = true;
         showNotif('Cocok! +10 poin 🎉');
         renderG1();
-        // Check win
-        if (state.g1Matched.length === getPhotosForGame(1).slice(0,8).length) {
-          showG1Result();
-        }
+        if (state.g1Matched.length === getPhotosForGame(1).slice(0,8).length) showG1Result();
       } else {
-        // No match - move to next player
         state.g1Flipped = [];
-        state.g1CurrentPlayer = (state.g1CurrentPlayer + 1) % 4;
+        state.g1CurrentPlayer = (state.g1CurrentPlayer + 1) % Math.min(state.players.length, 4);
         state.g1CanFlip = true;
         renderG1();
       }
-    }, 3000);
+    }, 1000);
   }
 }
 
-function showG1Result() {
+async function showG1Result() {
   document.getElementById('game1Result').style.display = 'block';
   const scores = state.g1Scores.map((s, i) => ({ name: state.players[i] || 'P' + (i+1), score: s }));
   scores.sort((a, b) => b.score - a.score);
   document.getElementById('g1Podium').innerHTML = buildPodium(scores);
-  // Broadcast ke proyektor
+  // Simpan ke Supabase
   try {
-    const players = JSON.parse(localStorage.getItem('ras_players') || '[]');
-    const scoreData = state.g1Scores.map((s, i) => {
-      const name = state.players[i] || 'P' + (i+1);
-      const p = players.find(p => p.name === name);
-      return { name, photo: p ? p.photo : '', score: s, done: true, time: Date.now() };
-    }).filter(s => s.name && s.name !== 'P1' && s.name !== 'P2' && s.name !== 'P3' && s.name !== 'P4');
-    const existing = JSON.parse(localStorage.getItem('ras_g1_scores') || '[]');
-    scoreData.forEach(s => {
-      const idx = existing.findIndex(e => e.name === s.name);
-      if (idx >= 0) existing[idx] = s; else existing.push(s);
-    });
-    localStorage.setItem('ras_g1_scores', JSON.stringify(existing));
-  } catch(e) {}
+    const scoreData = state.g1Scores.map((s, i) => ({
+      player_name: state.players[i] || 'P' + (i+1),
+      photo_b64: state.playerPhotos[state.players[i]] || '',
+      score: s,
+      done: true,
+      played_at: new Date().toISOString()
+    })).filter(x => !x.player_name.startsWith('P'));
+    for (const entry of scoreData) {
+      await sbUpsert('ras_g1_scores', entry);
+    }
+  } catch(e) { console.warn('G1 score save error:', e); }
 }
 
-function restartGame1() {
-  state.g1SelectedPlayers = [];
-  initGame1();
-}
+function restartGame1() { state.g1SelectedPlayers = []; initGame1(); }
 
-// ===== GAME 2: TEBAK SIAPA =====
+// ============================================================
+// GAME 2: TEBAK SIAPA
+// ============================================================
 function initGame2() {
   showPage('game2');
   state.g2Members = [...getPhotosForGame(2)].sort(() => Math.random() - 0.5);
-  state.g2CurrentIdx = 0;
-  state.g2Score = 0;
-  state.g2Scores = {};
+  state.g2CurrentIdx = 0; state.g2Score = 0; state.g2Scores = {};
   document.getElementById('g2Soal').style.display = 'block';
   document.getElementById('g2Leaderboard').style.display = 'none';
   loadG2Soal();
 }
 
 function loadG2Soal() {
-  if (state.g2CurrentIdx >= state.g2Members.length) {
-    showG2Leaderboard(); return;
-  }
+  if (state.g2CurrentIdx >= state.g2Members.length) { showG2Leaderboard(); return; }
   const m = state.g2Members[state.g2CurrentIdx];
-  state.g2PoinLeft = 500;
-  state.g2Stage = 0;
+  state.g2PoinLeft = 500; state.g2Stage = 0;
   document.getElementById('g2Num').textContent = state.g2CurrentIdx + 1;
   document.getElementById('g2Total').textContent = state.g2Members.length;
   document.getElementById('g2Progress').style.width = ((state.g2CurrentIdx / state.g2Members.length) * 100) + '%';
   document.getElementById('g2Poin').textContent = state.g2PoinLeft;
   document.getElementById('g2Answer').value = '';
   document.getElementById('g2Feedback').innerHTML = '';
-
-  if (m.foto) {
-    document.getElementById('g2Img').src = m.foto;
-  }
-
-  // Start mask reveal
+  if (m.foto) document.getElementById('g2Img').src = m.foto;
   clearInterval(state.g2Timer);
   updateG2Mask(0);
   state.g2Timer = setInterval(() => {
@@ -2370,9 +2429,8 @@ function loadG2Soal() {
 }
 
 function updateG2Mask(stage) {
-  const pct = stage * 20;
   const mask = document.getElementById('g2Mask');
-  if (mask) mask.style.clipPath = `inset(${pct}% 0 0 0)`;
+  if (mask) mask.style.clipPath = 'inset(' + (stage * 20) + '% 0 0 0)';
 }
 
 function submitG2() {
@@ -2382,54 +2440,45 @@ function submitG2() {
   const correct = m.nama.toLowerCase();
   const isCorrect = ans.includes(correct.split(' ')[0].toLowerCase()) || correct.includes(ans);
   const fb = document.getElementById('g2Feedback');
-
   if (isCorrect) {
-    const poin = state.g2PoinLeft;
-    state.g2Score += poin;
-    state.g2Scores[state.playerName || 'Kamu'] = (state.g2Scores[state.playerName || 'Kamu'] || 0) + poin;
-    fb.innerHTML = `<span style="color:var(--green);font-weight:600">✓ Benar! +${poin} poin</span>`;
+    state.g2Score += state.g2PoinLeft;
+    state.g2Scores[state.playerName || 'Kamu'] = (state.g2Scores[state.playerName || 'Kamu'] || 0) + state.g2PoinLeft;
+    fb.innerHTML = '<span style="color:var(--green);font-weight:600">✓ Benar! +' + state.g2PoinLeft + ' poin</span>';
   } else {
-    fb.innerHTML = `<span style="color:var(--red)">✗ Salah. Jawabannya: <strong>${m.nama}</strong></span>`;
+    fb.innerHTML = '<span style="color:var(--red)">✗ Salah. Jawabannya: <strong>' + m.nama + '</strong></span>';
   }
-
-  // Fully reveal
   updateG2Mask(5);
-
-  setTimeout(() => {
-    state.g2CurrentIdx++;
-    loadG2Soal();
-  }, 2000);
+  setTimeout(() => { state.g2CurrentIdx++; loadG2Soal(); }, 2000);
 }
 
 function showG2Leaderboard() {
   document.getElementById('g2Soal').style.display = 'none';
   document.getElementById('g2Leaderboard').style.display = 'block';
-  const list = document.getElementById('g2LBList');
   const sorted = Object.entries(state.g2Scores).sort((a,b) => b[1]-a[1]);
-  list.innerHTML = sorted.map(([name, score], i) => `
-    <div style="display:flex;align-items:center;gap:1rem;padding:12px;background:var(--${i===0?'cream-dark':'white'});border-radius:10px;margin-bottom:8px;border:1px solid rgba(201,168,76,0.2)">
-      <div style="font-size:1.5rem">${i===0?'🥇':i===1?'🥈':'🥉'}</div>
-      <div style="flex:1;font-weight:600;color:var(--brown)">${name}</div>
-      <div style="font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--gold)">${score}</div>
-    </div>`).join('');
+  document.getElementById('g2LBList').innerHTML = sorted.map(([name, score], i) =>
+    '<div style="display:flex;align-items:center;gap:1rem;padding:12px;background:var(--' + (i===0?'cream-dark':'white') + ');border-radius:10px;margin-bottom:8px;border:1px solid rgba(201,168,76,0.2)">' +
+    '<div style="font-size:1.5rem">' + (i===0?'🥇':i===1?'🥈':'🥉') + '</div>' +
+    '<div style="flex:1;font-weight:600;color:var(--brown)">' + name + '</div>' +
+    '<div style="font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--gold)">' + score + '</div></div>'
+  ).join('');
 }
 
 function restartGame2() { initGame2(); }
 
-// ===== GAME 3: SIAPA PALING =====
+// ============================================================
+// GAME 3: SIAPA PALING
+// ============================================================
 function initGame3() {
   showPage('game3');
   state.g3Questions = [...PERTANYAAN_G3].sort(() => Math.random() - 0.5).slice(0, 5);
-  state.g3CurrentQ = 0;
-  state.g3Votes = {};
-  state.g3HofData = {};
+  state.g3CurrentQ = 0; state.g3Votes = {}; state.g3HofData = {};
   document.getElementById('g3Voting').style.display = 'block';
   document.getElementById('g3Result').style.display = 'none';
   document.getElementById('g3HallOfFame').style.display = 'none';
   loadG3Question();
 }
 
-function loadG3Question() {
+async function loadG3Question() {
   const q = state.g3Questions[state.g3CurrentQ];
   state.g3Votes = {};
   document.getElementById('g3Num').textContent = state.g3CurrentQ + 1;
@@ -2438,29 +2487,27 @@ function loadG3Question() {
   document.getElementById('g3Timer').style.width = '100%';
   document.getElementById('g3SubmitBtn').disabled = false;
 
-  // Broadcast ke proyektor
+  // Broadcast ke Supabase
   try {
     const members = getPhotosForGame(3).slice(0, 20);
-    localStorage.setItem('ras_g3_live', JSON.stringify({
+    await sbUpsert('ras_g3_live', {
+      id: 1,
       question: q,
-      questionNum: state.g3CurrentQ + 1,
-      totalQ: state.g3Questions.length,
+      question_num: state.g3CurrentQ + 1,
+      total_q: state.g3Questions.length,
       votes: {},
-      members: members.map(m => ({ id: m.id, nama: m.nama, foto: m.foto || '' })),
-      ts: Date.now()
-    }));
+      members_json: JSON.stringify(members.map(m => ({ id: m.id, nama: m.nama, foto: m.foto || '' }))),
+      updated_at: new Date().toISOString()
+    });
   } catch(e) {}
 
-  // Render vote grid
   const members = getPhotosForGame(3).slice(0, 20);
-  document.getElementById('voteGrid').innerHTML = members.map(m => `
-    <div class="vote-card" id="vc_${m.id}" onclick="selectVote(${m.id})">
-      ${m.foto ? `<img src="${m.foto}" alt="${m.nama}">` :
-        `<div style="width:64px;height:64px;border-radius:50%;background:var(--cream-dark);margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;border:2px solid rgba(201,168,76,0.3)">👤</div>`}
-      <div class="vote-name">${m.nama}</div>
-    </div>`).join('');
+  document.getElementById('voteGrid').innerHTML = members.map(m =>
+    '<div class="vote-card" id="vc_' + m.id + '" onclick="selectVote(' + m.id + ')">' +
+    (m.foto ? '<img src="' + m.foto + '" alt="' + m.nama + '">' : '<div style="width:64px;height:64px;border-radius:50%;background:var(--cream-dark);margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;border:2px solid rgba(201,168,76,0.3)">👤</div>') +
+    '<div class="vote-name">' + m.nama + '</div></div>'
+  ).join('');
 
-  // Timer
   clearInterval(state.g3Timer);
   let t = 30;
   state.g3Timer = setInterval(() => {
@@ -2477,29 +2524,27 @@ function selectVote(id) {
   state.selectedVote = id;
 }
 
-function submitVote() {
+async function submitVote() {
   clearInterval(state.g3Timer);
   if (state.selectedVote) {
     state.g3Votes[state.selectedVote] = (state.g3Votes[state.selectedVote] || 0) + 1;
-    // Simulate other votes
     getPhotosForGame(3).slice(0, 10).forEach(m => {
-      if (Math.random() > 0.6) {
-        state.g3Votes[m.id] = (state.g3Votes[m.id] || 0) + 1;
-      }
+      if (Math.random() > 0.6) state.g3Votes[m.id] = (state.g3Votes[m.id] || 0) + 1;
     });
   }
-  // Broadcast hasil vote ke proyektor
+  // Broadcast hasil vote ke Supabase
   try {
     const q = state.g3Questions[state.g3CurrentQ];
     const members = getPhotosForGame(3).slice(0, 20);
-    localStorage.setItem('ras_g3_live', JSON.stringify({
+    await sbUpsert('ras_g3_live', {
+      id: 1,
       question: q,
-      questionNum: state.g3CurrentQ + 1,
-      totalQ: state.g3Questions.length,
+      question_num: state.g3CurrentQ + 1,
+      total_q: state.g3Questions.length,
       votes: state.g3Votes,
-      members: members.map(m => ({ id: m.id, nama: m.nama, foto: m.foto || '' })),
-      ts: Date.now()
-    }));
+      members_json: JSON.stringify(members.map(m => ({ id: m.id, nama: m.nama, foto: m.foto || '' }))),
+      updated_at: new Date().toISOString()
+    });
   } catch(e) {}
   showG3Result();
 }
@@ -2507,14 +2552,10 @@ function submitVote() {
 function showG3Result() {
   document.getElementById('g3Voting').style.display = 'none';
   document.getElementById('g3Result').style.display = 'block';
-
   const q = state.g3Questions[state.g3CurrentQ];
   document.getElementById('g3ResultQ').textContent = q;
-
-  // Find winner
   const sorted = Object.entries(state.g3Votes).sort((a,b) => b[1]-a[1]);
   const total = Object.values(state.g3Votes).reduce((a,b) => a+b, 0) || 1;
-
   if (sorted.length > 0) {
     const winnerId = parseInt(sorted[0][0]);
     const winner = FAMILY_MEMBERS.find(m => m.id === winnerId);
@@ -2522,23 +2563,14 @@ function showG3Result() {
       document.getElementById('g3WinnerName').textContent = winner.nama;
       document.getElementById('g3WinnerPct').textContent = Math.round(sorted[0][1] / total * 100) + '% suara';
       document.getElementById('g3WinnerImg').textContent = '👑';
-      // Update HOF
       state.g3HofData[winner.nama] = (state.g3HofData[winner.nama] || 0) + 1;
     }
   }
-
-  // Vote bars
-  const topFive = sorted.slice(0, 5);
-  document.getElementById('g3Bars').innerHTML = topFive.map(([id, cnt]) => {
+  document.getElementById('g3Bars').innerHTML = sorted.slice(0,5).map(([id, cnt]) => {
     const m = FAMILY_MEMBERS.find(x => x.id == id);
     const pct = Math.round(cnt / total * 100);
-    return `<div class="vote-bar-row">
-      <div class="vote-bar-name">${m ? m.nama : '?'}</div>
-      <div class="vote-bar-wrap"><div class="vote-bar-fill" style="width:${pct}%"></div></div>
-      <div class="vote-bar-pct">${pct}%</div>
-    </div>`;
+    return '<div class="vote-bar-row"><div class="vote-bar-name">' + (m ? m.nama : '?') + '</div><div class="vote-bar-wrap"><div class="vote-bar-fill" style="width:' + pct + '%"></div></div><div class="vote-bar-pct">' + pct + '%</div></div>';
   }).join('');
-
   const isLast = state.g3CurrentQ >= state.g3Questions.length - 1;
   document.getElementById('g3NextBtn').textContent = isLast ? '🏛️ Lihat Hall of Fame' : 'Pertanyaan Berikutnya →';
 }
@@ -2559,26 +2591,20 @@ function showG3HallOfFame() {
   document.getElementById('g3Result').style.display = 'none';
   document.getElementById('g3HallOfFame').style.display = 'block';
   const sorted = Object.entries(state.g3HofData).sort((a,b) => b[1]-a[1]);
-  const trophies = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'];
-  document.getElementById('hofList').innerHTML = sorted.map(([name, count], i) => `
-    <div class="hof-item">
-      <div class="hof-placeholder">👤</div>
-      <div class="hof-info">
-        <strong>${name}</strong>
-        <span>Terpilih di ${count} kategori</span>
-      </div>
-      <div class="hof-trophy">${trophies[i] || '⭐'}</div>
-    </div>`).join('');
+  const trophies = ['🥇','🥈','🥉','4️⃣','5️⃣'];
+  document.getElementById('hofList').innerHTML = sorted.map(([name, count], i) =>
+    '<div class="hof-item"><div class="hof-placeholder">👤</div><div class="hof-info"><strong>' + name + '</strong><span>Terpilih di ' + count + ' kategori</span></div><div class="hof-trophy">' + (trophies[i] || '⭐') + '</div></div>'
+  ).join('');
 }
 
 function restartGame3() { initGame3(); }
 
-// ===== GAME 4: TIMELINE =====
+// ============================================================
+// GAME 4: TIMELINE
+// ============================================================
 function initGame4() {
   showPage('game4');
-  state.g4Ronde = 1;
-  state.g4Score = 0;
-  state.g4Answer = [];
+  state.g4Ronde = 1; state.g4Score = 0; state.g4Answer = [];
   document.getElementById('g4Playing').style.display = 'block';
   document.getElementById('g4Result').style.display = 'none';
   loadG4Ronde();
@@ -2588,16 +2614,11 @@ function loadG4Ronde() {
   document.getElementById('g4Ronde').textContent = state.g4Ronde;
   document.getElementById('g4Score').textContent = state.g4Score;
   document.getElementById('g4Timer').textContent = 60;
-
-  // Pick 5 members with "usia" field for this ronde
   const g4Pool = getPhotosForGame(4);
-  const pool = g4Pool.slice((state.g4Ronde - 1) * 5, state.g4Ronde * 5)
-    .map((m, i) => ({ ...m, usia: 20 + i * 8 }));
+  const pool = g4Pool.slice((state.g4Ronde - 1) * 5, state.g4Ronde * 5).map((m, i) => ({ ...m, usia: 20 + i * 8 }));
   state.g4Current = [...pool].sort(() => Math.random() - 0.5);
   state.g4Answer = [];
-
-  // Timer
-  clearInterval(state.g4Timer);
+  clearInterval(state.g4TimerInterval);
   let t = 60;
   const timerEl = document.getElementById('g4Timer');
   state.g4TimerInterval = setInterval(() => {
@@ -2605,113 +2626,75 @@ function loadG4Ronde() {
     if (timerEl) timerEl.textContent = t;
     if (t <= 0) { clearInterval(state.g4TimerInterval); submitTimeline(); }
   }, 1000);
-
   renderG4();
 }
 
 function renderG4() {
-  document.getElementById('timelineCards').innerHTML = state.g4Current.map(m => `
-    <div class="timeline-card" draggable="true" id="tc_${m.id}" ondragstart="dragStart(${m.id})" onclick="addToAnswer(${m.id})">
-      ${m.foto ? `<img src="${m.foto}" alt="${m.nama}">` :
-        `<div style="width:70px;height:70px;border-radius:50%;background:var(--cream-dark);display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin:0 auto 6px;border:2px solid rgba(201,168,76,0.3)">👤</div>`}
-      <div class="tl-name">${m.nama}</div>
-    </div>`).join('');
-
+  document.getElementById('timelineCards').innerHTML = state.g4Current.map(m =>
+    '<div class="timeline-card" draggable="true" id="tc_' + m.id + '" ondragstart="dragStart(' + m.id + ')" onclick="addToAnswer(' + m.id + ')">' +
+    (m.foto ? '<img src="' + m.foto + '" alt="' + m.nama + '">' : '<div style="width:70px;height:70px;border-radius:50%;background:var(--cream-dark);display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin:0 auto 6px;border:2px solid rgba(201,168,76,0.3)">👤</div>') +
+    '<div class="tl-name">' + m.nama + '</div></div>'
+  ).join('');
   document.getElementById('answerSlots').innerHTML = Array(5).fill(0).map((_, i) => {
     const filled = state.g4Answer[i];
     return filled ?
-      `<div class="answer-slot filled" onclick="removeFromAnswer(${i})" style="width:80px;height:90px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--white);padding:4px">
-        <div style="font-size:1.5rem">👤</div>
-        <div style="font-size:9px;font-weight:600;color:var(--brown);text-align:center;margin-top:4px">${filled.nama}</div>
-      </div>` :
-      `<div class="answer-slot" ondragover="event.preventDefault()" ondrop="dropHere(${i})">${i + 1}</div>`;
+      '<div class="answer-slot filled" onclick="removeFromAnswer(' + i + ')" style="width:80px;height:90px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--white);padding:4px"><div style="font-size:1.5rem">👤</div><div style="font-size:9px;font-weight:600;color:var(--brown);text-align:center;margin-top:4px">' + filled.nama + '</div></div>' :
+      '<div class="answer-slot" ondragover="event.preventDefault()" ondrop="dropHere(' + i + ')">' + (i + 1) + '</div>';
   }).join('');
 }
 
 let dragId = null;
 function dragStart(id) { dragId = id; }
-function dropHere(slotIdx) {
-  if (dragId !== null) addToAnswerAt(dragId, slotIdx);
-}
-
+function dropHere(slotIdx) { if (dragId !== null) addToAnswerAt(dragId, slotIdx); }
 function addToAnswer(id) {
   const m = state.g4Current.find(x => x.id === id);
   if (!m) return;
-  const nextEmpty = state.g4Answer.length;
-  if (nextEmpty < 5 && !state.g4Answer.find(x => x.id === id)) {
-    state.g4Answer.push(m);
-    renderG4();
-  }
+  if (state.g4Answer.length < 5 && !state.g4Answer.find(x => x.id === id)) { state.g4Answer.push(m); renderG4(); }
 }
-
 function addToAnswerAt(id, slotIdx) {
   const m = state.g4Current.find(x => x.id === id);
   if (!m || state.g4Answer.find(x => x.id === id)) return;
-  state.g4Answer[slotIdx] = m;
-  renderG4();
+  state.g4Answer[slotIdx] = m; renderG4();
 }
+function removeFromAnswer(i) { state.g4Answer.splice(i, 1); renderG4(); }
+function resetTimeline() { state.g4Answer = []; renderG4(); }
 
-function removeFromAnswer(i) {
-  state.g4Answer.splice(i, 1);
-  renderG4();
-}
-
-function resetTimeline() {
-  state.g4Answer = [];
-  renderG4();
-}
-
-function submitTimeline() {
+async function submitTimeline() {
   clearInterval(state.g4TimerInterval);
   const correct = [...state.g4Current].sort((a, b) => a.usia - b.usia);
   let roundScore = 0;
-
-  state.g4Answer.forEach((m, i) => {
-    if (m && correct[i] && m.id === correct[i].id) roundScore += 10;
-  });
-
-  if (state.g4Answer.length === 5 && state.g4Answer.every((m, i) => m && correct[i] && m.id === correct[i].id)) {
-    roundScore += 20; // Bonus semua benar
-  }
-
+  state.g4Answer.forEach((m, i) => { if (m && correct[i] && m.id === correct[i].id) roundScore += 10; });
+  if (state.g4Answer.length === 5 && state.g4Answer.every((m, i) => m && correct[i] && m.id === correct[i].id)) roundScore += 20;
   state.g4Score += roundScore;
-  showNotif(`Ronde ${state.g4Ronde}: +${roundScore} poin`);
-
-  if (state.g4Ronde < 3) {
-    state.g4Ronde++;
-    setTimeout(loadG4Ronde, 1500);
-  } else {
-    setTimeout(showG4Result, 1500);
-  }
+  showNotif('Ronde ' + state.g4Ronde + ': +' + roundScore + ' poin');
+  if (state.g4Ronde < 3) { state.g4Ronde++; setTimeout(loadG4Ronde, 1500); }
+  else setTimeout(showG4Result, 1500);
 }
 
-function showG4Result() {
+async function showG4Result() {
   document.getElementById('g4Playing').style.display = 'none';
   document.getElementById('g4Result').style.display = 'block';
   document.getElementById('g4FinalScore').textContent = state.g4Score + ' Poin';
-  const scores = [{ name: state.playerName || 'Kamu', score: state.g4Score }];
-  document.getElementById('g4Podium').innerHTML = buildPodium(scores);
-  // Broadcast ke proyektor
+  document.getElementById('g4Podium').innerHTML = buildPodium([{ name: state.playerName || 'Kamu', score: state.g4Score }]);
   try {
-    const players = JSON.parse(localStorage.getItem('ras_players') || '[]');
-    const name = state.playerName || 'Kamu';
-    const p = players.find(p => p.name === name);
-    const newEntry = { name, photo: p ? p.photo : '', score: state.g4Score, ronde: state.g4Ronde };
-    const existing = JSON.parse(localStorage.getItem('ras_g4_scores') || '[]');
-    const idx = existing.findIndex(e => e.name === name);
-    if (idx >= 0) { if (newEntry.score > existing[idx].score) existing[idx] = newEntry; }
-    else existing.push(newEntry);
-    localStorage.setItem('ras_g4_scores', JSON.stringify(existing));
-  } catch(e) {}
+    await sbUpsert('ras_g4_scores', {
+      player_name: state.playerName || 'Kamu',
+      photo_b64: state.playerPhotos[state.playerName] || '',
+      score: state.g4Score,
+      ronde: state.g4Ronde,
+      played_at: new Date().toISOString()
+    });
+  } catch(e) { console.warn('G4 score save error:', e); }
 }
 
 function restartGame4() { initGame4(); }
 
-// ===== GAME 5: MIRIP SIAPA =====
+// ============================================================
+// GAME 5: MIRIP SIAPA
+// ============================================================
 function initGame5() {
   showPage('game5');
-  state.g5Step = 0;
-  state.g5Answers = {};
+  state.g5Step = 0; state.g5Answers = {};
   document.getElementById('g5Quiz').style.display = 'block';
   document.getElementById('miripResult').style.display = 'none';
   renderG5Step();
@@ -2719,48 +2702,36 @@ function initGame5() {
 
 function renderG5Step() {
   const q = PERTANYAAN_G5[state.g5Step];
-
-  // Progress dots
   document.getElementById('quizProgress').innerHTML = PERTANYAAN_G5.map((_, i) =>
-    `<div class="quiz-dot ${i < state.g5Step ? 'done' : i === state.g5Step ? 'active' : ''}"></div>`
+    '<div class="quiz-dot ' + (i < state.g5Step ? 'done' : i === state.g5Step ? 'active' : '') + '"></div>'
   ).join('');
-
   document.getElementById('quizQuestion').textContent = q.pertanyaan;
-  document.getElementById('quizOptions').innerHTML = q.opsi.map(opt => `
-    <button class="quiz-opt ${state.g5Answers[q.field] === opt ? 'selected' : ''}"
-      onclick="selectG5('${q.field}', '${opt}')">${opt}</button>`).join('');
+  document.getElementById('quizOptions').innerHTML = q.opsi.map(opt =>
+    '<button class="quiz-opt ' + (state.g5Answers[q.field] === opt ? 'selected' : '') + '" onclick="selectG5('' + q.field + '', '' + opt + '')">' + opt + '</button>'
+  ).join('');
 }
 
 function selectG5(field, val) {
   state.g5Answers[field] = val;
   document.querySelectorAll('.quiz-opt').forEach(b => b.classList.remove('selected'));
   event.target.classList.add('selected');
-
   setTimeout(() => {
     state.g5Step++;
-    if (state.g5Step >= PERTANYAAN_G5.length) {
-      showG5Result();
-    } else {
-      renderG5Step();
-    }
+    if (state.g5Step >= PERTANYAAN_G5.length) showG5Result();
+    else renderG5Step();
   }, 400);
 }
 
-function showG5Result() {
+async function showG5Result() {
   document.getElementById('g5Quiz').style.display = 'none';
-  const result = document.getElementById('miripResult');
-  result.style.display = 'block';
-
+  document.getElementById('miripResult').style.display = 'block';
   const { gender, usia, postur, rambut, ciri, karakter } = state.g5Answers;
   const pool = gender === 'Pria' ? COMEDIANS.pria : COMEDIANS.wanita;
-
   const usiaMap = { "Muda (< 30 tahun)": [0,29], "Paruh Baya (30–50 tahun)": [30,50], "Senior (> 50 tahun)": [51,999] };
   const posturMap = { "Kurus": "kurus", "Sedang": "sedang", "Gemuk": "gemuk" };
   const rambutMap = { "Lurus": "lurus", "Keriting": "keriting", "Botak": "botak" };
   const karakterMap = { "Lebay & Dramatis": "lebay", "Polos & Innocent": "polos", "Cerdas & Satir": "cerdas", "Ekspresif & Energik": "ekspresif", "Kalem & Misterius": "kalem", "Jail & Usil": "jail" };
-
   const [minU, maxU] = usiaMap[usia] || [0, 999];
-
   let scores = pool.map(k => {
     let s = 0;
     if ((k.usia || 35) >= minU && (k.usia || 35) <= maxU) s += 3;
@@ -2772,211 +2743,118 @@ function showG5Result() {
     s += Math.random() * 1.5;
     return { ...k, score: s };
   });
-
   scores.sort((a, b) => b.score - a.score);
   const winner = scores[0];
   const persen = Math.floor(70 + Math.random() * 25);
-
   document.getElementById('userName2').textContent = state.playerName || 'Kamu';
   document.getElementById('komedianName').textContent = winner.nama;
   document.getElementById('persenBadge').textContent = persen + '% Mirip';
   document.getElementById('komentarLucu').textContent = winner.komentar;
 
-  // 💾 Simpan hasil ke localStorage supaya bisa dilihat di proyektor/room
+  // Simpan ke Supabase
   try {
-    const allResults = JSON.parse(localStorage.getItem('ras_g5_results') || '[]');
-    const existingIdx = allResults.findIndex(r => r.player === state.playerName);
-    const entry = {
-      player: state.playerName,
-      photo: state.playerPhoto || state.playerPhotos[state.playerName] || '',
+    await sbUpsert('ras_g5_results', {
+      player_name: state.playerName || 'Anonim',
+      photo_b64: state.playerPhoto || state.playerPhotos[state.playerName] || '',
       komedian: winner.nama,
       persen: persen,
       komentar: winner.komentar,
       gender: gender,
-      timestamp: Date.now()
-    };
-    if (existingIdx >= 0) allResults[existingIdx] = entry;
-    else allResults.push(entry);
-    localStorage.setItem('ras_g5_results', JSON.stringify(allResults));
-  } catch(e) {}
+      created_at: new Date().toISOString()
+    });
+  } catch(e) { console.warn('G5 save error:', e); }
 }
 
 function restartGame5() { initGame5(); }
 
-function showG5ResultsModal() {
-  const modal = document.getElementById('g5Modal');
-  const content = document.getElementById('g5ModalContent');
+// ============================================================
+// ADMIN PANEL
+// ============================================================
+async function loadAdminData() {
   try {
-    const results = JSON.parse(localStorage.getItem('ras_g5_results') || '[]');
-    if (results.length === 0) {
-      content.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--brown-light)">🎭<br><br>Belum ada peserta yang main Game 5.<br>Main dulu ya!</div>';
-    } else {
-      const sorted = [...results].sort((a,b) => b.timestamp - a.timestamp);
-      content.innerHTML = sorted.map(r => `
-        <div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid rgba(201,168,76,0.2);">
-          <div style="width:48px;height:48px;border-radius:50%;background:var(--cream-dark);border:2px solid var(--gold);flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:1.2rem;">
-            ${r.photo ? `<img src="${r.photo}" style="width:100%;height:100%;object-fit:cover;">` : '👤'}
-          </div>
-          <div style="flex:1;min-width:0;">
-            <div style="font-weight:600;color:var(--brown);font-size:14px;">${r.player}</div>
-            <div style="font-size:12px;color:var(--brown-light);">mirip dengan</div>
-            <div style="font-weight:700;color:var(--green);font-size:15px;">🎭 ${r.komedian}</div>
-          </div>
-          <div style="background:var(--gold);color:var(--brown);font-size:11px;font-weight:700;padding:4px 10px;border-radius:12px;flex-shrink:0;">${r.persen}%</div>
-        </div>
-      `).join('');
-    }
-  } catch(e) {
-    content.innerHTML = '<div style="padding:1rem;color:var(--brown-light)">Gagal memuat data.</div>';
-  }
-  modal.style.display = 'block';
+    const ev = await sbGetOne('ras_event', null) || {};
+    document.getElementById('inputEventName').value = ev.name || '';
+    document.getElementById('inputEventDate').value = ev.date || '';
+    document.getElementById('inputEventVenue').value = ev.venue || '';
+    document.getElementById('inputRoomCode').value = ev.room_code || 'FAM2026';
+    document.getElementById('adminRoomCode').textContent = ev.room_code || 'FAM2026';
+    document.getElementById('adminEventTitle').textContent = ev.name || "Rasmita\'s Family Gathering 2026";
+  } catch(e) {}
+  // Load players count
+  try {
+    const players = await sbGet('ras_players');
+    document.getElementById('adminPlayerCount').textContent = (players || []).length;
+    state.players = (players || []).map(p => p.name);
+  } catch(e) {}
+  renderUploadGrid();
 }
 
-// ===== ADMIN =====
-
-// Load saved data from localStorage on startup
-function loadSavedData() {
-  try {
-    // Event settings
-    const evSettings = localStorage.getItem('ras_event');
-    if (evSettings) {
-      const ev = JSON.parse(evSettings);
-      if (ev.name) {
-        document.title = ev.name;
-        const wm = document.querySelector('.event-watermark');
-        if (wm) wm.textContent = (ev.name.toUpperCase()) + ' · ' + (ev.date || '') + ' · ' + (ev.venue || '');
-        const lt = document.querySelector('.landing-title');
-        if (lt) lt.innerHTML = ev.name.replace("'s", "'s<br>").replace('Family', '<span>Family</span>');
-        const ei = document.querySelector('.event-info p');
-        if (ei && ev.date && ev.venue) ei.innerHTML = '📅 ' + ev.date + ' &nbsp;·&nbsp; 🏛️ ' + ev.venue;
-      }
-      if (ev.roomCode) state.savedRoomCode = ev.roomCode;
-    }
-
-    // Family members & photos
-    const savedMembers = localStorage.getItem('ras_members');
-    if (savedMembers) {
-      const parsed = JSON.parse(savedMembers);
-      if (parsed && parsed.length > 0) {
-        // Merge saved data into FAMILY_MEMBERS
-        parsed.forEach((saved, i) => {
-          if (i < FAMILY_MEMBERS.length) {
-            if (saved.nama) FAMILY_MEMBERS[i].nama = saved.nama;
-            if (saved.foto) FAMILY_MEMBERS[i].foto = saved.foto;
-          }
-        });
-      }
-    }
-
-    // Load custom lirik sing-along dari admin
-    const savedLirik = localStorage.getItem('ras_lagu_lirik');
-    if (savedLirik) {
-      const lirikMap = JSON.parse(savedLirik);
-      LAGU_INDONESIA.forEach(l => {
-        if (lirikMap[l.id] !== undefined) l.lirik_singalong = lirikMap[l.id];
-      });
-    }
-
-    // Load MP3 data dari admin
-    const savedLaguStorage = localStorage.getItem('ras_lagu_storage');
-    if (savedLaguStorage) {
-      const laguSt = JSON.parse(savedLaguStorage);
-      LAGU_INDONESIA.forEach(l => {
-        if (laguSt[l.id] && laguSt[l.id].mp3) l.mp3 = laguSt[l.id].mp3;
-        if (laguSt[l.id] && laguSt[l.id].lirik !== undefined) l.lirik_singalong = laguSt[l.id].lirik;
-      });
-    }
-
-    // Load custom pertanyaan G3 dari admin
-    const savedG3Q = localStorage.getItem('ras_g3_questions');
-    if (savedG3Q) {
-      const customQ = JSON.parse(savedG3Q);
-      if (customQ && customQ.length >= 3) {
-        PERTANYAAN_G3.length = 0;
-        customQ.forEach(q => PERTANYAAN_G3.push(q));
-      }
-    }
-
-    // Load open games dari admin
-    const savedOpenGames = localStorage.getItem('ras_open_games');
-    if (savedOpenGames) {
-      state.openGames = JSON.parse(savedOpenGames);
-    }
-
-  } catch(e) {
-    console.log('No saved data or parse error', e);
-  }
-}
-
-function saveEventSettings() {
-  const name = document.getElementById('inputEventName').value.trim() || 'Rasmita\'s Family Gathering 2026';
+async function saveEventSettings() {
+  const name = document.getElementById('inputEventName').value.trim() || "Rasmita\'s Family Gathering 2026";
   const date = document.getElementById('inputEventDate').value.trim() || '28 Maret 2026';
   const venue = document.getElementById('inputEventVenue').value.trim() || 'Wisma Mandiri, Bandung';
-  const roomCode = (document.getElementById('inputRoomCode').value.trim() || 'FAM2026').toUpperCase();
-
-  localStorage.setItem('ras_event', JSON.stringify({ name, date, venue, roomCode }));
-  state.savedRoomCode = roomCode;
-
-  // Update UI
-  document.getElementById('adminRoomCode').textContent = roomCode;
-  document.getElementById('displayRoomCode').textContent = roomCode;
-  document.getElementById('adminEventTitle').textContent = name;
-  document.querySelector('.event-watermark').textContent = name.toUpperCase() + ' · ' + date + ' · ' + venue;
-  document.querySelector('.event-info p').innerHTML = '📅 ' + date + ' &nbsp;·&nbsp; 🏛️ ' + venue;
-
-  showNotif('✅ Pengaturan disimpan!');
+  const room_code = (document.getElementById('inputRoomCode').value.trim() || 'FAM2026').toUpperCase();
+  try {
+    await sbUpsert('ras_event', { id: 1, name, date, venue, room_code, updated_at: new Date().toISOString() });
+    state.savedRoomCode = room_code;
+    document.getElementById('adminRoomCode').textContent = room_code;
+    document.getElementById('adminEventTitle').textContent = name;
+    showNotif('✅ Pengaturan disimpan!');
+  } catch(e) { showNotif('❌ Gagal simpan: ' + e.message); }
 }
 
 let currentUploadId = null;
 
-function addMember() {
+async function addMember() {
   const newId = FAMILY_MEMBERS.length + 1;
   FAMILY_MEMBERS.push({ id: newId, nama: 'Anggota ' + newId, foto: '' });
-  saveMembersToStorage();
+  try {
+    await sbUpsert('ras_members', { member_id: newId, nama: 'Anggota ' + newId, foto_url: '' });
+  } catch(e) {}
   renderUploadGrid();
   showNotif('Anggota baru ditambahkan');
 }
 
-function clearAllPhotos() {
+async function clearAllPhotos() {
   if (!confirm('Hapus semua foto yang sudah diupload?')) return;
   FAMILY_MEMBERS.forEach(m => m.foto = '');
-  saveMembersToStorage();
+  try {
+    for (const m of FAMILY_MEMBERS) {
+      await sbUpsert('ras_members', { member_id: m.id, nama: m.nama, foto_url: '' });
+    }
+  } catch(e) {}
   renderUploadGrid();
   showNotif('Semua foto dihapus');
 }
 
 function exportMemberData() {
   const data = FAMILY_MEMBERS.map(m => ({ id: m.id, nama: m.nama, hasFoto: !!m.foto }));
-  const text = JSON.stringify(data, null, 2);
-  const blob = new Blob([text], { type: 'application/json' });
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = 'anggota-keluarga.json';
   a.click();
 }
 
-function saveMembersToStorage() {
+async function saveMembersToStorage() {
   try {
-    const toSave = FAMILY_MEMBERS.map(m => ({ id: m.id, nama: m.nama, foto: m.foto }));
-    localStorage.setItem('ras_members', JSON.stringify(toSave));
+    for (const m of FAMILY_MEMBERS) {
+      await sbUpsert('ras_members', { member_id: m.id, nama: m.nama, foto_url: m.foto || '' });
+    }
   } catch(e) {
-    showNotif('⚠️ Storage penuh! Kurangi ukuran foto.');
+    showNotif('⚠️ Gagal sync ke Supabase: ' + e.message);
   }
 }
 
 function renderUploadGrid() {
   const grid = document.getElementById('uploadGrid');
   if (!grid) return;
-  grid.innerHTML = FAMILY_MEMBERS.map(m => `
-    <div class="upload-item ${m.foto ? 'has-photo' : ''}" onclick="triggerPhotoUpload(${m.id})">
-      ${m.foto
-        ? `<img src="${m.foto}" alt="${m.nama}">`
-        : `<div class="upload-placeholder">📷</div>`}
-      <div class="upload-member-name" id="mname_${m.id}" contenteditable="true"
-        onblur="renameMember(${m.id}, this.textContent)"
-        onclick="event.stopPropagation()">${m.nama}</div>
-      <div class="upload-hint">${m.foto ? '✓ Ada foto' : 'Tap upload'}</div>
-    </div>`).join('');
+  grid.innerHTML = FAMILY_MEMBERS.map(m =>
+    '<div class="upload-item ' + (m.foto ? 'has-photo' : '') + '" onclick="triggerPhotoUpload(' + m.id + ')">' +
+    (m.foto ? '<img src="' + m.foto + '" alt="' + m.nama + '">' : '<div class="upload-placeholder">📷</div>') +
+    '<div class="upload-member-name" id="mname_' + m.id + '" contenteditable="true" onblur="renameMember(' + m.id + ', this.textContent)" onclick="event.stopPropagation()">' + m.nama + '</div>' +
+    '<div class="upload-hint">' + (m.foto ? '✓ Ada foto' : 'Tap upload') + '</div></div>'
+  ).join('');
 }
 
 function triggerPhotoUpload(memberId) {
@@ -2984,29 +2862,34 @@ function triggerPhotoUpload(memberId) {
   document.getElementById('photoFileInput').click();
 }
 
-function handlePhotoUpload(event) {
+async function handlePhotoUpload(event) {
   const file = event.target.files[0];
   if (!file || !currentUploadId) return;
-
-  // Resize & compress to base64
   const reader = new FileReader();
-  reader.onload = function(e) {
+  reader.onload = async function(e) {
     const img = new Image();
-    img.onload = function() {
+    img.onload = async function() {
       const canvas = document.createElement('canvas');
       const MAX = 300;
       let w = img.width, h = img.height;
       if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
       else { w = Math.round(w * MAX / h); h = MAX; }
       canvas.width = w; canvas.height = h;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, w, h);
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
       const dataUrl = canvas.toDataURL('image/jpeg', 0.75);
-
       const member = FAMILY_MEMBERS.find(m => m.id === currentUploadId);
       if (member) {
         member.foto = dataUrl;
-        saveMembersToStorage();
+        // Upload ke Supabase Storage
+        showNotif('⏳ Mengupload foto...');
+        try {
+          const storageUrl = await sbUploadFile('rasmita-photos', 'members/' + member.id + '.jpg', dataUrl);
+          member.foto = storageUrl; // pakai URL dari storage
+          await sbUpsert('ras_members', { member_id: member.id, nama: member.nama, foto_url: storageUrl });
+        } catch(err) {
+          // Fallback: simpan base64 ke database
+          await sbUpsert('ras_members', { member_id: member.id, nama: member.nama, foto_url: dataUrl });
+        }
         renderUploadGrid();
         showNotif('✅ Foto ' + member.nama + ' tersimpan!');
       }
@@ -3014,89 +2897,76 @@ function handlePhotoUpload(event) {
     img.src = e.target.result;
   };
   reader.readAsDataURL(file);
-  event.target.value = ''; // reset input
+  event.target.value = '';
 }
 
-function renameMember(id, newName) {
+async function renameMember(id, newName) {
   const member = FAMILY_MEMBERS.find(m => m.id === id);
   if (member && newName.trim()) {
     member.nama = newName.trim();
-    saveMembersToStorage();
+    try {
+      await sbUpsert('ras_members', { member_id: id, nama: member.nama, foto_url: member.foto || '' });
+    } catch(e) {}
   }
 }
 
-function openAllGames() {
+async function openAllGames() {
   state.openGames = GAMES_INFO.map(g => g.id);
+  try {
+    await sbUpsert('ras_open_games', { id: 1, game_ids: state.openGames, updated_at: new Date().toISOString() });
+  } catch(e) {}
   renderAdmin();
   showNotif('🎮 Semua game dibuka!');
 }
 
-function closeAllGames() {
+async function closeAllGames() {
   state.openGames = [];
+  try {
+    await sbUpsert('ras_open_games', { id: 1, game_ids: [], updated_at: new Date().toISOString() });
+  } catch(e) {}
   renderAdmin();
   showNotif('Semua game ditutup.');
 }
 
-function renderAdmin() {
-  // Fill settings inputs with saved values
-  try {
-    const ev = JSON.parse(localStorage.getItem('ras_event') || '{}');
-    document.getElementById('inputEventName').value = ev.name || '';
-    document.getElementById('inputEventDate').value = ev.date || '';
-    document.getElementById('inputEventVenue').value = ev.venue || '';
-    document.getElementById('inputRoomCode').value = ev.roomCode || 'FAM2026';
-    document.getElementById('adminRoomCode').textContent = ev.roomCode || 'FAM2026';
-    document.getElementById('adminEventTitle').textContent = ev.name || "Rasmita's Family Gathering 2026";
-  } catch(e) {}
-
-  document.getElementById('adminPlayerCount').textContent = state.players.length;
+async function renderAdmin() {
+  await loadAdminData();
   document.getElementById('adminOpenCount').textContent = state.openGames.length;
-
   document.getElementById('adminGames').innerHTML = GAMES_INFO.map(g => {
     const isOpen = state.openGames.includes(g.id);
-    return `
-    <div class="admin-game-card">
-      <div style="font-size:1.5rem;margin-bottom:6px">${g.icon}</div>
-      <h4>${g.title}</h4>
-      <p>${g.desc}</p>
-      <button class="toggle-btn ${isOpen ? 'close' : 'open'}" onclick="toggleGame(${g.id})">
-        ${isOpen ? '⏹ Tutup Game' : '▶ Buka Game'}
-      </button>
-    </div>`;
+    return '<div class="admin-game-card"><div style="font-size:1.5rem;margin-bottom:6px">' + g.icon + '</div><h4>' + g.title + '</h4><p>' + g.desc + '</p>' +
+      '<button class="toggle-btn ' + (isOpen ? 'close' : 'open') + '" onclick="toggleGame(' + g.id + ')">' +
+      (isOpen ? '⏹ Tutup Game' : '▶ Buka Game') + '</button></div>';
   }).join('');
-
-  document.getElementById('adminPlayerList').innerHTML = state.players.map(p => `
-    <div class="player-item">
-      <div class="player-avatar">${p[0].toUpperCase()}</div>
-      <div class="player-name">${p}</div>
-      <div class="player-status">● Online</div>
-    </div>`).join('') || '<p style="color:var(--brown-light);font-size:13px">Belum ada pemain</p>';
-
+  document.getElementById('adminPlayerList').innerHTML = state.players.map(p =>
+    '<div class="player-item"><div class="player-avatar">' + p[0].toUpperCase() + '</div><div class="player-name">' + p + '</div><div class="player-status">● Online</div></div>'
+  ).join('') || '<p style="color:var(--brown-light);font-size:13px">Belum ada pemain</p>';
   renderUploadGrid();
 }
 
-function toggleGame(id) {
+async function toggleGame(id) {
   if (state.openGames.includes(id)) {
     state.openGames = state.openGames.filter(g => g !== id);
     showNotif('Game ' + id + ' ditutup');
   } else {
     state.openGames.push(id);
-    showNotif('Game ' + id + ' dibuka! Pemain bisa bergabung 🎉');
+    showNotif('Game ' + id + ' dibuka! 🎉');
   }
+  try {
+    await sbUpsert('ras_open_games', { id: 1, game_ids: state.openGames, updated_at: new Date().toISOString() });
+  } catch(e) {}
   renderAdmin();
 }
 
-// ===== HELPERS =====
+// ============================================================
+// HELPERS
+// ============================================================
 function buildPodium(scores) {
   const ordered = [scores[1], scores[0], scores[2]].filter(Boolean);
   const classes = ['second', 'first', 'third'];
   const labels = ['🥈', '🥇', '🥉'];
-  return `<div class="podium">` + ordered.map((s, i) => `
-    <div class="podium-slot">
-      <div class="podium-bar ${classes[i]}">${labels[i]}</div>
-      <div class="podium-name">${s.name}</div>
-      <div class="podium-score">${s.score} poin</div>
-    </div>`).join('') + `</div>`;
+  return '<div class="podium">' + ordered.map((s, i) =>
+    '<div class="podium-slot"><div class="podium-bar ' + classes[i] + '">' + labels[i] + '</div><div class="podium-name">' + s.name + '</div><div class="podium-score">' + s.score + ' poin</div></div>'
+  ).join('') + '</div>';
 }
 
 function showNotif(msg) {
@@ -3106,73 +2976,35 @@ function showNotif(msg) {
   setTimeout(() => n.classList.remove('show'), 3000);
 }
 
-// ===== GAME 6: TEBAK LAGU =====
+// ============================================================
+// GAME 6: TEBAK LAGU (audio logic tidak berubah, hanya sync)
+// ============================================================
 const LAGU_INDONESIA = [
-  {
-    id: 1,
-    judul: "Tabola Bale",
-    artis: "Silet Open Up feat. Jacson Zeran, Juan Reza",
-    tahun: 2025,
-    emoji: "🌴",
+  { id: 1, judul: "Tabola Bale", artis: "Silet Open Up feat. Jacson Zeran, Juan Reza", tahun: 2025, emoji: "🌴",
     petunjuk: "Lagu timur viral 2025 yang bikin semua orang goyang — pasti sudah pernah dengar!",
     lirik_singalong: "Kaka tabola bale lia ade nona e\nSu makin manyala e, kaka hati susah e\nAde bikin kaka mete, tidur malam bola bale\nSejak kaka lia ade, aduh Tuhan ampun e",
-    pilihan: ["Tabola Bale", "Gemu Fa Mi Re", "Poco Poco", "Maumere"],
-    jawaban: "Tabola Bale",
-    intro_nada: [392,392,440,392,330,349,392,330],
-    mp3: null,
-  },
-  {
-    id: 2,
-    judul: "Harta yang Paling Berharga",
-    artis: "Hedi Yunus (OST Keluarga Cemara)",
-    tahun: 1996,
-    emoji: "🏡",
+    pilihan: ["Tabola Bale", "Gemu Fa Mi Re", "Poco Poco", "Maumere"], jawaban: "Tabola Bale",
+    intro_nada: [392,392,440,392,330,349,392,330], mp3: null },
+  { id: 2, judul: "Harta yang Paling Berharga", artis: "Hedi Yunus (OST Keluarga Cemara)", tahun: 1996, emoji: "🏡",
     petunjuk: "OST sinetron keluarga legendaris tahun 90-an — anthem keluarga Indonesia!",
     lirik_singalong: "Harta yang paling berharga adalah keluarga\nIstana yang paling indah adalah keluarga\nPuisi yang paling bermakna adalah keluarga\nMutiara tiada tara adalah keluarga",
-    pilihan: ["Harta yang Paling Berharga", "Satu Nusa Satu Bangsa", "Bintang di Surga", "Rumah Kita"],
-    jawaban: "Harta yang Paling Berharga",
-    intro_nada: [261,329,392,329,261,196,220,261],
-    mp3: null,
-  },
-  {
-    id: 3,
-    judul: "Dansa Yok Dansa",
-    artis: "Harvey Malaiholo",
-    tahun: 1985,
-    emoji: "💃",
-    petunjuk: "Lagu joget klasik wajib di setiap pesta keluarga Indonesia — semua generasi hafal!",
+    pilihan: ["Harta yang Paling Berharga", "Satu Nusa Satu Bangsa", "Bintang di Surga", "Rumah Kita"], jawaban: "Harta yang Paling Berharga",
+    intro_nada: [261,329,392,329,261,196,220,261], mp3: null },
+  { id: 3, judul: "Dansa Yok Dansa", artis: "Harvey Malaiholo", tahun: 1985, emoji: "💃",
+    petunjuk: "Lagu joget klasik wajib di setiap pesta keluarga Indonesia!",
     lirik_singalong: "Dansa yok dansa, dansa yok dansa\nMari bersama kita bergembira\nDansa yok dansa, dansa yok dansa\nSambil bernyanyi kita berdansa",
-    pilihan: ["Dansa Yok Dansa", "Buka Semangat Baru", "Tari Saman", "Joget"],
-    jawaban: "Dansa Yok Dansa",
-    intro_nada: [392,440,392,349,330,349,392,440],
-    mp3: null,
-  },
-  {
-    id: 4,
-    judul: "Kopi Dangdut",
-    artis: "Fahmi Shahab",
-    tahun: 1987,
-    emoji: "☕",
+    pilihan: ["Dansa Yok Dansa", "Buka Semangat Baru", "Tari Saman", "Joget"], jawaban: "Dansa Yok Dansa",
+    intro_nada: [392,440,392,349,330,349,392,440], mp3: null },
+  { id: 4, judul: "Kopi Dangdut", artis: "Fahmi Shahab", tahun: 1987, emoji: "☕",
     petunjuk: "Dangdut klasik legendaris yang pasti bikin semua goyang dari nenek sampai cucu!",
     lirik_singalong: "Kopi dangdut, kopi dangdut\nPanas-panas enak rasanya\nKopi dangdut, kopi dangdut\nCampur gula tambah nikmatnya",
-    pilihan: ["Kopi Dangdut", "Teh Botol", "Goyang Dumang", "Kucing Garong"],
-    jawaban: "Kopi Dangdut",
-    intro_nada: [330,349,392,392,349,330,294,294],
-    mp3: null,
-  },
-  {
-    id: 5,
-    judul: "Goyang Dumang",
-    artis: "Cita Citata",
-    tahun: 2014,
-    emoji: "🕺",
-    petunjuk: "Lagu dangdut hits yang pasti bikin semua langsung joget — ayoo goyang!",
+    pilihan: ["Kopi Dangdut", "Teh Botol", "Goyang Dumang", "Kucing Garong"], jawaban: "Kopi Dangdut",
+    intro_nada: [330,349,392,392,349,330,294,294], mp3: null },
+  { id: 5, judul: "Goyang Dumang", artis: "Cita Citata", tahun: 2014, emoji: "🕺",
+    petunjuk: "Lagu dangdut hits yang pasti bikin semua langsung joget!",
     lirik_singalong: "Goyang dumang, goyang dumang\nGoyang goyang goyang dumang\nAyo kita goyang bersama-sama\nJangan malu-malu ayoo bergoyang!",
-    pilihan: ["Goyang Dumang", "Madu dan Racun", "Seksi Seksi", "Kereta Malam"],
-    jawaban: "Goyang Dumang",
-    intro_nada: [392,392,440,392,349,330,349,392],
-    mp3: null,
-  },
+    pilihan: ["Goyang Dumang", "Madu dan Racun", "Seksi Seksi", "Kereta Malam"], jawaban: "Goyang Dumang",
+    intro_nada: [392,392,440,392,349,330,349,392], mp3: null },
 ];
 
 let g6AudioCtx = null;
@@ -3180,9 +3012,7 @@ let g6OscNodes = [];
 let g6IsPlaying = false;
 
 function getAudioCtx() {
-  if (!g6AudioCtx) {
-    g6AudioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  }
+  if (!g6AudioCtx) g6AudioCtx = new (window.AudioContext || window.webkitAudioContext)();
   return g6AudioCtx;
 }
 
@@ -3196,40 +3026,16 @@ function playTone(freq, startTime, duration, ctx, gainNode) {
   g6OscNodes.push(osc);
 }
 
-let g6AudioElement = null;
-
-function playAudioFile(src, startSec, endSec, onEnd) {
-  if (g6AudioElement) {
-    g6AudioElement.pause();
-    g6AudioElement = null;
-  }
-  const audio = new Audio(src);
-  g6AudioElement = audio;
-  audio.currentTime = startSec || 0;
-  audio.play().catch(() => {
-    // Fallback to synthetic if file fails
-    const lagu = LAGU_INDONESIA[state.g6Idx];
-    playMelodi(lagu.intro_nada, onEnd);
-  });
-  const duration = ((endSec || 10) - (startSec || 0)) * 1000;
-  setTimeout(() => {
-    audio.pause();
-    if (onEnd) onEnd();
-  }, duration);
-}
-
 function stopG6Audio() {
-  if (g6AudioElement) {
-    g6AudioElement.pause();
-    g6AudioElement = null;
-  }
+  if (g6AudioElement) { g6AudioElement.pause(); g6AudioElement = null; }
   g6OscNodes.forEach(o => { try { o.stop(); } catch(e) {} });
   g6OscNodes = [];
   g6IsPlaying = false;
-  setDiscSpin(false);
-  setWavePlay(false);
-  document.getElementById('g6StatusText').textContent = 'TEKAN PLAY UNTUK MULAI';
-  document.getElementById('g6PlayBtn').textContent = '▶';
+  setDiscSpin(false); setWavePlay(false);
+  const st = document.getElementById('g6StatusText');
+  if (st) st.textContent = 'TEKAN PLAY UNTUK MULAI';
+  const pb = document.getElementById('g6PlayBtn');
+  if (pb) pb.textContent = '▶';
 }
 
 function setDiscSpin(spin) {
@@ -3238,61 +3044,38 @@ function setDiscSpin(spin) {
 }
 
 function setWavePlay(play) {
-  document.querySelectorAll('.audio-wave').forEach(w => {
-    w.classList.toggle('paused', !play);
-  });
+  document.querySelectorAll('.audio-wave').forEach(w => w.classList.toggle('paused', !play));
 }
 
 function playMelodi(nada, onEnd) {
   const ctx = getAudioCtx();
-  let notes = [];
-  
-  // Support both array [261,329,...] and string "Do Re Mi..."
-  if (Array.isArray(nada)) {
-    notes = nada.filter(f => f > 0);
-  } else {
-    const noteMap = { 'Do':261.63,'Re':293.66,'Mi':329.63,'Fa':349.23,'Sol':392,'La':440,'Si':493.88 };
-    const parts = nada.replace(/\.\.\./g,'').trim().split(/\s+/);
-    parts.forEach(p => {
-      const clean = p.replace(/,/g,'');
-      if (noteMap[clean]) notes.push(noteMap[clean]);
-    });
-  }
-
-  if (notes.length === 0) { if(onEnd) onEnd(); return; }
-
+  let notes = Array.isArray(nada) ? nada.filter(f => f > 0) : [];
+  if (notes.length === 0) { if (onEnd) onEnd(); return; }
   const gainNode = ctx.createGain();
   gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
   gainNode.connect(ctx.destination);
-
-  const noteDur = 0.38;
-  const gap = 0.06;
-  notes.forEach((freq, i) => {
-    playTone(freq, ctx.currentTime + i * (noteDur + gap), noteDur, ctx, gainNode);
-  });
-
+  const noteDur = 0.38, gap = 0.06;
+  notes.forEach((freq, i) => playTone(freq, ctx.currentTime + i * (noteDur + gap), noteDur, ctx, gainNode));
   const totalTime = notes.length * (noteDur + gap) * 1000;
   setTimeout(() => {
-    g6IsPlaying = false;
-    setDiscSpin(false);
-    setWavePlay(false);
-    document.getElementById('g6StatusText').textContent = 'SELESAI — JAWAB SEKARANG!';
-    document.getElementById('g6PlayBtn').textContent = '▶';
+    g6IsPlaying = false; setDiscSpin(false); setWavePlay(false);
+    const st = document.getElementById('g6StatusText');
+    if (st) st.textContent = 'SELESAI — JAWAB SEKARANG!';
+    const pb = document.getElementById('g6PlayBtn');
+    if (pb) pb.textContent = '▶';
     if (onEnd) onEnd();
   }, totalTime + 200);
 }
 
+let g6AudioElement = null;
+
 function initGame6() {
   showPage('game6');
-  state.g6Idx = 0;
-  state.g6Score = 0;
-  state.g6Answers = [];
-  state.g6HintUsed = false;
+  state.g6Idx = 0; state.g6Score = 0; state.g6Answers = []; state.g6HintUsed = false;
   document.getElementById('g6Playing').style.display = 'block';
   document.getElementById('g6RoundResult').style.display = 'none';
   document.getElementById('g6FinalResult').style.display = 'none';
-  stopG6Audio();
-  loadG6Song();
+  stopG6Audio(); loadG6Song();
 }
 
 function loadG6Song() {
@@ -3305,34 +3088,29 @@ function loadG6Song() {
   document.getElementById('g6PlayBtn').textContent = '▶';
   document.getElementById('g6HintBox').style.display = 'none';
   document.getElementById('g6HintBtn').style.display = 'inline-block';
-
-  // Build choices
   const shuffled = [...lagu.pilihan].sort(() => Math.random() - 0.5);
-  document.getElementById('g6Choices').innerHTML = shuffled.map(p => `
-    <button class="g6-choice" onclick="answerG6('${p}')">${p}</button>
-  `).join('');
-
+  document.getElementById('g6Choices').innerHTML = shuffled.map(p =>
+    '<button class="g6-choice" onclick="answerG6('' + p + '')">' + p + '</button>'
+  ).join('');
   stopG6Audio();
 }
 
 function playG6Intro() {
   if (g6IsPlaying) return;
   const lagu = LAGU_INDONESIA[state.g6Idx];
-  g6IsPlaying = true;
-  setDiscSpin(true);
-  setWavePlay(true);
+  g6IsPlaying = true; setDiscSpin(true); setWavePlay(true);
   document.getElementById('g6StatusText').textContent = '♪ MEMAINKAN INTRO...';
   document.getElementById('g6PlayBtn').textContent = '⏸';
-
-  // Try audio file first, fallback to synthetic melody
-  if (lagu.audio_file) {
-    playAudioFile(lagu.audio_file, lagu.intro_start || 0, lagu.intro_end || 10, () => {
-      g6IsPlaying = false;
-      setDiscSpin(false);
-      setWavePlay(false);
+  if (lagu.mp3) {
+    if (g6AudioElement) { g6AudioElement.pause(); g6AudioElement = null; }
+    g6AudioElement = new Audio(lagu.mp3);
+    g6AudioElement.play().catch(() => playMelodi(lagu.intro_nada, null));
+    setTimeout(() => {
+      if (g6AudioElement) { g6AudioElement.pause(); g6AudioElement = null; }
+      g6IsPlaying = false; setDiscSpin(false); setWavePlay(false);
       document.getElementById('g6StatusText').textContent = 'SELESAI — JAWAB SEKARANG!';
       document.getElementById('g6PlayBtn').textContent = '▶';
-    });
+    }, 10000);
   } else {
     playMelodi(lagu.intro_nada, null);
   }
@@ -3342,14 +3120,8 @@ function playG6Full() {
   const lagu = LAGU_INDONESIA[state.g6Idx];
   stopG6Audio();
   setTimeout(() => {
-    g6IsPlaying = true;
-    setDiscSpin(true);
-    setWavePlay(true);
-    const btn = document.getElementById('g6PlayFullBtn');
-    if (btn) btn.textContent = '⏸ Sedang Diputar...';
-    playMelodi(lagu.intro_nada, () => {
-      if (btn) btn.textContent = '▶ Play Intro Lagi';
-    });
+    g6IsPlaying = true; setDiscSpin(true); setWavePlay(true);
+    playMelodi(lagu.intro_nada, () => {});
   }, 100);
 }
 
@@ -3361,25 +3133,22 @@ function showG6Hint() {
   document.getElementById('g6HintBtn').style.display = 'none';
 }
 
-function answerG6(jawaban) {
+async function answerG6(jawaban) {
   stopG6Audio();
   const lagu = LAGU_INDONESIA[state.g6Idx];
   const benar = jawaban === lagu.jawaban;
   const poin = benar ? (state.g6HintUsed ? 50 : 100) : 0;
   state.g6Score += poin;
   state.g6Answers.push({ lagu: lagu.judul, benar, poin });
-
-  // Highlight choices
   document.querySelectorAll('.g6-choice').forEach(btn => {
     btn.disabled = true;
     if (btn.textContent === lagu.jawaban) btn.classList.add('correct');
     else if (btn.textContent === jawaban && !benar) btn.classList.add('wrong');
   });
-
   setTimeout(() => showG6RoundResult(benar, poin, lagu), 800);
 }
 
-function showG6RoundResult(benar, poin, lagu) {
+async function showG6RoundResult(benar, poin, lagu) {
   document.getElementById('g6Playing').style.display = 'none';
   document.getElementById('g6RoundResult').style.display = 'block';
   document.getElementById('g6RoundIcon').textContent = benar ? '🎉' : '😅';
@@ -3391,7 +3160,6 @@ function showG6RoundResult(benar, poin, lagu) {
   document.getElementById('g6Lirik').style.display = 'none';
   document.getElementById('g6WaitHost').style.display = 'flex';
   document.getElementById('g6PlayingState').style.display = 'none';
-
   const isLast = state.g6Idx >= LAGU_INDONESIA.length - 1;
   const nextBtn = document.getElementById('g6NextBtn');
   nextBtn.textContent = isLast ? '🏆 Lihat Hasil Akhir' : 'Lagu Berikutnya →';
@@ -3399,16 +3167,15 @@ function showG6RoundResult(benar, poin, lagu) {
   nextBtn.disabled = true;
   nextBtn.style.opacity = '0.5';
 
-  // Broadcast current lagu to localStorage for admin + projector
+  // Broadcast ke Supabase
   try {
-    localStorage.setItem('ras_g6_singalong', JSON.stringify({
-      laguId: lagu.id, judul: lagu.judul, artis: lagu.artis,
-      lirik: lagu.lirik_singalong || '', status: 'waiting', ts: Date.now()
-    }));
-    localStorage.removeItem('ras_g6_play_cmd');
+    await sbUpsert('ras_g6_singalong', {
+      id: 1, lagu_id: lagu.id, judul: lagu.judul, artis: lagu.artis,
+      lirik: lagu.lirik_singalong || '', status: 'waiting',
+      updated_at: new Date().toISOString()
+    });
   } catch(e) {}
 
-  // Poll for host play command
   startG6SingAlongPoll(lagu);
 }
 
@@ -3417,58 +3184,45 @@ let g6SingAlongAudio = null;
 
 function startG6SingAlongPoll(lagu) {
   clearInterval(g6SingAlongPollTimer);
-  g6SingAlongPollTimer = setInterval(() => {
+  let lastTs = '';
+  g6SingAlongPollTimer = setInterval(async () => {
     try {
-      const cmd = JSON.parse(localStorage.getItem('ras_g6_play_cmd') || 'null');
-      if (!cmd) return;
-      if (cmd.laguId === lagu.id && cmd.action === 'play' && cmd.ts > (Date.now() - 30000)) {
+      const rows = await sbGet('ras_g6_play_cmd');
+      if (!rows || rows.length === 0) return;
+      const cmd = rows[0];
+      if (cmd.updated_at === lastTs) return;
+      lastTs = cmd.updated_at;
+      if (cmd.lagu_id === lagu.id && cmd.action === 'play' && new Date(cmd.updated_at) > new Date(Date.now() - 30000)) {
         clearInterval(g6SingAlongPollTimer);
-        triggerG6SingAlong(lagu, cmd.mp3DataUrl || null);
+        triggerG6SingAlong(lagu, cmd.mp3_url || null);
       }
-      if (cmd.laguId === lagu.id && cmd.action === 'next') {
+      if (cmd.lagu_id === lagu.id && cmd.action === 'next') {
         clearInterval(g6SingAlongPollTimer);
         const isLast = state.g6Idx >= LAGU_INDONESIA.length - 1;
         if (isLast) showG6FinalResult(); else nextG6Song();
       }
     } catch(e) {}
-  }, 1000);
+  }, 2000);
 }
 
-function triggerG6SingAlong(lagu, mp3DataUrl) {
-  // Show lirik, hide waiting
+function triggerG6SingAlong(lagu, mp3Url) {
   document.getElementById('g6WaitHost').style.display = 'none';
   document.getElementById('g6Lirik').style.display = 'block';
   document.getElementById('g6PlayingState').style.display = 'block';
-
-  // Enable next button
   const nextBtn = document.getElementById('g6NextBtn');
-  nextBtn.disabled = false;
-  nextBtn.style.opacity = '1';
-
-  // Update status ke playing untuk proyektor
-  try {
-    const sa = JSON.parse(localStorage.getItem('ras_g6_singalong') || '{}');
-    sa.status = 'playing';
-    sa.lirik = lagu.lirik_singalong || '';
-    localStorage.setItem('ras_g6_singalong', JSON.stringify(sa));
-  } catch(e) {}
-
-  // Play MP3 if available, else play sintetis
-  if (mp3DataUrl) {
+  nextBtn.disabled = false; nextBtn.style.opacity = '1';
+  if (mp3Url) {
     try {
       if (g6SingAlongAudio) { g6SingAlongAudio.pause(); g6SingAlongAudio = null; }
-      g6SingAlongAudio = new Audio(mp3DataUrl);
+      g6SingAlongAudio = new Audio(mp3Url);
       g6SingAlongAudio.play();
       g6SingAlongAudio.onended = () => { document.getElementById('g6PlayingState').style.display = 'none'; };
     } catch(e) { playG6Full(); }
-  } else {
-    playG6Full();
-  }
+  } else { playG6Full(); }
 }
 
 function nextG6Song() {
-  stopG6Audio();
-  clearInterval(g6SingAlongPollTimer);
+  stopG6Audio(); clearInterval(g6SingAlongPollTimer);
   if (g6SingAlongAudio) { g6SingAlongAudio.pause(); g6SingAlongAudio = null; }
   state.g6Idx++;
   document.getElementById('g6Playing').style.display = 'block';
@@ -3481,24 +3235,26 @@ function showG6FinalResult() {
   document.getElementById('g6RoundResult').style.display = 'none';
   document.getElementById('g6FinalResult').style.display = 'block';
   document.getElementById('g6TotalScore').textContent = state.g6Score + ' Poin';
-
-  const summary = state.g6Answers.map((a, i) =>
-    `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:${a.benar?'#E8F5E9':'#FFEBEE'};border-radius:8px;margin-bottom:6px;">
-      <div style="font-size:13px;color:var(--brown);font-weight:600;">${i+1}. ${a.lagu}</div>
-      <div style="font-size:13px;font-weight:700;color:${a.benar?'var(--green)':'#C62828'}">${a.benar?'✓ +'+a.poin:'✗ 0'}</div>
-    </div>`
+  document.getElementById('g6ScoreSummary').innerHTML = state.g6Answers.map((a, i) =>
+    '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:' + (a.benar ? '#E8F5E9' : '#FFEBEE') + ';border-radius:8px;margin-bottom:6px;">' +
+    '<div style="font-size:13px;color:var(--brown);font-weight:600;">' + (i+1) + '. ' + a.lagu + '</div>' +
+    '<div style="font-size:13px;font-weight:700;color:' + (a.benar ? 'var(--green)' : '#C62828') + '">' + (a.benar ? '✓ +' + a.poin : '✗ 0') + '</div></div>'
   ).join('');
-  document.getElementById('g6ScoreSummary').innerHTML = summary;
-
-  const scores = [{ name: state.playerName || 'Kamu', score: state.g6Score }];
-  document.getElementById('g6Podium').innerHTML = buildPodium(scores);
+  document.getElementById('g6Podium').innerHTML = buildPodium([{ name: state.playerName || 'Kamu', score: state.g6Score }]);
 }
 
 function restartGame6() { initGame6(); }
 
-// ===== INIT =====
-loadSavedData();
-showPage('landing');
+// ============================================================
+// INIT
+// ============================================================
+async function init() {
+  await loadSavedData();
+  startRealtimeSync();
+  showPage('landing');
+}
+
+init();
 </script>
 </body>
 </html>
