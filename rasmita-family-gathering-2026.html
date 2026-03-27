@@ -1821,8 +1821,8 @@
 // ============================================================
 // SUPABASE CONFIG — ganti dengan credentials project Anda
 // ============================================================
-const SUPABASE_URL = 'https://ykibpxiovrslknagmnpq.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_mC5dlpZLyCUFWgGetANo4w_F44OZGXn';
+const SUPABASE_URL = 'https://XXXX.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.XXXXXX';
 
 // ── Low-level REST helpers ──
 async function sbGet(table, filters) {
@@ -2282,7 +2282,7 @@ function renderG1PlayerSelector() {
   if (state.g1SelectedPlayers.length === 0 && state.playerName) state.g1SelectedPlayers = [state.playerName];
   list.innerHTML = joined.map(name => {
     const selected = state.g1SelectedPlayers.includes(name);
-    return '<div onclick="toggleG1Player('' + name + '')" style="cursor:pointer;padding:8px 16px;border-radius:20px;font-size:13px;font-weight:600;border:2px solid ' + (selected ? 'var(--green)' : 'rgba(201,168,76,0.3)') + ';background:' + (selected ? '#e8f5e9' : 'var(--cream)') + ';color:' + (selected ? 'var(--green)' : 'var(--brown)') + ';transition:all 0.2s;">' + (selected ? '✓ ' : '') + name + '</div>';
+    return '<div onclick="toggleG1Player(\'' + name + '\')" style="cursor:pointer;padding:8px 16px;border-radius:20px;font-size:13px;font-weight:600;border:2px solid ' + (selected ? 'var(--green)' : 'rgba(201,168,76,0.3)') + ';background:' + (selected ? '#e8f5e9' : 'var(--cream)') + ';color:' + (selected ? 'var(--green)' : 'var(--brown)') + ';transition:all 0.2s;">' + (selected ? '✓ ' : '') + name + '</div>';
   }).join('') + '<div onclick="addG1CustomPlayer()" style="cursor:pointer;padding:8px 16px;border-radius:20px;font-size:13px;font-weight:600;border:2px dashed rgba(201,168,76,0.4);background:transparent;color:var(--brown-light);">+ Tambah</div>';
 }
 
