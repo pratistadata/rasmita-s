@@ -2455,12 +2455,14 @@ function showG2Leaderboard() {
   document.getElementById('g2Soal').style.display = 'none';
   document.getElementById('g2Leaderboard').style.display = 'block';
   const sorted = Object.entries(state.g2Scores).sort((a,b) => b[1]-a[1]);
-  document.getElementById('g2LBList').innerHTML = sorted.map(([name, score], i) =>
-    '<div style="display:flex;align-items:center;gap:1rem;padding:12px;background:var(--' + (i===0?'cream-dark':'white') + ');border-radius:10px;margin-bottom:8px;border:1px solid rgba(201,168,76,0.2)">' +
-    '<div style="font-size:1.5rem">' + (i===0?'🥇':i===1?'🥈':'🥉') + '</div>' +
+  document.getElementById('g2LBList').innerHTML = sorted.map(([name, score], i) => {
+    const bg = i===0?'cream-dark':'white';
+    const medal = i===0?'🥇':i===1?'🥈':'🥉';
+    return '<div style="display:flex;align-items:center;gap:1rem;padding:12px;background:var(--' + bg + ');border-radius:10px;margin-bottom:8px;border:1px solid rgba(201,168,76,0.2)">' +
+    '<div style="font-size:1.5rem">' + medal + '</div>' +
     '<div style="flex:1;font-weight:600;color:var(--brown)">' + name + '</div>' +
-    '<div style="font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--gold)">' + score + '</div></div>'
-  ).join('');
+    '<div style="font-size:1.2rem;color:var(--gold)">' + score + '</div></div>';
+  }).join('');
 }
 
 function restartGame2() { initGame2(); }
