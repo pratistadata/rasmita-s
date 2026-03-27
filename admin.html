@@ -1211,8 +1211,9 @@ async function loadAllFromSupabase() {
     // Members
     const memberRows = await sbGet('ras_members');
     if (memberRows && memberRows.length > 0) {
-      FAMILY_MEMBERS = memberRows.map(r => ({ id: r.member_id, nama: r.nama, foto: r.foto_url || '', game_tags: r.game_tags || ['g1','g2','g3','g4'] }));
+      FAMILY_MEMBERS = memberRows.map(r => ({ id: r.member_id, nama: r.nama, alias: r.alias || '', foto: r.foto_url || '', usia: r.usia || 0, game_tags: r.game_tags || ['g1','g2','g3','g4'] }));
       FAMILY_MEMBERS.sort((a, b) => a.id - b.id);
+    window.allMembers = FAMILY_MEMBERS.filter(m => m.foto); // sync untuk renderG4RondeUI
     } else {
       initDefaultMembers();
     }
@@ -1376,6 +1377,7 @@ function renderPhotoGrid() {
     '<button class="photo-del" onclick="deleteMemberPhoto(event,' + m.id + ')">✕</button>' +
     (m.foto ? '<img src="' + m.foto + '" alt="' + m.nama + '">' : '<div class="photo-placeholder">📷</div>') +
     '<div class="photo-name" contenteditable="true" onblur="renameMember(' + m.id + ',this.textContent)" onclick="event.stopPropagation()">' + m.nama + '</div>' +
+    '<input type="text" placeholder="Nama panggilan (opsional)" value="' + (m.alias||'') + '" title="Nama panggilan/alias untuk pencocokan jawaban Game 2" onchange="renameAlias(' + m.id + ',this.value)" onclick="event.stopPropagation()" style="width:100%;border:1px dashed rgba(201,168,76,0.4);border-radius:4px;padding:2px 6px;font-size:10px;color:var(--brown-light);background:transparent;margin-top:2px;box-sizing:border-box;outline:none;">' +
     '<div class="photo-status ' + (m.foto ? 'has-photo' : '') + '">' + (m.foto ? '✓ Ada foto' : 'Tap untuk upload') + '</div></div>'
   ).join('');
 }
@@ -1404,10 +1406,10 @@ async function handlePhotoUpload(event) {
         try {
           const storageUrl = await sbUploadFile('rasmita-photos', 'members/' + m.id + '.jpg', dataUrl);
           m.foto = storageUrl;
-          await sbUpsert('ras_members', { member_id: m.id, nama: m.nama, foto_url: storageUrl, game_tags: m.game_tags || ['g1','g2','g3','g4'] });
+          await sbUpsert('ras_members', { member_id: m.id, nama: m.nama, foto_url: storageUrl, alias: m.alias || '', game_tags: m.game_tags || ['g1','g2','g3','g4'] });
         } catch(err) {
           m.foto = dataUrl;
-          await sbUpsert('ras_members', { member_id: m.id, nama: m.nama, foto_url: dataUrl, game_tags: m.game_tags || ['g1','g2','g3','g4'] });
+          await sbUpsert('ras_members', { member_id: m.id, nama: m.nama, foto_url: dataUrl, alias: m.alias || '', game_tags: m.game_tags || ['g1','g2','g3','g4'] });
         }
         renderPhotoGrid(); renderDashboard(); showNotif('✅ Foto ' + m.nama + ' disimpan!');
       }
@@ -1422,7 +1424,16 @@ async function renameMember(id, name) {
   const m = FAMILY_MEMBERS.find(m => m.id === id);
   if (m && name.trim()) {
     m.nama = name.trim();
-    await sbUpsert('ras_members', { member_id: id, nama: m.nama, foto_url: m.foto || '' });
+    await sbUpsert('ras_members', { member_id: id, nama: m.nama, foto_url: m.foto || '', alias: m.alias || '' });
+  }
+}
+
+async function renameAlias(id, alias) {
+  const m = FAMILY_MEMBERS.find(m => m.id === id);
+  if (m) {
+    m.alias = alias.trim();
+    await sbUpsert('ras_members', { member_id: id, nama: m.nama, foto_url: m.foto || '', alias: m.alias });
+    showNotif('💾 Alias tersimpan: ' + (m.alias || '(kosong)'));
   }
 }
 
@@ -1431,7 +1442,7 @@ async function deleteMemberPhoto(event, id) {
   const m = FAMILY_MEMBERS.find(m => m.id === id);
   if (m && confirm('Hapus foto ' + m.nama + '?')) {
     m.foto = '';
-    await sbUpsert('ras_members', { member_id: id, nama: m.nama, foto_url: '' });
+    await sbUpsert('ras_members', { member_id: id, nama: m.nama, foto_url: '', alias: m.alias || '' });
     renderPhotoGrid(); renderDashboard();
   }
 }
@@ -1440,7 +1451,7 @@ async function addMember() {
   const newId = Math.max(...FAMILY_MEMBERS.map(m => m.id), 0) + 1;
   const nm = { id: newId, nama: 'Anggota ' + newId, foto: '' };
   FAMILY_MEMBERS.push(nm);
-  await sbUpsert('ras_members', { member_id: newId, nama: nm.nama, foto_url: '' });
+  await sbUpsert('ras_members', { member_id: newId, nama: nm.nama, foto_url: '', alias: '' });
   renderPhotoGrid(); renderDashboard(); showNotif('Anggota baru ditambahkan');
 }
 
@@ -1448,7 +1459,7 @@ async function clearAllPhotos() {
   if (!confirm('Hapus semua foto?')) return;
   for (const m of FAMILY_MEMBERS) {
     m.foto = '';
-    await sbUpsert('ras_members', { member_id: m.id, nama: m.nama, foto_url: '' });
+    await sbUpsert('ras_members', { member_id: m.id, nama: m.nama, foto_url: '', alias: m.alias || '' });
   }
   renderPhotoGrid(); renderDashboard(); showNotif('Semua foto dihapus');
 }
@@ -1473,7 +1484,7 @@ async function handleImportJSON(event) {
         if (m) {
           if (d.nama) m.nama = d.nama;
           if (d.foto) m.foto = d.foto;
-          await sbUpsert('ras_members', { member_id: m.id, nama: m.nama, foto_url: m.foto || '' });
+          await sbUpsert('ras_members', { member_id: m.id, nama: m.nama, foto_url: m.foto || '', alias: m.alias || '' });
         }
       }
       renderPhotoGrid(); renderDashboard(); showNotif('✅ Data diimport!');
@@ -1779,6 +1790,7 @@ async function saveGameAssignment(tag) {
       await sbUpsert('ras_members', {
         member_id: m.id,
         nama: m.nama,
+        alias: m.alias || '',
         foto_url: m.foto || '',
         game_tags: m.game_tags || ['g1','g2','g3','g4']
       });
@@ -1794,7 +1806,7 @@ async function saveGameAssignment(tag) {
 // ── RESET ──
 async function resetPhotos() {
   if (!confirm('Reset semua foto keluarga?')) return;
-  for (const m of FAMILY_MEMBERS) { m.foto = ''; await sbUpsert('ras_members', { member_id: m.id, nama: m.nama, foto_url: '' }); }
+  for (const m of FAMILY_MEMBERS) { m.foto = ''; await sbUpsert('ras_members', { member_id: m.id, nama: m.nama, foto_url: '', alias: m.alias || '' }); }
   renderPhotoGrid(); renderDashboard(); showNotif('Foto keluarga direset');
 }
 async function resetPlayers() {
@@ -1827,7 +1839,7 @@ async function exportAllData() {
 async function saveAllToStorage() {
   try {
     await sbUpsert('ras_event', { id: 1, ...eventSettings, updated_at: new Date().toISOString() });
-    for (const m of FAMILY_MEMBERS) await sbUpsert('ras_members', { member_id: m.id, nama: m.nama, foto_url: m.foto || '' });
+    for (const m of FAMILY_MEMBERS) await sbUpsert('ras_members', { member_id: m.id, nama: m.nama, foto_url: m.foto || '', alias: m.alias || '' });
     await sbUpsert('ras_open_games', { id: 1, game_ids: openGames, updated_at: new Date().toISOString() });
     showNotif('✅ Semua data tersimpan ke Supabase!');
   } catch(e) { showNotif('⚠️ Gagal simpan: ' + e.message); }
@@ -2081,7 +2093,7 @@ async function loadG4RondeAssignment() {
 
 function renderG4RondeUI() {
   const rondeCount = parseInt(document.getElementById('g4RondeCount')?.value || '3');
-  const members = window.allMembers || [];
+  const members = (window.allMembers && window.allMembers.length > 0) ? window.allMembers : FAMILY_MEMBERS.filter(m => m.foto);
   const container = document.getElementById('g4RondeUI');
   if (!container) return;
 
@@ -2144,7 +2156,7 @@ function toggleG4Ronde(ronde, memberId) {
 
 function autoAssignG4() {
   const rondeCount = parseInt(document.getElementById('g4RondeCount')?.value || '3');
-  const members = window.allMembers || [];
+  const members = (window.allMembers && window.allMembers.length > 0) ? window.allMembers : FAMILY_MEMBERS.filter(m => m.foto);
   if (members.length < rondeCount * 5) {
     showNotif('⚠️ Perlu minimal ' + (rondeCount * 5) + ' foto untuk ' + rondeCount + ' ronde!');
     return;
