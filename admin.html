@@ -1140,7 +1140,7 @@ async function loadAllFromSupabase() {
     // Members
     const memberRows = await sbGet('ras_members');
     if (memberRows && memberRows.length > 0) {
-      FAMILY_MEMBERS = memberRows.map(r => ({ id: r.member_id, nama: r.nama, foto: r.foto_url || '' }));
+      FAMILY_MEMBERS = memberRows.map(r => ({ id: r.member_id, nama: r.nama, foto: r.foto_url || '', game_tags: r.game_tags || ['g1','g2','g3','g4'] }));
       FAMILY_MEMBERS.sort((a, b) => a.id - b.id);
     } else {
       initDefaultMembers();
@@ -1969,7 +1969,7 @@ async function saveG3Questions() {
       }
     });
     // Insert semua sekaligus dengan satu request
-    const payload = g3Questions.map((q, i) => ({ urutan: i, pertanyaan: q, aktif: true }));
+    const payload = g3Questions.map((q, i) => ({ id: i + 1, urutan: i, pertanyaan: q, aktif: true }));
     if (payload.length > 0) {
       await fetch(SUPABASE_URL + '/rest/v1/ras_g3_questions', {
         method: 'POST',
@@ -1982,7 +1982,7 @@ async function saveG3Questions() {
         body: JSON.stringify(payload)
       });
     }
-  } catch(e) { console.warn('saveG3Questions error:', e); }
+  } catch(e) { console.warn('saveG3Questions error:', e); showNotif('❌ Gagal simpan: ' + e.message); return; }
   const count = document.getElementById('g3QuestionCount');
   if (count) count.textContent = g3Questions.length;
   showNotif('✅ ' + g3Questions.length + ' pertanyaan tersimpan!');
@@ -2121,11 +2121,26 @@ async function renderKomedianGrid() {
   if (!grid) return;
   grid.innerHTML = KOMEDIAN_TOP.map(k => {
     const photo = komedianPhotos[k.id];
-    return '<div class="komedian-card"><div class="komedian-photo" onclick="uploadKomedianPhoto(' + k.id + ')">' +
+    return '<div class="komedian-card" style="position:relative;">' +
+      '<div class="komedian-photo" onclick="uploadKomedianPhoto(' + k.id + ')">' +
       (photo ? '<img src="' + photo + '" alt="' + k.nama + '">' : k.nama[0].toUpperCase()) +
-      '</div><div class="komedian-info"><div class="k-name">' + k.nama + '</div>' +
+      '</div>' +
+      (photo ? '<button onclick="deleteKomedianPhoto(' + k.id + ')" title="Hapus foto" style="position:absolute;top:6px;right:6px;background:rgba(139,26,26,0.85);color:white;border:none;border-radius:50%;width:22px;height:22px;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">✕</button>' : '') +
+      '<div class="komedian-info"><div class="k-name">' + k.nama + '</div>' +
       '<div class="k-sub">' + (photo ? '✓ Ada foto' : 'Klik upload') + ' · ID ' + k.id + '</div></div></div>';
   }).join('');
+}
+
+async function deleteKomedianPhoto(id) {
+  const k = KOMEDIAN_TOP.find(k => k.id === id);
+  const nama = k ? k.nama : 'ID ' + id;
+  if (!confirm('Hapus foto ' + nama + '?')) return;
+  komedianPhotos[id] = '';
+  try {
+    await sbUpsert('ras_komedian_photos', { komedian_id: id, photo_url: '', updated_at: new Date().toISOString() });
+  } catch(e) {}
+  renderKomedianGrid();
+  showNotif('🗑️ Foto ' + nama + ' dihapus.');
 }
 
 let currentKomedianId = null;
