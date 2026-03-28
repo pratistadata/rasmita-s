@@ -2384,6 +2384,20 @@ function handleRegPhoto(event) {
 async function joinRoom() {
   const name = document.getElementById('playerName').value.trim();
   if (!name) { showNotif('Masukkan namamu dulu ya! 😊'); return; }
+
+  // Cek apakah device ini sudah pernah login dengan nama lain
+  const savedSession = localStorage.getItem('ras_session');
+  if (savedSession) {
+    try {
+      const sess = JSON.parse(savedSession);
+      if (sess.name && sess.name !== name) {
+        showNotif('⚠️ Device ini sudah login sebagai ' + sess.name + '. Tidak bisa ganti nama!');
+        document.getElementById('playerName').value = sess.name;
+        return;
+      }
+    } catch(e) {}
+  }
+
   const code = state.savedRoomCode || 'FAM2026';
   state.playerName = name;
   state.roomCode = code;
@@ -2413,6 +2427,15 @@ async function joinRoom() {
   } catch(e) {
     console.warn('joinRoom Supabase error:', e);
   }
+
+  // Simpan sesi ke localStorage agar auto-login berikutnya
+  try {
+    localStorage.setItem('ras_session', JSON.stringify({
+      name: name,
+      photo: state.playerPhoto || '',
+      savedAt: new Date().toISOString()
+    }));
+  } catch(e) {}
 
   showNotif('Berhasil masuk! Selamat datang, ' + name + ' 🎉');
   showLobby();
@@ -3569,7 +3592,7 @@ Istana yang paling indah adalah keluarga
 Puisi yang paling bermakna adalah keluarga
 Mutiara tiada tara adalah keluarga`,
     pilihan: ["Harta yang Paling Berharga", "Satu Nusa Satu Bangsa", "Bintang di Surga", "Rumah Kita"], jawaban: "Harta yang Paling Berharga",
-    intro_nada: [261,329,392,329,261,196,220,261], mp3: null },
+    intro_nada: [392,392,440,392,330,294,262,294,330,392,440,392], mp3: null },
   { id: 2, judul: "Dansa Yok Dansa", artis: "Harvey Malaiholo", tahun: 1985, emoji: "💃",
     petunjuk: "Lagu joget klasik wajib di setiap pesta keluarga Indonesia!",
     lirik_singalong: `Dansa yok dansa, dansa yok dansa
@@ -3577,7 +3600,7 @@ Mari bersama kita bergembira
 Dansa yok dansa, dansa yok dansa
 Sambil bernyanyi kita berdansa`,
     pilihan: ["Dansa Yok Dansa", "Buka Semangat Baru", "Joget Poco Poco", "Ayo Menari"], jawaban: "Dansa Yok Dansa",
-    intro_nada: [392,440,392,349,330,349,392,440], mp3: null },
+    intro_nada: [392,440,392,349,330,349,392,440,392,330,294,330], mp3: null },
   { id: 3, judul: "Kopi Dangdut", artis: "Fahmi Shahab", tahun: 1987, emoji: "☕",
     petunjuk: "Dangdut klasik legendaris yang pasti bikin semua goyang dari nenek sampai cucu!",
     lirik_singalong: `Kopi dangdut, kopi dangdut
@@ -3585,7 +3608,7 @@ Panas-panas enak rasanya
 Kopi dangdut, kopi dangdut
 Campur gula tambah nikmatnya`,
     pilihan: ["Kopi Dangdut", "Teh Manis", "Goyang Dumang", "Kucing Garong"], jawaban: "Kopi Dangdut",
-    intro_nada: [330,349,392,392,349,330,294,294], mp3: null },
+    intro_nada: [262,294,330,349,330,294,262,294,330,349,330,294], mp3: null },
   { id: 4, judul: "Goyang Dumang", artis: "Cita Citata", tahun: 2014, emoji: "🕺",
     petunjuk: "Lagu dangdut hits yang pasti bikin semua langsung joget!",
     lirik_singalong: `Goyang dumang, goyang dumang
@@ -3593,7 +3616,7 @@ Goyang goyang goyang dumang
 Ayo kita goyang bersama-sama
 Jangan malu-malu ayoo bergoyang!`,
     pilihan: ["Goyang Dumang", "Madu dan Racun", "Seksi Seksi", "Kereta Malam"], jawaban: "Goyang Dumang",
-    intro_nada: [392,392,440,392,349,330,349,392], mp3: null },
+    intro_nada: [392,392,440,392,349,392,392,440,392,349,330,349], mp3: null },
   { id: 5, judul: "Tabola Bale", artis: "Silet Open Up feat. Jacson Zeran", tahun: 2025, emoji: "🌴",
     petunjuk: "Lagu timur viral 2025 yang bikin semua orang goyang — pasti sudah pernah dengar!",
     lirik_singalong: `Kaka tabola bale lia ade nona e
@@ -3601,7 +3624,7 @@ Su makin manyala e, kaka hati susah e
 Ade bikin kaka mete, tidur malam bola bale
 Sejak kaka lia ade, aduh Tuhan ampun e`,
     pilihan: ["Tabola Bale", "Gemu Fa Mi Re", "Poco Poco", "Maumere"], jawaban: "Tabola Bale",
-    intro_nada: [392,392,440,392,330,349,392,330], mp3: null },
+    intro_nada: [392,440,392,440,392,330,294,330,392,440,392,330], mp3: null },
   { id: 6, judul: "Kemesraan", artis: "Iwan Fals", tahun: 1990, emoji: "❤️",
     petunjuk: "Lagu romantis legendaris Iwan Fals yang sering dinyanyikan di momen spesial keluarga.",
     lirik_singalong: `Kemesraan ini janganlah cepat berlalu
@@ -3609,7 +3632,7 @@ Kemesraan ini ingin kukenang selalu
 Hangat nafasmu, mengalir ke jiwaku
 Kemesraan ini janganlah cepat berlalu`,
     pilihan: ["Kemesraan", "Oemar Bakri", "Bento", "Galang Rambu Anarki"], jawaban: "Kemesraan",
-    intro_nada: [329,349,392,440,392,349,329,294], mp3: null },
+    intro_nada: [440,392,349,330,349,392,440,392,349,330,294,330], mp3: null },
   { id: 7, judul: "Madu dan Racun", artis: "Benyamin Sueb & Ida Royani", tahun: 1976, emoji: "🍯",
     petunjuk: "Duet legendaris Benyamin Sueb, lagu pop Betawi paling ikonik sepanjang masa!",
     lirik_singalong: `Kau bagai madu, manis di awal
@@ -3617,7 +3640,7 @@ Kau bagai racun, pahit di akhir
 Oh kekasih mengapa begini
 Kau berikan madu, lalu racun kini`,
     pilihan: ["Madu dan Racun", "Kompor Meleduk", "Tukang Sayur", "Si Jampang"], jawaban: "Madu dan Racun",
-    intro_nada: [261,294,329,349,329,294,261,246], mp3: null },
+    intro_nada: [262,294,330,349,330,294,262,294,330,294,262,294], mp3: null },
   { id: 8, judul: "Kolam Susu", artis: "Koes Plus", tahun: 1973, emoji: "🌊",
     petunjuk: "Lagu ikonik Koes Plus tentang keindahan alam Indonesia yang sangat terkenal.",
     lirik_singalong: `Bukan lautan hanya kolam susu
@@ -3625,7 +3648,7 @@ Kail dan jala cukup menghidupimu
 Tiada badai tiada topan kautemui
 Ikan dan udang menghampiri dirimu`,
     pilihan: ["Kolam Susu", "Bunga di Tepi Jalan", "Nusantara", "Kembali ke Jakarta"], jawaban: "Kolam Susu",
-    intro_nada: [329,329,392,392,440,392,349,329], mp3: null },
+    intro_nada: [330,330,392,392,440,392,349,330,294,330,392,440], mp3: null },
   { id: 9, judul: "Cinta Pertama dan Terakhir", artis: "Sherina Munaf", tahun: 2000, emoji: "🌟",
     petunjuk: "Lagu hits penyanyi cilik yang paling terkenal di era 2000-an!",
     lirik_singalong: `Ku tak mau lagi merasakan
@@ -3633,7 +3656,7 @@ Sakit hati karena cinta
 Ku tak ingin lagi terluka
 Oleh cinta yang tak terjaga`,
     pilihan: ["Cinta Pertama dan Terakhir", "Andai Aku Besar Nanti", "Lihat Aku", "Kembali"], jawaban: "Cinta Pertama dan Terakhir",
-    intro_nada: [392,440,494,440,392,349,329,294], mp3: null },
+    intro_nada: [392,440,494,440,392,349,330,294,330,392,440,392], mp3: null },
   { id: 10, judul: "Baju Pengantin", artis: "Meggy Z", tahun: 1989, emoji: "👰",
     petunjuk: "Dangdut klasik Meggy Z yang sering diputar di pesta pernikahan Indonesia!",
     lirik_singalong: `Baju pengantin yang kau kenakan
@@ -3641,7 +3664,7 @@ Sungguh membuatku terpesona
 Baju pengantin berwarna putih
 Seperti salju di musim dingin`,
     pilihan: ["Baju Pengantin", "Sekuntum Mawar Merah", "Janda Muda", "Aku Tak Biasa"], jawaban: "Baju Pengantin",
-    intro_nada: [349,392,440,392,349,330,294,330], mp3: null },
+    intro_nada: [349,392,440,392,349,330,294,330,349,392,440,392], mp3: null },
   { id: 11, judul: "Gemu Fa Mi Re", artis: "Trio Ambisi / Maumere", tahun: 1990, emoji: "🎵",
     petunjuk: "Lagu dansa timur yang pasti bikin semua orang berdiri dan bergoyang!",
     lirik_singalong: `Gemu fa mi re
@@ -3649,7 +3672,7 @@ Gemu fa mi re
 Ayo muda mudi ita
 Mari bareng bernyanyi`,
     pilihan: ["Gemu Fa Mi Re", "Poco Poco", "Maumere", "Sajojo"], jawaban: "Gemu Fa Mi Re",
-    intro_nada: [392,349,329,294,329,349,392,392], mp3: null },
+    intro_nada: [392,440,392,349,330,294,330,349,392,392,440,349], mp3: null },
   { id: 12, judul: "Setengah Hati", artis: "Dewa 19", tahun: 2004, emoji: "💔",
     petunjuk: "Hits Dewa 19 era 2000-an yang liriknya paling banyak dihafal anak muda!",
     lirik_singalong: `Ku berikan setengah hatiku
@@ -3657,7 +3680,7 @@ Karena takut terluka lagi
 Ku berikan setengah hatiku
 Hanya untukmu seorang`,
     pilihan: ["Setengah Hati", "Kangen", "Pangeran Cinta", "Risalah Hati"], jawaban: "Setengah Hati",
-    intro_nada: [329,392,440,392,329,294,329,349], mp3: null },
+    intro_nada: [330,392,440,392,440,392,330,294,330,392,440,392], mp3: null },
   { id: 13, judul: "Opo Sing Salah", artis: "Didi Kempot", tahun: 2019, emoji: "😢",
     petunjuk: "Raja campursari yang dijuluki 'The Godfather of Broken Heart' oleh anak muda!",
     lirik_singalong: `Opo sing salah
@@ -3665,7 +3688,7 @@ Atiku sing kesalah
 Apo sing lupak
 Pikiran terus melayang`,
     pilihan: ["Opo Sing Salah", "Suket Teki", "Pamer Bojo", "Banyu Langit"], jawaban: "Opo Sing Salah",
-    intro_nada: [294,329,349,392,349,329,294,261], mp3: null },
+    intro_nada: [294,330,349,392,349,330,294,262,294,330,349,392], mp3: null },
   { id: 14, judul: "Bintang di Surga", artis: "Peterpan", tahun: 2004, emoji: "⭐",
     petunjuk: "Lagu hits Peterpan yang paling ikonik dan dikenal semua generasi Indonesia!",
     lirik_singalong: `Masih adakah bintang di surga
@@ -3673,7 +3696,7 @@ Yang selalu menjagamu setiap saat
 Masih adakah cinta di dunia
 Yang akan selalu bersamamu selamanya`,
     pilihan: ["Bintang di Surga", "Ada Apa Denganmu", "Mungkin Nanti", "Topeng"], jawaban: "Bintang di Surga",
-    intro_nada: [392,440,494,440,392,392,349,392], mp3: null },
+    intro_nada: [392,392,440,494,440,392,440,392,349,392,440,494], mp3: null },
   { id: 15, judul: "Rasa Sayange", artis: "Lagu Tradisional Maluku", tahun: 1970, emoji: "🌺",
     petunjuk: "Lagu daerah Maluku paling terkenal yang sudah jadi lagu kebanggaan Indonesia!",
     lirik_singalong: `Rasa sayange, rasa sayang sayange
@@ -3681,7 +3704,7 @@ He lihat nona jauh rasa sayang sayange
 Rasa sayange, rasa sayang sayange
 He lihat nona jauh rasa sayang sayange`,
     pilihan: ["Rasa Sayange", "Ambon Manise", "O Ina Ni Keke", "Ayo Mama"], jawaban: "Rasa Sayange",
-    intro_nada: [392,392,440,440,392,349,330,349], mp3: null },
+    intro_nada: [440,440,392,349,392,440,440,392,349,330,349,392], mp3: null },
 ];
 
 let g6AudioCtx = null;
@@ -3786,19 +3809,8 @@ function playG6Intro() {
   g6IsPlaying = true; setDiscSpin(true); setWavePlay(true);
   document.getElementById('g6StatusText').textContent = '♪ MEMAINKAN INTRO...';
   document.getElementById('g6PlayBtn').textContent = '⏸';
-  if (lagu.mp3) {
-    if (g6AudioElement) { g6AudioElement.pause(); g6AudioElement = null; }
-    g6AudioElement = new Audio(lagu.mp3);
-    g6AudioElement.play().catch(() => playMelodi(lagu.intro_nada, null));
-    setTimeout(() => {
-      if (g6AudioElement) { g6AudioElement.pause(); g6AudioElement = null; }
-      g6IsPlaying = false; setDiscSpin(false); setWavePlay(false);
-      document.getElementById('g6StatusText').textContent = 'SELESAI — JAWAB SEKARANG!';
-      document.getElementById('g6PlayBtn').textContent = '▶';
-    }, 10000);
-  } else {
-    playMelodi(lagu.intro_nada, null);
-  }
+  // Selalu gunakan nada sintetis untuk babak tebak (mp3 hanya untuk sing-along)
+  playMelodi(lagu.intro_nada, null);
 }
 
 function playG6Full() {
@@ -3936,7 +3948,35 @@ function restartGame6() { initGame6(); }
 async function init() {
   await loadSavedData();
   startRealtimeSync();
+
+  // Cek sesi tersimpan di localStorage
+  try {
+    const savedSession = localStorage.getItem('ras_session');
+    if (savedSession) {
+      const sess = JSON.parse(savedSession);
+      if (sess && sess.name) {
+        // Pulihkan sesi
+        state.playerName = sess.name;
+        if (sess.photo) {
+          state.playerPhoto = sess.photo;
+          state.playerPhotos[sess.name] = sess.photo;
+        }
+        if (!state.players.includes(sess.name)) state.players.push(sess.name);
+        const wn = document.getElementById('welcomeName');
+        if (wn) wn.textContent = sess.name;
+
+        // Auto-masuk ke lobby
+        showNotif('Selamat datang kembali, ' + sess.name + '! \uD83D\uDC4B');
+        showLobby();
+        return;
+      }
+    }
+  } catch(e) {}
+
+  // Tidak ada sesi → tampil landing biasa
   showPage('landing');
+  const nameInput = document.getElementById('playerName');
+  if (nameInput) nameInput.value = '';
 }
 
 init();
