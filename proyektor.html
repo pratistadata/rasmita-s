@@ -723,26 +723,36 @@ async function sbGet(table) {
   return r.json();
 }
 
+let _rtProjFail = 0;
 function sbSubscribe(table, callback) {
   const wsUrl = SUPABASE_URL.replace('https://','wss://') + '/realtime/v1/websocket?apikey=' + SUPABASE_ANON_KEY + '&vsn=1.0.0';
-  let ws;
+  let ws, stopped = false, retryCount = 0;
   function connect() {
-    ws = new WebSocket(wsUrl);
-    ws.onopen = () => {
-      ws.send(JSON.stringify({ topic: 'realtime:public:' + table, event: 'phx_join',
-        payload: { config: { postgres_changes: [{ event: '*', schema: 'public', table }] } }, ref: '1' }));
-    };
-    ws.onmessage = (e) => {
-      try {
-        const msg = JSON.parse(e.data);
-        if (msg.event === 'postgres_changes') callback(msg.payload);
-      } catch(_) {}
-    };
-    ws.onclose = () => setTimeout(connect, 3000);
-    ws.onerror = () => ws.close();
+    if (stopped || retryCount >= 3) return;
+    try {
+      ws = new WebSocket(wsUrl);
+      const timeout = setTimeout(() => { if (ws.readyState !== 1) ws.close(); }, 5000);
+      ws.onopen = () => {
+        clearTimeout(timeout);
+        retryCount = 0;
+        ws.send(JSON.stringify({ topic: 'realtime:public:' + table, event: 'phx_join',
+          payload: { config: { postgres_changes: [{ event: '*', schema: 'public', table }] } }, ref: '1' }));
+      };
+      ws.onmessage = (e) => {
+        try {
+          const msg = JSON.parse(e.data);
+          if (msg.event === 'postgres_changes') callback(msg.payload);
+        } catch(_) {}
+      };
+      ws.onclose = () => {
+        clearTimeout(timeout);
+        if (!stopped) { retryCount++; setTimeout(connect, Math.min(3000 * retryCount, 12000)); }
+      };
+      ws.onerror = () => { clearTimeout(timeout); ws.close(); };
+    } catch(e) { retryCount++; if (retryCount < 3) setTimeout(connect, 5000); }
   }
   connect();
-  return { close: () => ws && ws.close() };
+  return { close: () => { stopped = true; ws && ws.close(); } };
 }
 
 // ═══════════════════════════════════════════════════════
@@ -994,11 +1004,12 @@ async function renderG1() {
           'background:' + (isMatched ? 'rgba(0,230,118,0.2)' : isFlipped ? 'rgba(201,168,76,0.3)' : 'rgba(255,255,255,0.05)') + ';' +
           'border:1.5px solid ' + (isMatched ? '#00E676' : isFlipped ? '#C9A84C' : 'rgba(255,255,255,0.1)') + ';' +
           'border-radius:8px;aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;' +
-          'font-size:0.7rem;color:rgba(255,255,255,0.8);overflow:hidden;transition:all 0.3s;">' +
+          'font-size:0.7rem;color:rgba(255,255,255,0.8);overflow:hidden;transition:all 0.3s;position:relative;">' +
           (isFlipped ?
             (c.foto ? '<img src="' + c.foto + '" style="width:70%;height:70%;object-fit:cover;border-radius:50%">' : '👤') +
             '<div style="font-size:9px;margin-top:2px;max-width:90%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + c.nama + '</div>'
-            : '<div style="font-size:1.2rem;opacity:0.3">❋</div>'
+            :
+            '<div style="font-size:clamp(1.8rem,3vw,3rem);font-weight:900;color:var(--gold-light);opacity:0.9;font-family:\'Playfair Display\',serif;line-height:1;">' + (idx+1) + '</div>'
           ) + '</div>';
       }).join('');
     } else if (grid && status === 'waiting') {
@@ -1250,16 +1261,27 @@ function detectUrl() {
   document.getElementById('displayUrl').textContent = display || 'buka file HTML di browser';
 }
 
+let _tickErrCount = 0;
 async function tick() {
-  await renderPlayers();
-  await renderG5();
-  await renderG3();
-  await renderG6();
-  await renderG1();
-  await renderG4();
-  await renderG2();
-  // renderResult only when screen is active (expensive)
-  if (currentScreen === 'screenResult') await renderResult();
+  try {
+    await renderPlayers();
+    await renderG5();
+    await renderG3();
+    await renderG6();
+    await renderG1();
+    await renderG4();
+    await renderG2();
+    if (currentScreen === 'screenResult') await renderResult();
+    _tickErrCount = 0;
+    // Update connection dot — hijau jika berhasil
+    document.querySelectorAll('.live-dot').forEach(d => d.style.background = '#4caf50');
+  } catch(e) {
+    _tickErrCount++;
+    if (_tickErrCount >= 3) {
+      // Tandai offline setelah 3 tick berturut-turut gagal
+      document.querySelectorAll('.live-dot').forEach(d => d.style.background = '#f44336');
+    }
+  }
 }
 
 // Realtime subscriptions untuk update instan

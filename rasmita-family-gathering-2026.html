@@ -489,22 +489,25 @@
   .mem-card.matched .mem-name { color: var(--green); }
   .card-number {
     position: absolute;
-    top: 4px;
-    left: 0; right: 0;
-    text-align: center;
-    font-size: 10px;
-    font-weight: 700;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: clamp(1.8rem, 5vw, 3rem);
+    font-weight: 900;
     color: var(--gold-light);
-    opacity: 0.7;
+    opacity: 0.9;
     pointer-events: none;
     z-index: 2;
+    font-family: 'Playfair Display', serif;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    line-height: 1;
   }
   .mem-back .card-number-back {
-    font-size: 9px;
+    font-size: clamp(0.75rem, 2vw, 1rem);
     color: var(--brown-light);
     text-align: center;
     margin-bottom: 2px;
-    font-weight: 600;
+    font-weight: 700;
   }
 
   /* ===== GAME 2: TEBAK SIAPA ===== */
@@ -2007,25 +2010,61 @@ function sbHeaders() {
     'Content-Type': 'application/json'
   };
 }
+// Realtime connection status
+let _rtConnected = false;
+let _rtFailCount  = 0;
+const _RT_MAX_FAIL = 3; // berhenti retry setelah 3 gagal berturut-turut
+
 function sbSubscribe(table, callback) {
   const wsUrl = SUPABASE_URL.replace('https://','wss://') + '/realtime/v1/websocket?apikey=' + SUPABASE_ANON_KEY + '&vsn=1.0.0';
-  let ws;
+  let ws, stopped = false, retryCount = 0;
+
   function connect() {
-    ws = new WebSocket(wsUrl);
-    ws.onopen = () => {
-      ws.send(JSON.stringify({ topic: 'realtime:public:' + table, event: 'phx_join', payload: { config: { broadcast: { self: true }, presence: {}, postgres_changes: [{ event: '*', schema: 'public', table }] } }, ref: '1' }));
-    };
-    ws.onmessage = (e) => {
-      try {
-        const msg = JSON.parse(e.data);
-        if (msg.event === 'postgres_changes') callback(msg.payload);
-      } catch(_) {}
-    };
-    ws.onclose = () => setTimeout(connect, 3000);
-    ws.onerror = () => ws.close();
+    if (stopped) return;
+    // Circuit breaker — jika sudah terlalu banyak gagal, hentikan
+    if (retryCount >= _RT_MAX_FAIL) {
+      console.warn('[Realtime] ' + table + ': max retry reached, using polling fallback only.');
+      _rtConnected = false;
+      return;
+    }
+    try {
+      ws = new WebSocket(wsUrl);
+      const timeout = setTimeout(() => { if (ws.readyState !== 1) ws.close(); }, 5000);
+      ws.onopen = () => {
+        clearTimeout(timeout);
+        retryCount = 0;
+        _rtConnected = true;
+        _rtFailCount = 0;
+        ws.send(JSON.stringify({
+          topic: 'realtime:public:' + table,
+          event: 'phx_join',
+          payload: { config: { broadcast: { self: true }, presence: {}, postgres_changes: [{ event: '*', schema: 'public', table }] } },
+          ref: '1'
+        }));
+      };
+      ws.onmessage = (e) => {
+        try {
+          const msg = JSON.parse(e.data);
+          if (msg.event === 'postgres_changes') callback(msg.payload);
+        } catch(_) {}
+      };
+      ws.onclose = () => {
+        clearTimeout(timeout);
+        if (!stopped) {
+          retryCount++;
+          _rtFailCount++;
+          const delay = Math.min(3000 * retryCount, 15000); // backoff: 3s, 6s, 9s max 15s
+          setTimeout(connect, delay);
+        }
+      };
+      ws.onerror = () => { clearTimeout(timeout); ws.close(); };
+    } catch(e) {
+      retryCount++;
+      if (retryCount < _RT_MAX_FAIL) setTimeout(connect, 5000);
+    }
   }
   connect();
-  return { close: () => ws && ws.close() };
+  return { close: () => { stopped = true; ws && ws.close(); } };
 }
 async function sbUploadFile(bucket, path, dataUrl) {
   const mime = dataUrl.startsWith('data:') ? dataUrl.split(';')[0].split(':')[1] : 'application/octet-stream';
@@ -3933,9 +3972,25 @@ function restartGame6() { initGame6(); }
 // INIT
 // ============================================================
 async function init() {
-  await loadSavedData();
-  startRealtimeSync();
+  // Tampilkan landing dulu agar halaman tidak blank
   showPage('landing');
+
+  // Load data dengan timeout 5 detik — jika Supabase lambat/down, tetap jalan
+  try {
+    await Promise.race([
+      loadSavedData(),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000))
+    ]);
+  } catch(e) {
+    console.warn('[Init] loadSavedData:', e.message, '— lanjut dengan data default.');
+    // Tampilkan banner peringatan jika offline
+    if (e.message === 'timeout' || e.message.includes('fetch')) {
+      showNotif('⚠️ Tidak bisa terhubung ke server. Mode offline — data default digunakan.');
+    }
+  }
+
+  // Mulai realtime sync (gagal silently jika tidak konek)
+  startRealtimeSync();
 }
 
 init();
